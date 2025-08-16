@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "postbuild": "next-sitemap",
     "start": "next start -p 3201",
     "lint": "next lint"
   },
@@ -14,6 +15,7 @@
     "framer-motion": "^12.23.6",
     "gsap": "^3.13.0",
     "next": "15.4.2",
+    "next-sitemap": "^4.2.3",
     "nodemailer": "^7.0.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
