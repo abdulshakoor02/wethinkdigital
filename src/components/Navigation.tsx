@@ -59,6 +59,13 @@ export default function Navigation() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                const contactElement = document.getElementById('contact');
+                if (contactElement) {
+                  contactElement.scrollIntoView({ behavior: 'smooth' });
+                  setIsMobileMenuOpen(false);
+                }
+              }}
               className="btn-primary px-6 py-2"
             >
               Get Started
@@ -102,7 +109,18 @@ export default function Navigation() {
                 {item.name}
               </a>
             ))}
-            <button className="btn-primary w-full py-2">Get Started</button>
+            <button 
+              className="btn-primary w-full py-2"
+              onClick={() => {
+                const contactElement = document.getElementById('contact');
+                if (contactElement) {
+                  contactElement.scrollIntoView({ behavior: 'smooth' });
+                  setIsMobileMenuOpen(false);
+                }
+              }}
+            >
+              Get Started
+            </button>
           </div>
         </motion.div>
       </div>

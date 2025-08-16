@@ -182,6 +182,12 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                const contactElement = document.getElementById('contact');
+                if (contactElement) {
+                  contactElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="btn-primary px-8 py-4 text-lg"
             >
               Start Your Project

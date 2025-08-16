@@ -23,16 +23,31 @@ export default function ContactForm() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    console.log('Form submitted:', data);
-    setSubmitSuccess(true);
-    reset();
-    setIsSubmitting(false);
-    
-    // Reset success message after 5 seconds
-    setTimeout(() => setSubmitSuccess(false), 5000);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setSubmitSuccess(true);
+        reset();
+      } else {
+        const errorData = await response.json();
+        console.error('Error sending email:', errorData.error);
+        // You might want to show an error message to the user here
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsSubmitting(false);
+      // Reset success message after 5 seconds
+      setTimeout(() => setSubmitSuccess(false), 5000);
+    }
   };
 
   return (
@@ -115,7 +130,7 @@ export default function ContactForm() {
                     type="tel"
                     {...register('phone')}
                     className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="+971 (58) 1233-567"
                   />
                 </div>
 
@@ -126,10 +141,10 @@ export default function ContactForm() {
                     className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary"
                   >
                     <option value="">Select Budget Range</option>
-                    <option value="10k-25k">$10,000 - $25,000</option>
-                    <option value="25k-50k">$25,000 - $50,000</option>
-                    <option value="50k-100k">$50,000 - $100,000</option>
-                    <option value="100k+">$100,000+</option>
+                    <option value="100-1k">AED100 - AED1000</option>
+                    <option value="1k-5k">AED1000 - AED5000</option>
+                    <option value="5k-10k">AED5000 - AED10,000</option>
+                    <option value="10k+">AED10,000+</option>
                   </select>
                   {errors.budget && <span className="text-red-400 text-sm">{errors.budget.message}</span>}
                 </div>
