@@ -3,27 +3,28 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { FaRocket, FaChartLine, FaChartBar } from 'react-icons/fa';
 
 const services = [
   {
     title: 'Full-Stack Development',
     description: 'End-to-end web and mobile applications built with cutting-edge technologies.',
     features: ['React/Next.js', 'Node.js/Python', 'Mobile Apps', 'Cloud Architecture'],
-    icon: '🚀',
+    icon: <FaRocket className="text-6xl" />,
     color: 'from-purple-500 to-blue-500'
   },
   {
     title: 'Growth Marketing',
     description: 'Data-driven marketing strategies that scale your business exponentially.',
     features: ['SEO Optimization', 'PPC Campaigns', 'Content Strategy', 'Social Media'],
-    icon: '📈',
+    icon: <FaChartLine className="text-6xl" />,
     color: 'from-blue-500 to-cyan-500'
   },
   {
     title: 'Analytics & CRO',
     description: 'Turn data into actionable insights with advanced analytics and conversion optimization.',
     features: ['Data Analytics', 'A/B Testing', 'User Research', 'Conversion Funnels'],
-    icon: '📊',
+    icon: <FaChartBar className="text-6xl" />,
     color: 'from-cyan-500 to-teal-500'
   }
 ];
@@ -60,7 +61,7 @@ export default function Services() {
               whileHover={{ scale: 1.05 }}
               className="glass rounded-xl p-8 hover:shadow-2xl transition-all duration-300"
             >
-              <div className={`text-6xl mb-4 bg-gradient-to-r ${service.color} bg-clip-text text-transparent`}>
+              <div className={`mb-4 bg-gradient-to-r ${service.color} bg-clip-text`}>
                 {service.icon}
               </div>
               

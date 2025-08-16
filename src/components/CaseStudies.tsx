@@ -9,7 +9,7 @@ const caseStudies = [
     title: 'E-commerce Revolution',
     client: 'TechGear Pro',
     description: 'Transformed a struggling e-commerce store into a market leader with 300% revenue growth.',
-    image: '/api/placeholder/600/400',
+    image: 'https://plus.unsplash.com/premium_photo-1726729310968-f322e3742418?w=600&h=400&fit=crop',
     results: [
       { metric: 'Revenue Increase', value: '300%' },
       { metric: 'Conversion Rate', value: '4.5% → 12.8%' },
@@ -28,7 +28,7 @@ const caseStudies = [
     title: 'SaaS Platform Scaling',
     client: 'CloudFlow Solutions',
     description: 'Architected and developed a SaaS platform that now serves 50,000+ users globally.',
-    image: '/api/placeholder/600/400',
+    image: 'https://images.unsplash.com/photo-1651760464181-49092525ca3b?w=600&h=400&fit=crop',
     results: [
       { metric: 'User Growth', value: '0 → 50,000+' },
       { metric: 'Uptime', value: '99.9%' },
@@ -47,7 +47,7 @@ const caseStudies = [
     title: 'Local Business Digitalization',
     client: 'Urban Fitness Studio',
     description: 'Helped a local gym pivot to digital during COVID and achieve 5x revenue growth.',
-    image: '/api/placeholder/600/400',
+    image: 'https://plus.unsplash.com/premium_photo-1712999654713-59018f76fe6d?w=600&h=400&fit=crop',
     results: [
       { metric: 'Revenue Growth', value: '500%' },
       { metric: 'Online Bookings', value: '0 → 2,000+/month' },
@@ -117,9 +117,11 @@ export default function CaseStudies() {
                 whileHover={{ scale: 1.02 }}
                 className="relative overflow-hidden rounded-lg mb-6"
               >
-                <div className="w-full h-64 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                  <span className="text-white text-6xl">🖼️</span>
-                </div>
+                <img 
+                  src={caseStudies[selectedCase].image} 
+                  alt={`${caseStudies[selectedCase].client} project`} 
+                  className="w-full h-64 object-cover rounded-lg"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
               </motion.div>
 
