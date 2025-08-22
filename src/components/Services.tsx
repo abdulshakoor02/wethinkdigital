@@ -3,29 +3,43 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { FaRocket, FaChartLine, FaChartBar } from 'react-icons/fa';
+import { FaRocket, FaChartLine, FaChartBar, FaStore, FaLanguage } from 'react-icons/fa';
 
 const services = [
   {
-    title: 'Full-Stack Development',
-    description: 'End-to-end web and mobile applications built with cutting-edge technologies.',
+    title: 'Full-Stack Development in Dubai',
+    description: 'End-to-end web and mobile applications built with cutting-edge technologies for businesses in the UAE.',
     features: ['React/Next.js', 'Node.js/Python', 'Mobile Apps', 'Cloud Architecture'],
     icon: <FaRocket className="text-6xl" />,
     color: 'from-purple-500 to-blue-500'
   },
   {
-    title: 'Growth Marketing',
-    description: 'Data-driven marketing strategies that scale your business exponentially.',
+    title: 'Growth Marketing in UAE',
+    description: 'Data-driven marketing strategies that scale your business in the competitive UAE market.',
     features: ['SEO Optimization', 'PPC Campaigns', 'Content Strategy', 'Social Media'],
     icon: <FaChartLine className="text-6xl" />,
     color: 'from-blue-500 to-cyan-500'
   },
   {
-    title: 'Analytics & CRO',
-    description: 'Turn data into actionable insights with advanced analytics and conversion optimization.',
+    title: 'Analytics & CRO in Dubai',
+    description: 'Turn data into actionable insights with advanced analytics and conversion optimization for your Dubai-based business.',
     features: ['Data Analytics', 'A/B Testing', 'User Research', 'Conversion Funnels'],
     icon: <FaChartBar className="text-6xl" />,
     color: 'from-cyan-500 to-teal-500'
+  },
+  {
+    title: 'E-commerce Development (Shopify/Magento)',
+    description: 'Custom e-commerce solutions to help you sell online in Dubai and the wider UAE.',
+    features: ['Shopify Development', 'Magento Development', 'Payment Gateway Integration', 'UX for E-commerce'],
+    icon: <FaStore className="text-6xl" />,
+    color: 'from-green-500 to-lime-500'
+  },
+  {
+    title: 'Bilingual SEO Services (Arabic/English)',
+    description: 'Reach a wider audience in the UAE with our expert bilingual SEO services.',
+    features: ['Arabic Keyword Research', 'English Keyword Research', 'On-page and Off-page SEO', 'Technical SEO'],
+    icon: <FaLanguage className="text-6xl" />,
+    color: 'from-red-500 to-orange-500'
   }
 ];
 
@@ -43,11 +57,11 @@ export default function Services() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Comprehensive Digital Solutions</span>
+            <span className="gradient-text">Comprehensive Digital Solutions in Dubai & UAE</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             From initial concept to market domination, we provide end-to-end solutions 
-            that drive real business results.
+            that drive real business results in the UAE.
           </p>
         </motion.div>
 

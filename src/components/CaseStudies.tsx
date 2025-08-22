@@ -6,9 +6,9 @@ import { useState } from 'react';
 const caseStudies = [
   {
     id: 1,
-    title: 'E-commerce Revolution',
-    client: 'TechGear Pro',
-    description: 'Transformed a struggling e-commerce store into a market leader with 300% revenue growth.',
+    title: 'Dubai E-commerce Success Story',
+    client: 'a leading Dubai-based e-commerce retailer',
+    description: 'Transformed a struggling e-commerce store into a market leader in the UAE with 300% revenue growth.',
     image: 'https://plus.unsplash.com/premium_photo-1726729310968-f322e3742418?w=600&h=400&fit=crop',
     results: [
       { metric: 'Revenue Increase', value: '300%' },
@@ -18,16 +18,16 @@ const caseStudies = [
     ],
     technologies: ['Next.js', 'Stripe', 'AWS', 'Google Analytics'],
     testimonial: {
-      text: "WeThinkDigital didn't just build our website - they built our entire digital strategy. The ROI speaks for itself.",
-      author: 'Sarah Johnson',
-      position: 'CEO, TechGear Pro'
+      text: "WeThinkDigital didn't just build our website - they built our entire digital strategy for the UAE market. The ROI speaks for itself.",
+      author: 'Fatima Al-Mansoori',
+      position: 'CEO, Dubai Deals Online'
     }
   },
   {
     id: 2,
-    title: 'SaaS Platform Scaling',
-    client: 'CloudFlow Solutions',
-    description: 'Architected and developed a SaaS platform that now serves 50,000+ users globally.',
+    title: 'Abu Dhabi SaaS Platform Scaling',
+    client: 'a high-growth SaaS company in Abu Dhabi',
+    description: 'Architected and developed a SaaS platform that now serves 50,000+ users across the MENA region.',
     image: 'https://images.unsplash.com/photo-1651760464181-49092525ca3b?w=600&h=400&fit=crop',
     results: [
       { metric: 'User Growth', value: '0 → 50,000+' },
@@ -37,16 +37,16 @@ const caseStudies = [
     ],
     technologies: ['React', 'Node.js', 'PostgreSQL', 'Redis'],
     testimonial: {
-      text: "Their technical expertise and growth marketing strategies took us from idea to IPO-ready in 18 months.",
-      author: 'Michael Chen',
-      position: 'CTO, CloudFlow Solutions'
+      text: "Their technical expertise and growth marketing strategies took us from a local startup to a regional player.",
+      author: 'Ahmed Al-Futtaim',
+      position: 'CTO, MENA Cloud Solutions'
     }
   },
   {
     id: 3,
-    title: 'Local Business Digitalization',
-    client: 'Urban Fitness Studio',
-    description: 'Helped a local gym pivot to digital during COVID and achieve 5x revenue growth.',
+    title: 'Digitalization of a Local UAE Business',
+    client: 'a popular fitness center in Abu Dhabi',
+    description: 'Helped a local gym pivot to digital during COVID and achieve 5x revenue growth in the UAE.',
     image: 'https://plus.unsplash.com/premium_photo-1712999654713-59018f76fe6d?w=600&h=400&fit=crop',
     results: [
       { metric: 'Revenue Growth', value: '500%' },
@@ -56,9 +56,9 @@ const caseStudies = [
     ],
     technologies: ['React Native', 'Firebase', 'Stripe', 'Instagram API'],
     testimonial: {
-      text: "They saved our business during the pandemic and helped us thrive in ways we never imagined.",
-      author: 'David Martinez',
-      position: 'Owner, Urban Fitness'
+      text: "They saved our business during the pandemic and helped us thrive in the competitive UAE market.",
+      author: 'Youssef Al-Haddad',
+      position: 'Owner, Abu Dhabi Fitness'
     }
   }
 ];
@@ -76,10 +76,10 @@ export default function CaseStudies() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Proven Results</span>
+            <span className="gradient-text">Proven Results in the UAE</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Real businesses, real results. See how we've helped companies like yours achieve extraordinary growth.
+            Real businesses, real results. See how we've helped companies in Dubai and Abu Dhabi achieve extraordinary growth.
           </p>
         </motion.div>
 
