@@ -3,43 +3,50 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { FaRocket, FaChartLine, FaChartBar, FaStore, FaLanguage } from 'react-icons/fa';
+import { FaRocket, FaChartLine, FaChartBar, FaStore, FaLanguage, FaMobileAlt, FaWordpress } from 'react-icons/fa';
 
 const services = [
   {
-    title: 'Full-Stack Development in Dubai',
-    description: 'End-to-end web and mobile applications built with cutting-edge technologies for businesses in the UAE.',
-    features: ['React/Next.js', 'Node.js/Python', 'Mobile Apps', 'Cloud Architecture'],
+    title: 'Custom Web Development Dubai',
+    description: "I don't just build websites. I build revenue-generating machines. As the best digital marketing company in Dubai, I deliver custom web development that converts.",
+    features: ['Responsive Web Design Dubai', 'Custom Software Development Dubai', 'Enterprise Software Solutions Dubai', 'CRM Software Development Dubai'],
     icon: <FaRocket className="text-6xl" />,
     color: 'from-purple-500 to-blue-500'
   },
   {
-    title: 'Growth Marketing in UAE',
-    description: 'Data-driven marketing strategies that scale your business in the competitive UAE market.',
-    features: ['SEO Optimization', 'PPC Campaigns', 'Content Strategy', 'Social Media'],
+    title: 'Digital Marketing Services Dubai UAE',
+    description: "You're losing money every day you're not at the top of Google. My digital marketing services in Dubai UAE will get you there. I'm the social media marketing agency Dubai trusts.",
+    features: ['SEO Services Dubai Small Business', 'PPC Advertising Company Dubai', 'Content Marketing Services UAE', 'Email Marketing Agency Dubai'],
     icon: <FaChartLine className="text-6xl" />,
     color: 'from-blue-500 to-cyan-500'
   },
   {
-    title: 'Analytics & CRO in Dubai',
-    description: 'Turn data into actionable insights with advanced analytics and conversion optimization for your Dubai-based business.',
-    features: ['Data Analytics', 'A/B Testing', 'User Research', 'Conversion Funnels'],
-    icon: <FaChartBar className="text-6xl" />,
-    color: 'from-cyan-500 to-teal-500'
-  },
-  {
-    title: 'E-commerce Development (Shopify/Magento)',
-    description: 'Custom e-commerce solutions to help you sell online in Dubai and the wider UAE.',
+    title: 'Ecommerce Website Development UAE',
+    description: "Your ecommerce store should be making you money while you sleep. My ecommerce website development in the UAE is designed to do just that. More traffic, more sales, more profit.",
     features: ['Shopify Development', 'Magento Development', 'Payment Gateway Integration', 'UX for E-commerce'],
     icon: <FaStore className="text-6xl" />,
     color: 'from-green-500 to-lime-500'
   },
   {
-    title: 'Bilingual SEO Services (Arabic/English)',
-    description: 'Reach a wider audience in the UAE with our expert bilingual SEO services.',
-    features: ['Arabic Keyword Research', 'English Keyword Research', 'On-page and Off-page SEO', 'Technical SEO'],
-    icon: <FaLanguage className="text-6xl" />,
+    title: 'Mobile App Development Dubai',
+    description: "I build mobile apps that people actually use. As leading mobile app developers in the UAE, I create experiences that drive engagement and revenue.",
+    features: ['iOS Development', 'Android Development', 'Cross-Platform Apps', 'App Store Optimization'],
+    icon: <FaMobileAlt className="text-6xl" />,
     color: 'from-red-500 to-orange-500'
+  },
+  {
+    title: 'WordPress Development Company Dubai',
+    description: "I build WordPress sites that are fast, secure, and SEO-friendly. As a top WordPress development company in Dubai, I'll make sure your website is a lead-generating asset, not a liability.",
+    features: ['Custom Themes & Plugins', 'Performance Optimization', 'Security Hardening', 'WooCommerce Integration'],
+    icon: <FaWordpress className="text-6xl" />,
+    color: 'from-yellow-500 to-amber-500'
+  },
+  {
+    title: 'Business Automation Software UAE',
+    description: "I help businesses in the UAE automate their processes and save money. My business automation software is custom-built to solve your specific problems and scale your operations.",
+    features: ['Process Analysis', 'Custom Software Development', 'API Integration', 'Ongoing Support'],
+    icon: <FaChartBar className="text-6xl" />,
+    color: 'from-cyan-500 to-teal-500'
   }
 ];
 
@@ -57,11 +64,10 @@ export default function Services() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Comprehensive Digital Solutions in Dubai & UAE</span>
+            <span className="gradient-text">I Offer a Lot More Than Just Services</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            From initial concept to market domination, we provide end-to-end solutions 
-            that drive real business results in the UAE.
+            I provide a clear path to dominating your market. I'm not just a service provider; I'm your partner in growth. I'm the best digital marketing company in Dubai, and I have the results to prove it.
           </p>
         </motion.div>
 
@@ -94,33 +100,6 @@ export default function Services() {
             </motion.div>
           ))}
         </div>
-
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8"
-        >
-          {[
-            { label: 'Projects Delivered', value: '250+' },
-            { label: 'Revenue Generated', value: '$47M+' },
-            { label: 'Happy Clients', value: '150+' },
-            { label: 'Years Experience', value: '8+' }
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={isInView ? { scale: 1 } : {}}
-                transition={{ duration: 0.5, delay: 0.7 }}
-                className="text-4xl md:text-5xl font-bold gradient-text mb-2"
-              >
-                {stat.value}
-              </motion.div>
-              <p className="text-gray-400">{stat.label}</p>
-            </div>
-          ))}
-        </motion.div>
       </div>
     </section>
   );

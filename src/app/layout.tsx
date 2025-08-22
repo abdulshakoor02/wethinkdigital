@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { localBusinessSchema } from "./schema";
+import { localBusinessSchema } from "./schema.tsx";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,14 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Web Development and Digital Marketing in Dubai, UAE | WeThinkDigital",
-  description: "Expert web development, digital marketing, and SEO services in Dubai and across the UAE. We help businesses grow with results-driven digital solutions.",
-  keywords: "web development dubai, digital marketing uae, seo services dubai, e-commerce development uae, mobile app development dubai, growth marketing uae, shopify development dubai, magento development uae",
+  title: "Best Digital Marketing Company in Dubai | Custom Web Development Dubai",
+  description: "I help businesses in Dubai & UAE dominate their market with custom web development, SEO, and digital marketing services. I get results. It's that simple.",
+  keywords: "best digital marketing company dubai, digital marketing services dubai uae, social media marketing agency dubai, seo services dubai small business, ppc advertising company dubai, content marketing services uae, email marketing agency dubai, website design companies dubai uae, custom web development dubai, ecommerce website development uae, responsive web design dubai, mobile app development dubai, wordpress development company dubai, custom software development dubai, mobile app developers uae, enterprise software solutions dubai, crm software development dubai, business automation software uae",
   authors: [{ name: "WeThinkDigital Team" }],
   creator: "WeThinkDigital",
   openGraph: {
-    title: "WeThinkDigital - Digital Excellence in Dubai & UAE",
-    description: "End-to-end digital solutions that drive real business growth in the UAE.",
+    title: "Best Digital Marketing Company in Dubai | Custom Web Development Dubai",
+    description: "I help businesses in Dubai & UAE dominate their market with custom web development, SEO, and digital marketing services. I get results. It's that simple.",
     type: "website",
   },
 };

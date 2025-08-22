@@ -200,19 +200,19 @@ export default function ContactForm() {
           <div className="glass rounded-lg p-6">
             <div className="text-3xl mb-4">📧</div>
             <h3 className="text-xl font-bold mb-2">Email Us</h3>
-            <p className="text-gray-300">hello@wethinkdigital.com</p>
+            <p className="text-gray-300">info@wethinkdigital.solutions</p>
           </div>
 
           <div className="glass rounded-lg p-6">
             <div className="text-3xl mb-4">📱</div>
             <h3 className="text-xl font-bold mb-2">Call Us</h3>
-            <p className="text-gray-300">+1 (555) 123-4567</p>
+            <p className="text-gray-300">+971 (564) 713-394</p>
           </div>
 
           <div className="glass rounded-lg p-6">
             <div className="text-3xl mb-4">📍</div>
             <h3 className="text-xl font-bold mb-2">Visit Us</h3>
-            <p className="text-gray-300">San Francisco, CA</p>
+            <p className="text-gray-300">Dubai, UAE</p>
           </div>
         </motion.div>
       </div>

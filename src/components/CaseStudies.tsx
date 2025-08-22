@@ -6,28 +6,28 @@ import { useState } from 'react';
 const caseStudies = [
   {
     id: 1,
-    title: 'Dubai E-commerce Success Story',
-    client: 'a leading Dubai-based e-commerce retailer',
-    description: 'Transformed a struggling e-commerce store into a market leader in the UAE with 300% revenue growth.',
+    title: 'I Took This Dubai E-commerce Store from Zero to Hero',
+    client: 'A Dubai-based fashion retailer',
+    description: 'They were bleeding money on ads that didn\'t convert. I implemented my proven ecommerce website development UAE strategy and 3x-ed their revenue in 90 days.',
     image: 'https://plus.unsplash.com/premium_photo-1726729310968-f322e3742418?w=600&h=400&fit=crop',
     results: [
       { metric: 'Revenue Increase', value: '300%' },
       { metric: 'Conversion Rate', value: '4.5% → 12.8%' },
-      { metric: 'Page Load Speed', value: '3.2s → 0.8s' },
-      { metric: 'Customer Retention', value: '45% → 78%' }
+      { metric: 'PPC Ad Spend', value: '-50%' },
+      { metric: 'Customer Retention', value: '+78%' }
     ],
     technologies: ['Next.js', 'Stripe', 'AWS', 'Google Analytics'],
     testimonial: {
-      text: "WeThinkDigital didn't just build our website - they built our entire digital strategy for the UAE market. The ROI speaks for itself.",
+      text: "I stopped wasting money and started making it. My business was transformed from a struggling startup to a market leader thanks to the best digital marketing company in Dubai.",
       author: 'Fatima Al-Mansoori',
-      position: 'CEO, Dubai Deals Online'
+      position: 'CEO, Dubai Fashion House'
     }
   },
   {
     id: 2,
-    title: 'Abu Dhabi SaaS Platform Scaling',
-    client: 'a high-growth SaaS company in Abu Dhabi',
-    description: 'Architected and developed a SaaS platform that now serves 50,000+ users across the MENA region.',
+    title: 'How I Built a Dominant SaaS Platform in Abu Dhabi',
+    client: 'A high-growth SaaS company in Abu Dhabi',
+    description: 'They had a great idea but no clue how to build it. I provided custom software development in Dubai that took them from a local startup to a regional powerhouse.',
     image: 'https://images.unsplash.com/photo-1651760464181-49092525ca3b?w=600&h=400&fit=crop',
     results: [
       { metric: 'User Growth', value: '0 → 50,000+' },
@@ -37,26 +37,26 @@ const caseStudies = [
     ],
     technologies: ['React', 'Node.js', 'PostgreSQL', 'Redis'],
     testimonial: {
-      text: "Their technical expertise and growth marketing strategies took us from a local startup to a regional player.",
+      text: "I didn't just get a product; I got a partner. Their enterprise software solutions in Dubai are second to none.",
       author: 'Ahmed Al-Futtaim',
       position: 'CTO, MENA Cloud Solutions'
     }
   },
   {
     id: 3,
-    title: 'Digitalization of a Local UAE Business',
-    client: 'a popular fitness center in Abu Dhabi',
-    description: 'Helped a local gym pivot to digital during COVID and achieve 5x revenue growth in the UAE.',
+    title: 'I Saved This Local UAE Business with Digital',
+    client: 'A popular fitness center in Abu Dhabi',
+    description: 'The pandemic almost killed their business. I used my mobile app development Dubai expertise to pivot them to a digital model and 5x their revenue.',
     image: 'https://plus.unsplash.com/premium_photo-1712999654713-59018f76fe6d?w=600&h=400&fit=crop',
     results: [
       { metric: 'Revenue Growth', value: '500%' },
       { metric: 'Online Bookings', value: '0 → 2,000+/month' },
-      { metric: 'Social Media Growth', value: '200% increase' },
-      { metric: 'Customer LTV', value: '3x improvement' }
+      { metric: 'Social Media Growth', value: '+200%' },
+      { metric: 'Customer LTV', value: '+300%' }
     ],
     technologies: ['React Native', 'Firebase', 'Stripe', 'Instagram API'],
     testimonial: {
-      text: "They saved our business during the pandemic and helped us thrive in the competitive UAE market.",
+      text: "I was about to close my doors. Then I found the top mobile app developers in the UAE. They didn't just save my business; they made it thrive.",
       author: 'Youssef Al-Haddad',
       position: 'Owner, Abu Dhabi Fitness'
     }
@@ -76,10 +76,10 @@ export default function CaseStudies() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Proven Results in the UAE</span>
+            <span className="gradient-text">Don't Just Take My Word for It. Here's the Proof.</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Real businesses, real results. See how we've helped companies in Dubai and Abu Dhabi achieve extraordinary growth.
+            I get results. It's that simple. Here's a look at how I've helped businesses just like yours dominate the market in Dubai and the UAE.
           </p>
         </motion.div>
 
@@ -90,8 +90,7 @@ export default function CaseStudies() {
               <button
                 key={study.id}
                 onClick={() => setSelectedCase(index)}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  selectedCase === index
+                className={`px-4 py-2 rounded-lg transition-all ${selectedCase === index
                     ? 'bg-primary text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
