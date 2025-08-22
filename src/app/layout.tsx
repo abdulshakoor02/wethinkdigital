@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import link from "next/link";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -34,6 +34,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17485985143"
+        ></Script>
+        <Script
+          id="gtag-inline-script"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-17485985143');
+            `,
+          }}
+        />
         <link rel="icon" href="/wethinkdigital.ico" />
       </head>
       <body
