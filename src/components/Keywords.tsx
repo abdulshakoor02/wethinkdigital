@@ -2,6 +2,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 const primaryKeywords = [
   'Digital Marketing',
@@ -40,6 +41,9 @@ const lsiKeywords = [
 ];
 
 export default function Keywords() {
+  const [showAll, setShowAll] = useState(false);
+  const keywords = [...primaryKeywords, ...lsiKeywords];
+  const visibleKeywords = showAll ? keywords : keywords.slice(0, 10);
   return (
     <section id="keywords" className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -133,8 +137,8 @@ export default function Keywords() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-16">
-          {[...primaryKeywords, ...lsiKeywords].map((keyword, index) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+          {visibleKeywords.map((keyword, index) => (
             <motion.div
               key={keyword}
               initial={{ opacity: 0, y: 20 }}
@@ -146,6 +150,19 @@ export default function Keywords() {
             </motion.div>
           ))}
         </div>
+
+        {!showAll && (
+          <div className="text-center mb-16">
+            <motion.button
+              onClick={() => setShowAll(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="btn-secondary px-8 py-4 text-lg"
+            >
+              Show More
+            </motion.button>
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 50 }}
