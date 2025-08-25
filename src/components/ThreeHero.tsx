@@ -27,10 +27,10 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
     
     // Scene setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const camera = new THREE.PerspectiveCamera(60, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'high-performance' });
     renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     currentMount.appendChild(renderer.domElement);
 
     // Lighting
@@ -46,7 +46,7 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
     const connections: THREE.Line[] = [];
     
     // Create nodes
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 14; i++) {
       const geometry = new THREE.SphereGeometry(0.05, 8, 8);
       const material = new THREE.MeshPhongMaterial({
         color: new THREE.Color().setHSL(Math.random() * 0.3 + 0.6, 0.8, 0.6),
@@ -66,7 +66,7 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
     }
 
     // Create connections
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 8; i++) {
       const start = nodes[Math.floor(Math.random() * nodes.length)];
       const end = nodes[Math.floor(Math.random() * nodes.length)];
       
@@ -89,7 +89,7 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
     }
 
     // Central sphere
-    const centralGeometry = new THREE.SphereGeometry(1, 32, 32);
+    const centralGeometry = new THREE.SphereGeometry(1, 24, 24);
     const centralMaterial = new THREE.MeshPhongMaterial({
       color: 0x6b46c1,
       transparent: true,
@@ -112,8 +112,9 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
 
     window.addEventListener('mousemove', handleMouseMove);
 
+    let rafId: number;
     const animate = () => {
-      requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(animate);
 
       // Rotate nodes
       nodes.forEach((node, index) => {
@@ -157,6 +158,7 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
       if (currentMount && renderer.domElement) {
         currentMount.removeChild(renderer.domElement);
       }
+      cancelAnimationFrame(rafId);
       renderer.dispose();
     };
   }, [mountRef, isDesktop, isMounted]);

@@ -1,15 +1,17 @@
 import Navigation from '@/components/Navigation';
 import ThreeHero from '@/components/ThreeHero';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
-const Services = dynamic(() => import('@/components/Services'));
-const Keywords = dynamic(() => import('@/components/Keywords'));
-const DubaiDomination = dynamic(() => import('@/components/DubaiDomination'));
-const ROICalculator = dynamic(() => import('@/components/ROICalculator'));
-const CaseStudies = dynamic(() => import('@/components/CaseStudies'));
-const Process = dynamic(() => import('@/components/Process'));
-const ContactForm = dynamic(() => import('@/components/ContactForm'));
-const Footer = dynamic(() => import('@/components/Footer'));
+const Services = dynamicImport(() => import('@/components/Services'));
+const Keywords = dynamicImport(() => import('@/components/Keywords'));
+const DubaiDomination = dynamicImport(() => import('@/components/DubaiDomination'));
+const ROICalculator = dynamicImport(() => import('@/components/ROICalculator'));
+const CaseStudies = dynamicImport(() => import('@/components/CaseStudies'));
+const Process = dynamicImport(() => import('@/components/Process'));
+const ContactForm = dynamicImport(() => import('@/components/ContactForm'));
+const Footer = dynamicImport(() => import('@/components/Footer'));
 
 export default function Home() {
   return (
@@ -24,6 +26,9 @@ export default function Home() {
       <Process />
       <ContactForm />
       <Footer />
+      <noscript>
+        <style>{`.animate-spin{animation:none}`}</style>
+      </noscript>
     </main>
   );
 }

@@ -41,21 +41,26 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
         />
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17485985143"
-        ></Script>
-        <Script
-          id="gtag-inline-script"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'AW-17485985143');
-            `,
-          }}
-        />
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            <Script
+              strategy="lazyOnload"
+              src="https://www.googletagmanager.com/gtag/js?id=AW-17485985143"
+            />
+            <Script
+              id="gtag-inline-script"
+              strategy="lazyOnload"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', 'AW-17485985143');
+                `,
+              }}
+            />
+          </>
+        )}
         <link rel="icon" href="/wethinkdigital.ico" />
       </head>
       <body
