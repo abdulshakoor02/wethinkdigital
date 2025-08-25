@@ -3,19 +3,19 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { FaRocket, FaChartLine, FaChartBar, FaStore, FaLanguage, FaMobileAlt, FaWordpress } from 'react-icons/fa';
+import { FaRocket, FaChartLine, FaChartBar, FaStore, FaMobileAlt, FaWordpress } from 'react-icons/fa';
 
 const services = [
   {
     title: 'Custom Web Development Dubai',
-    description: "I don't just build websites. I build revenue-generating machines. As the best digital marketing company in Dubai, I deliver custom web development that converts.",
+    description: "I don&apos;t just build websites. I build revenue-generating machines. As the best digital marketing company in Dubai, I deliver custom web development that converts.",
     features: ['Responsive Web Design Dubai', 'Custom Software Development Dubai', 'Enterprise Software Solutions Dubai', 'CRM Software Development Dubai'],
     icon: <FaRocket className="text-6xl" />,
     color: 'from-purple-500 to-blue-500'
   },
   {
     title: 'Digital Marketing Services Dubai UAE',
-    description: "You're losing money every day you're not at the top of Google. My digital marketing services in Dubai UAE will get you there. I'm the social media marketing agency Dubai trusts.",
+    description: "You&apos;re losing money every day you&apos;re not at the top of Google. My digital marketing services in Dubai UAE will get you there. I&apos;m the social media marketing agency Dubai trusts.",
     features: ['SEO Services Dubai Small Business', 'PPC Advertising Company Dubai', 'Content Marketing Services UAE', 'Email Marketing Agency Dubai'],
     icon: <FaChartLine className="text-6xl" />,
     color: 'from-blue-500 to-cyan-500'
@@ -36,7 +36,7 @@ const services = [
   },
   {
     title: 'WordPress Development Company Dubai',
-    description: "I build WordPress sites that are fast, secure, and SEO-friendly. As a top WordPress development company in Dubai, I'll make sure your website is a lead-generating asset, not a liability.",
+    description: "I build WordPress sites that are fast, secure, and SEO-friendly. As a top WordPress development company in Dubai, I&apos;ll make sure your website is a lead-generating asset, not a liability.",
     features: ['Custom Themes & Plugins', 'Performance Optimization', 'Security Hardening', 'WooCommerce Integration'],
     icon: <FaWordpress className="text-6xl" />,
     color: 'from-yellow-500 to-amber-500'
@@ -67,7 +67,7 @@ export default function Services() {
             <span className="gradient-text">I Offer a Lot More Than Just Services</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            I provide a clear path to dominating your market. I'm not just a service provider; I'm your partner in growth. I'm the best digital marketing company in Dubai, and I have the results to prove it.
+            I provide a clear path to dominating your market. I&apos;m not just a service provider; I&apos;m your partner in growth. I&apos;m the best digital marketing company in Dubai, and I have the results to prove it.
           </p>
         </motion.div>
 

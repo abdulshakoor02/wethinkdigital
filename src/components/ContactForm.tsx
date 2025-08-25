@@ -60,10 +60,10 @@ export default function ContactForm() {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Let's Build Something Amazing</span>
+            <span className="gradient-text">Let&apos;s Build Your Empire</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Ready to transform your business? Get in touch with our team of experts today.
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            You&apos;ve seen the proof. You know what I can do. Now it&apos;s your turn.
           </p>
         </motion.div>
 
@@ -78,7 +78,7 @@ export default function ContactForm() {
               <div className="text-6xl mb-4">🎉</div>
               <h3 className="text-3xl font-bold mb-4 text-white">Thank You!</h3>
               <p className="text-xl text-gray-300 mb-6">
-                Your message has been sent successfully. We'll get back to you within 24 hours.
+                Your message has been sent successfully. We&apos;ll get back to you within 24 hours.
               </p>
               <motion.button
                 whileHover={{ scale: 1.05 }}

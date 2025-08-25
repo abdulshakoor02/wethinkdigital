@@ -169,7 +169,7 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
           className="text-center px-4 max-w-4xl mx-auto"
         >
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            <span className="gradient-text">Build Tomorrow's</span>
+            <span className="gradient-text">Build Tomorrow&apos;s</span>
             <br />
             <span className="text-white">Digital Experiences Today</span>
           </h1>

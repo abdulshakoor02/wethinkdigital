@@ -2,13 +2,14 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import Image from 'next/image';
 
 const caseStudies = [
   {
     id: 1,
     title: 'I Took This Dubai E-commerce Store from Zero to Hero',
     client: 'A Dubai-based fashion retailer',
-    description: 'They were bleeding money on ads that didn\'t convert. I implemented my proven ecommerce website development UAE strategy and 3x-ed their revenue in 90 days.',
+    description: 'They were bleeding money on ads that didn&apos;t convert. I implemented my proven ecommerce website development UAE strategy and 3x-ed their revenue in 90 days.',
     image: 'https://plus.unsplash.com/premium_photo-1726729310968-f322e3742418?w=600&h=400&fit=crop',
     results: [
       { metric: 'Revenue Increase', value: '300%' },
@@ -37,7 +38,7 @@ const caseStudies = [
     ],
     technologies: ['React', 'Node.js', 'PostgreSQL', 'Redis'],
     testimonial: {
-      text: "I didn't just get a product; I got a partner. Their enterprise software solutions in Dubai are second to none.",
+      text: "I didn&apos;t just get a product; I got a partner. Their enterprise software solutions in Dubai are second to none.",
       author: 'Ahmed Al-Futtaim',
       position: 'CTO, MENA Cloud Solutions'
     }
@@ -56,11 +57,11 @@ const caseStudies = [
     ],
     technologies: ['React Native', 'Firebase', 'Stripe', 'Instagram API'],
     testimonial: {
-      text: "I was about to close my doors. Then I found the top mobile app developers in the UAE. They didn't just save my business; they made it thrive.",
+      text: "I was about to close my doors. Then I found the top mobile app developers in the UAE. They didn&apos;t just save my business; they made it thrive.",
       author: 'Youssef Al-Haddad',
       position: 'Owner, Abu Dhabi Fitness'
     }
-  }
+  },
 ];
 
 export default function CaseStudies() {
@@ -76,10 +77,10 @@ export default function CaseStudies() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Don't Just Take My Word for It. Here's the Proof.</span>
+            <span className="gradient-text">Don&apos;t Just Take My Word for It. Here&apos;s the Proof.</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            I get results. It's that simple. Here's a look at how I've helped businesses just like yours dominate the market in Dubai and the UAE.
+            I get results. It&apos;s that simple. Here&apos;s a look at how I&apos;ve helped businesses just like yours dominate the market in Dubai and the UAE.
           </p>
         </motion.div>
 
@@ -116,9 +117,11 @@ export default function CaseStudies() {
                 whileHover={{ scale: 1.02 }}
                 className="relative overflow-hidden rounded-lg mb-6"
               >
-                <img 
+                <Image 
                   src={caseStudies[selectedCase].image} 
                   alt={`${caseStudies[selectedCase].client} project`} 
+                  width={600}
+                  height={400}
                   className="w-full h-64 object-cover rounded-lg"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />

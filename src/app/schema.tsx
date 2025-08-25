@@ -1,4 +1,4 @@
-import { CreativeWork } from 'schema-dts';
+
 
 export const localBusinessSchema = {
   "@context": "https://schema.org",

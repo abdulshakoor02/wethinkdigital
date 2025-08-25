@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 
 const processSteps = [
@@ -49,7 +48,6 @@ const processSteps = [
 
 export default function Process() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
     <section id="process" className="py-24 bg-slate-900/50">
@@ -78,14 +76,12 @@ export default function Process() {
               initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
-              className={`relative flex items-center mb-16 ${
-                index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-              }`}
+              className={`relative flex items-center mb-16 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                }`}
             >
               {/* Content */}
-              <div className={`w-full md:w-5/12 ${
-                index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
-              }`}>
+              <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
+                }`}>
                 <div className="glass rounded-xl p-8 hover:shadow-2xl transition-all duration-300">
                   <div className="flex items-center mb-4">
                     <div className="text-4xl mr-4">{step.icon}</div>
@@ -94,9 +90,9 @@ export default function Process() {
                       <p className="text-sm text-primary font-semibold">{step.duration}</p>
                     </div>
                   </div>
-                  
+
                   <p className="text-gray-300 mb-4">{step.description}</p>
-                  
+
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold text-white">Key Deliverables:</h4>
                     {step.deliverables.map((deliverable) => (
@@ -134,13 +130,19 @@ export default function Process() {
         >
           <h3 className="text-3xl font-bold mb-6 text-white">Ready to Start Your Journey?</h3>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Let's discuss how we can apply our proven process to transform your business.
+            Let&apos;s discuss how we can apply our proven process to transform your business.
           </p>
-          
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="btn-primary px-8 py-4 text-lg"
+            onClick={() => {
+              const contactElement = document.getElementById('contact');
+              if (contactElement) {
+                contactElement.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
           >
             Book Your Discovery Call
           </motion.button>

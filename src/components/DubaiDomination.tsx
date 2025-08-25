@@ -13,10 +13,10 @@ export default function DubaiDomination() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">I'm Here to Help You Dominate the Dubai Market</span>
+            <span className="gradient-text">I&apos;m Not Just in the Business of Digital Marketing. I&apos;m in the Business of Dubai Domination.</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            I don't play games. I get results. If you want to be the best, you have to work with the best. I am the best digital marketing company in Dubai, and I have the track record to prove it. I'm not interested in being your vendor; I want to be your partner in world domination.
+                    <p className="text-xl text-gray-300 max-w-4xl mx-auto">
+            I don&apos;t play small. I don&apos;t aim for incremental improvements. I go for the jugular. While other agencies are fighting for scraps, I&apos;m rewriting the rules of the game in the UAE.
           </p>
         </motion.div>
         <motion.div
@@ -30,7 +30,7 @@ export default function DubaiDomination() {
             whileTap={{ scale: 0.95 }}
             className="btn-primary px-8 py-4 text-lg"
           >
-            Let's Talk About How I Can Make You More Money
+            Let&apos;s Talk About How I Can Make You More Money
           </motion.button>
         </motion.div>
       </div>
