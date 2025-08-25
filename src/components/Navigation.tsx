@@ -91,10 +91,17 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         <motion.div
-          initial={{ opacity: 0, height: 0 }}
+          initial={{ opacity: 0, scaleY: 0 }}
           animate={{
             opacity: isMobileMenuOpen ? 1 : 0,
-            height: isMobileMenuOpen ? 'auto' : 0
+            scaleY: isMobileMenuOpen ? 1 : 0
+          }}
+          transition={{
+            duration: 0.2,
+            ease: 'easeInOut'
+          }}
+          style={{
+            transformOrigin: 'top'
           }}
           className="md:hidden overflow-hidden bg-background/95 backdrop-blur-md"
         >

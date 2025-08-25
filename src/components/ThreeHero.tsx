@@ -1,7 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
+import { 
+  Scene, 
+  PerspectiveCamera, 
+  WebGLRenderer, 
+  AmbientLight, 
+  DirectionalLight, 
+  SphereGeometry, 
+  MeshPhongMaterial, 
+  Mesh, 
+  BufferGeometry, 
+  LineBasicMaterial, 
+  Line, 
+  Color 
+} from 'three';
 import { motion } from 'framer-motion';
 import { useMediaQuery } from 'react-responsive';
 
@@ -26,35 +39,35 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
     const currentMount = mountRef.current;
     
     // Scene setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'high-performance' });
+    const scene = new Scene();
+    const camera = new PerspectiveCamera(60, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
+    const renderer = new WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'high-performance' });
     renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     currentMount.appendChild(renderer.domElement);
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0x6b46c1, 0.4);
+    const ambientLight = new AmbientLight(0x6b46c1, 0.4);
     scene.add(ambientLight);
     
-    const directionalLight = new THREE.DirectionalLight(0x3b82f6, 1);
+    const directionalLight = new DirectionalLight(0x3b82f6, 1);
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
 
     // Create digital ecosystem
-    const nodes: THREE.Mesh[] = [];
-    const connections: THREE.Line[] = [];
+    const nodes: Mesh[] = [];
+    const connections: Line[] = [];
     
-    // Create nodes
-    for (let i = 0; i < 14; i++) {
-      const geometry = new THREE.SphereGeometry(0.05, 8, 8);
-      const material = new THREE.MeshPhongMaterial({
-        color: new THREE.Color().setHSL(Math.random() * 0.3 + 0.6, 0.8, 0.6),
+    // Create nodes (reduced count for performance)
+    for (let i = 0; i < 10; i++) {
+      const geometry = new SphereGeometry(0.05, 6, 6); // Reduced segments
+      const material = new MeshPhongMaterial({
+        color: new Color().setHSL(Math.random() * 0.3 + 0.6, 0.8, 0.6),
         transparent: true,
         opacity: 0.8
       });
       
-      const node = new THREE.Mesh(geometry, material);
+      const node = new Mesh(geometry, material);
       node.position.set(
         (Math.random() - 0.5) * 10,
         (Math.random() - 0.5) * 10,
@@ -65,38 +78,38 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
       scene.add(node);
     }
 
-    // Create connections
-    for (let i = 0; i < 8; i++) {
+    // Create connections (reduced count for performance)
+    for (let i = 0; i < 6; i++) {
       const start = nodes[Math.floor(Math.random() * nodes.length)];
       const end = nodes[Math.floor(Math.random() * nodes.length)];
       
       if (start !== end) {
-        const geometry = new THREE.BufferGeometry().setFromPoints([
+        const geometry = new BufferGeometry().setFromPoints([
           start.position,
           end.position
         ]);
         
-        const material = new THREE.LineBasicMaterial({
+        const material = new LineBasicMaterial({
           color: 0x10b981,
           transparent: true,
           opacity: 0.3
         });
         
-        const line = new THREE.Line(geometry, material);
+        const line = new Line(geometry, material);
         connections.push(line);
         scene.add(line);
       }
     }
 
-    // Central sphere
-    const centralGeometry = new THREE.SphereGeometry(1, 24, 24);
-    const centralMaterial = new THREE.MeshPhongMaterial({
+    // Central sphere (reduced segments for performance)
+    const centralGeometry = new SphereGeometry(1, 16, 16);
+    const centralMaterial = new MeshPhongMaterial({
       color: 0x6b46c1,
       transparent: true,
       opacity: 0.8,
       wireframe: true
     });
-    const centralSphere = new THREE.Mesh(centralGeometry, centralMaterial);
+    const centralSphere = new Mesh(centralGeometry, centralMaterial);
     scene.add(centralSphere);
 
     camera.position.z = 8;

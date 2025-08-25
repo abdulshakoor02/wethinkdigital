@@ -25,12 +25,17 @@
     "three": "^0.178.0"
   },
   "browserslist": [
-    "last 2 Chrome versions",
-    "last 2 Firefox versions",
-    "last 2 Safari versions",
-    "last 2 Edge versions",
+    "Chrome >= 91",
+    "Firefox >= 90", 
+    "Safari >= 14",
+    "Edge >= 91",
+    "and_chr >= 91",
+    "and_ff >= 90",
+    "ios_saf >= 14",
+    "not dead",
     "not IE 11",
-    "not op_mini all"
+    "not op_mini all",
+    "not android < 91"
   ],
   "devDependencies": {
     "@eslint/eslintrc": "^3",
