@@ -24,6 +24,11 @@
     "react-responsive": "^10.0.1",
     "three": "^0.178.0"
   },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "not op_mini all"
+  ],
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.12",
