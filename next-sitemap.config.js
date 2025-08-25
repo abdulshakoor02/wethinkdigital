@@ -5,4 +5,10 @@ module.exports = {
   sitemapSize: 5000, // optional, max URLs per sitemap
   changefreq: "daily", // optional
   priority: 0.7, // optional
+  exclude: ['/blog/[slug]'], // Exclude dynamic blog routes from static sitemap
+  robotsTxtOptions: {
+    additionalSitemaps: [
+      'https://www.wethinkdigital.solutions/blog/sitemap.xml'
+    ]
+  }
 };

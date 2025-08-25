@@ -114,3 +114,60 @@ html {
   background: var(--primary);
   color: white;
 }
+/* Blog content styles */
+.prose {
+  color: #d1d5db;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: #f8fafc;
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose p {
+  margin-top: 0;
+  margin-bottom: 1em;
+  line-height: 1.75;
+}
+
+.prose a {
+  color: #818cf8;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #a5b4fc;
+}
+
+.prose ul,
+.prose ol {
+  margin-top: 0;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.25em;
+}
+
+.prose img {
+  border-radius: 0.5rem;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose blockquote {
+  border-left: 4px solid #4f46e5;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  color: #9ca3af;
+}

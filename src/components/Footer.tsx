@@ -20,7 +20,7 @@ export default function Footer() {
       { name: 'Contact', href: '#contact' }
     ],
     resources: [
-      { name: 'Blog', href: '#blog' },
+      { name: 'Blog', href: '/blog' },
       { name: 'Portfolio', href: '#portfolio' },
       { name: 'Careers', href: '#careers' },
       { name: 'Privacy Policy', href: '#privacy' }

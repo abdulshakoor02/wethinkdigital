@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 export default function DubaiDomination() {
   return (
-    <section className="py-24 bg-background">
+    <section id="team" className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}

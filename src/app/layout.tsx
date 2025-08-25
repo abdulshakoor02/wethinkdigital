@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { localBusinessSchema } from "./schema";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import Navigation from "@/components/Navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,6 +68,21 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
         />
         
+        <Script
+          id="json-ld-blog"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Blog",
+              "name": "WeThinkDigital Blog",
+              "url": "https://www.wethinkdigital.solutions/blog",
+              "description": "Latest insights, tips, and news from WeThinkDigital about digital marketing, web development, and SEO strategies."
+            })
+          }}
+        />
+        
         {process.env.NODE_ENV === 'production' && (
           <>
             <Script
@@ -115,6 +131,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Navigation />
         {children}
         <WhatsAppButton />
       </body>
