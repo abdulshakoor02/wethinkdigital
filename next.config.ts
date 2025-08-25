@@ -28,37 +28,47 @@ const nextConfig: NextConfig = {
         three: 'three',
       };
 
-      // SWC minification is enabled by default in Next.js 15
-      
-      // Split chunks more aggressively
+      // Mobile-specific optimizations
       config.optimization = {
         ...config.optimization,
+        // Smaller chunk sizes for mobile
         splitChunks: {
           ...config.optimization.splitChunks,
           chunks: 'all',
+          minSize: 20000, // Smaller min size for mobile
+          maxSize: 200000, // Smaller max size for mobile
           cacheGroups: {
             default: false,
             vendors: false,
-            // Vendor chunk for heavy libraries
-            vendor: {
-              name: 'vendor',
+            // Critical vendor chunk (small, immediately needed)
+            criticalVendor: {
+              name: 'critical-vendor',
               chunks: 'all',
-              test: /[\\/]node_modules[\\/]/,
-              priority: 20,
+              test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
+              priority: 40,
+              enforce: true,
             },
-            // Three.js specific chunk
+            // Three.js specific chunk (lazy loaded on mobile)
             three: {
               name: 'three',
               chunks: 'all',
               test: /[\\/]node_modules[\\/](three|@react-three)[\\/]/,
               priority: 30,
             },
-            // Animation libraries chunk
+            // Animation libraries chunk (lazy loaded)
             animations: {
               name: 'animations',
               chunks: 'all',
               test: /[\\/]node_modules[\\/](framer-motion|gsap)[\\/]/,
               priority: 25,
+            },
+            // Other vendor libraries
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/]/,
+              priority: 20,
+              maxSize: 150000, // Smaller chunks for mobile
             },
             // Common chunk for shared code
             common: {
@@ -67,9 +77,18 @@ const nextConfig: NextConfig = {
               minChunks: 2,
               priority: 10,
               reuseExistingChunk: true,
+              maxSize: 100000, // Smaller common chunks
             },
           },
         },
+      };
+
+      // Add mobile-specific performance hints
+      config.performance = {
+        ...config.performance,
+        maxAssetSize: 200000, // 200KB for mobile
+        maxEntrypointSize: 300000, // 300KB for mobile
+        hints: 'warning',
       };
     }
 
@@ -100,8 +119,13 @@ const nextConfig: NextConfig = {
       },
     ],
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Mobile-first device sizes (prioritize smaller sizes)
+    deviceSizes: [320, 420, 640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    // Optimize for mobile
+    minimumCacheTTL: 31536000, // 1 year
+    dangerouslyAllowSVG: false,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
   eslint: {

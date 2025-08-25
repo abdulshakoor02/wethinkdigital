@@ -1,12 +1,13 @@
-import { Suspense } from 'react';
+import React from 'react';
 import Navigation from '@/components/Navigation';
 import ThreeHero from '@/components/ThreeHero';
+import LazySection from '@/components/LazySection';
 import dynamic from 'next/dynamic';
 
 export const dynamicParams = false;
 export const revalidate = 3600;
 
-// Lazy load non-critical components with loading states
+// Mobile-optimized lazy loading with intersection observer
 const Services = dynamic(() => import('@/components/Services'), {
   loading: () => <div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />
 });
@@ -45,37 +46,61 @@ export default function Home() {
       <Navigation />
       <ThreeHero />
       
-      <Suspense fallback={<div className="h-64 bg-gray-900/20 animate-pulse rounded-lg" />}>
+      <LazySection 
+        rootMargin="200px" 
+        fallback={<div className="h-64 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
         <Keywords />
-      </Suspense>
+      </LazySection>
       
-      <Suspense fallback={<div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />}>
+      <LazySection 
+        rootMargin="200px"
+        fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
         <Services />
-      </Suspense>
+      </LazySection>
       
-      <Suspense fallback={<div className="h-80 bg-gray-900/20 animate-pulse rounded-lg" />}>
+      <LazySection 
+        rootMargin="150px"
+        fallback={<div className="h-80 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
         <DubaiDomination />
-      </Suspense>
+      </LazySection>
       
-      <Suspense fallback={<div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />}>
+      <LazySection 
+        rootMargin="150px"
+        fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
         <ROICalculator />
-      </Suspense>
+      </LazySection>
       
-      <Suspense fallback={<div className="h-80 bg-gray-900/20 animate-pulse rounded-lg" />}>
+      <LazySection 
+        rootMargin="100px"
+        fallback={<div className="h-80 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
         <CaseStudies />
-      </Suspense>
+      </LazySection>
       
-      <Suspense fallback={<div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />}>
+      <LazySection 
+        rootMargin="100px"
+        fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
         <Process />
-      </Suspense>
+      </LazySection>
       
-      <Suspense fallback={<div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />}>
+      <LazySection 
+        rootMargin="50px"
+        fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
         <ContactForm />
-      </Suspense>
+      </LazySection>
       
-      <Suspense fallback={<div className="h-32 bg-gray-900/20 animate-pulse" />}>
+      <LazySection 
+        rootMargin="0px"
+        fallback={<div className="h-32 bg-gray-900/10 animate-pulse" />}
+      >
         <Footer />
-      </Suspense>
+      </LazySection>
       
       <noscript>
         <style>{`.animate-spin{animation:none}`}</style>

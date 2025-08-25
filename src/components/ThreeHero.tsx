@@ -26,14 +26,116 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const isDesktop = useMediaQuery({ query: '(min-width: 768px)' });
+  const isMobile = useMediaQuery({ query: '(max-width: 767px)' });
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    setIsLoaded(true); // Set isLoaded to true unconditionally
+    setIsLoaded(true);
   }, []);
 
-    useEffect(() => {
+  // Mobile-optimized Three.js scene
+  useEffect(() => {
+    if (!mountRef.current || !isMobile || !isMounted) return;
+
+    const currentMount = mountRef.current;
+    
+    // Lightweight mobile scene setup
+    const scene = new Scene();
+    const camera = new PerspectiveCamera(50, currentMount.clientWidth / currentMount.clientHeight, 0.1, 500);
+    const renderer = new WebGLRenderer({ 
+      alpha: true, 
+      antialias: false, 
+      powerPreference: 'low-power',
+      precision: 'lowp',
+      stencil: false,
+      depth: false
+    });
+    
+    renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1)); // Lower pixel ratio for mobile
+    currentMount.appendChild(renderer.domElement);
+
+    // Minimal lighting for mobile
+    const ambientLight = new AmbientLight(0x6b46c1, 0.6);
+    scene.add(ambientLight);
+
+    // Simple mobile scene - just central sphere and few particles
+    const centralGeometry = new SphereGeometry(0.8, 8, 8); // Very low poly
+    const centralMaterial = new MeshPhongMaterial({
+      color: 0x6b46c1,
+      transparent: true,
+      opacity: 0.7,
+      wireframe: true
+    });
+    const centralSphere = new Mesh(centralGeometry, centralMaterial);
+    scene.add(centralSphere);
+
+    // Add only 4 simple nodes for mobile
+    const nodes: Mesh[] = [];
+    for (let i = 0; i < 4; i++) {
+      const geometry = new SphereGeometry(0.03, 4, 4); // Ultra low poly
+      const material = new MeshPhongMaterial({
+        color: new Color().setHSL(Math.random() * 0.3 + 0.6, 0.8, 0.6),
+        transparent: true,
+        opacity: 0.6
+      });
+      
+      const node = new Mesh(geometry, material);
+      node.position.set(
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4
+      );
+      
+      nodes.push(node);
+      scene.add(node);
+    }
+
+    camera.position.z = 5;
+
+    // Simplified animation for mobile
+    let rafId: number;
+    const animate = () => {
+      rafId = requestAnimationFrame(animate);
+
+      // Simple rotation only
+      centralSphere.rotation.x += 0.003;
+      centralSphere.rotation.y += 0.003;
+
+      nodes.forEach(node => {
+        node.rotation.x += 0.005;
+        node.rotation.y += 0.005;
+      });
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    // Handle resize
+    const handleResize = () => {
+      if (!currentMount) return;
+      camera.aspect = currentMount.clientWidth / currentMount.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (currentMount && renderer.domElement) {
+        currentMount.removeChild(renderer.domElement);
+      }
+      cancelAnimationFrame(rafId);
+      renderer.dispose();
+    };
+  }, [mountRef, isMobile, isMounted]);
+
+  // Desktop Three.js scene (existing)
+  useEffect(() => {
     if (!mountRef.current || !isDesktop || !isMounted) return;
 
     const currentMount = mountRef.current;
@@ -178,7 +280,7 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
 
   return (
     <div className={`relative w-full h-screen ${className}`}>
-      {isMounted && isDesktop && <div 
+      {isMounted && (isDesktop || isMobile) && <div 
         ref={mountRef} 
         className="absolute inset-0 w-full h-full"
       />}

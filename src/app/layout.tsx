@@ -90,14 +90,27 @@ export default function RootLayout({
         
         <link rel="icon" href="/wethinkdigital.ico" />
         
-        {/* Preload critical fonts */}
+        {/* Mobile-optimized font preloading */}
         <link
           rel="preload"
           href="/_next/static/media/GeistVF.woff2"
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
+          media="(min-width: 768px)"
         />
+        
+        {/* Critical font subset for mobile */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @media (max-width: 767px) {
+              .gradient-text, h1, h2, h3 {
+                font-display: swap;
+                text-rendering: optimizeSpeed;
+              }
+            }
+          `
+        }} />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
