@@ -43,3 +43,5 @@ next-env.d.ts
 public/robots.txt
 public/sitemap-0.xml
 public/sitemap.xml
+.roomodes
+*.xml
