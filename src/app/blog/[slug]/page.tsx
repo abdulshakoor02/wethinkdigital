@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Metadata, ResolvingMetadata } from 'next';
 import type { BlogPost } from '@/types/blog';
 import BlogPostComponent from '@/components/BlogPost';
+import RelatedPosts from '@/components/RelatedPosts';
 
 // Mock blog post data - in a real app, this would come from a CMS or database
 const mockPosts: BlogPost[] = [
@@ -637,15 +638,40 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
+  const cleanDescription = post.content.replace(/<[^>]*>/g, '').substring(0, 160);
+  
   return {
     title: `${post.title} | WeThinkDigital Blog`,
-    description: post.content.replace(/<[^>]*>/g, '').substring(0, 160),
+    description: cleanDescription,
+    keywords: `${post.slug.split('-').join(', ')}, seo services dubai, digital marketing dubai, wethinkdigital`,
+    authors: [{ name: post.author }],
     openGraph: {
       title: post.title,
-      description: post.content.replace(/<[^>]*>/g, '').substring(0, 160),
+      description: cleanDescription,
       type: 'article',
       publishedTime: new Date(post.date).toISOString(),
+      modifiedTime: new Date(post.date).toISOString(),
       authors: [post.author],
+      url: `https://www.wethinkdigital.solutions/blog/${resolvedParams.slug}`,
+      siteName: 'WeThinkDigital',
+      locale: 'en_US',
+      images: [
+        {
+          url: 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: cleanDescription,
+      images: ['https://www.wethinkdigital.solutions/wethinkdigital.ico'],
+    },
+    alternates: {
+      canonical: `https://www.wethinkdigital.solutions/blog/${resolvedParams.slug}`,
     },
   };
 }
@@ -693,6 +719,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         </div>
       </div>
+      
+      {/* Related Posts Section */}
+      <RelatedPosts currentPostId={post.id} />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { localBusinessSchema } from "./schema";
+import { localBusinessSchema, organizationSchema, professionalServiceSchema } from "./schema";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Navigation from "@/components/Navigation";
 
@@ -21,15 +21,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Best Digital Marketing Company in Dubai | Custom Web Development Dubai",
-  description: "I help businesses in Dubai & UAE dominate their market with custom web development, SEO, and digital marketing services. I get results. It's that simple.",
-  keywords: "best digital marketing company dubai, digital marketing services dubai uae, social media marketing agency dubai, seo services dubai small business, ppc advertising company dubai, content marketing services uae, email marketing agency dubai, website design companies dubai uae, custom web development dubai, ecommerce website development uae, responsive web design dubai, mobile app development dubai, wordpress development company dubai, custom software development dubai, mobile app developers uae, enterprise software solutions dubai, crm software development dubai, business automation software uae",
+  title: "Best SEO Services in Dubai | Top Digital Marketing Company - WeThinkDigital",
+  description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue. Get #1 rankings with Dubai's leading SEO service provider.",
+  keywords: "seo services in dubai, best digital marketing company in dubai, top digital marketing companies in dubai, seo service in dubai, best seo company dubai, digital marketing services dubai uae, social media marketing agency dubai, ppc advertising company dubai, content marketing services uae, email marketing agency dubai, website design companies dubai uae, custom web development dubai, ecommerce website development uae, responsive web design dubai, mobile app development dubai, wordpress development company dubai",
   authors: [{ name: "WeThinkDigital Team" }],
   creator: "WeThinkDigital",
   openGraph: {
-    title: "Best Digital Marketing Company in Dubai | Custom Web Development Dubai",
-    description: "I help businesses in Dubai & UAE dominate their market with custom web development, SEO, and digital marketing services. I get results. It's that simple.",
+    title: "Best SEO Services in Dubai | Top Digital Marketing Company - WeThinkDigital",
+    description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue. Get #1 rankings with Dubai's leading SEO service provider.",
     type: "website",
+    url: "https://www.wethinkdigital.solutions",
+    siteName: "WeThinkDigital",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Best SEO Services in Dubai | Top Digital Marketing Company",
+    description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue.",
+  },
+  alternates: {
+    canonical: "https://www.wethinkdigital.solutions",
   },
 };
 
@@ -62,10 +73,24 @@ export default function RootLayout({
         <link rel="preload" href="/wethinkdigital.ico" as="image" type="image/x-icon" />
         
         <Script
-          id="json-ld-schema"
+          id="json-ld-organization"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        
+        <Script
+          id="json-ld-localbusiness"
           type="application/ld+json"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
+        
+        <Script
+          id="json-ld-service"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceSchema) }}
         />
         
         <Script

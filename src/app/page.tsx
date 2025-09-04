@@ -1,5 +1,4 @@
 import React from 'react';
-import Navigation from '@/components/Navigation';
 import ThreeHero from '@/components/ThreeHero';
 import LazySection from '@/components/LazySection';
 import dynamic from 'next/dynamic';
@@ -32,7 +31,15 @@ const Process = dynamic(() => import('@/components/Process'), {
   loading: () => <div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />
 });
 
+const FAQ = dynamic(() => import('@/components/FAQ'), {
+  loading: () => <div className="h-80 bg-gray-900/20 animate-pulse rounded-lg" />
+});
+
 const ContactForm = dynamic(() => import('@/components/ContactForm'), {
+  loading: () => <div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />
+});
+
+const RecentBlogPosts = dynamic(() => import('@/components/RecentBlogPosts'), {
   loading: () => <div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />
 });
 
@@ -43,7 +50,6 @@ const Footer = dynamic(() => import('@/components/Footer'), {
 export default function Home() {
   return (
     <main className="bg-background">
-      <Navigation />
       <ThreeHero />
       
       <LazySection 
@@ -78,6 +84,13 @@ export default function Home() {
         rootMargin="100px"
         fallback={<div className="h-80 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
+        <FAQ />
+      </LazySection>
+      
+      <LazySection 
+        rootMargin="100px"
+        fallback={<div className="h-80 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
         <CaseStudies />
       </LazySection>
       
@@ -86,6 +99,13 @@ export default function Home() {
         fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <Process />
+      </LazySection>
+      
+      <LazySection 
+        rootMargin="100px"
+        fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
+      >
+        <RecentBlogPosts />
       </LazySection>
       
       <LazySection 

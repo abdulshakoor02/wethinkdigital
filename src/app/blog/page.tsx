@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { BlogPost } from '@/types/blog';
 import BlogPostList from '@/components/BlogPostList';
 import BlogHeader from '@/components/BlogHeader';
+import Navigation from '@/components/Navigation';
 
 export const metadata: Metadata = {
   title: 'Blog | WeThinkDigital',
@@ -114,6 +115,7 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto py-12">
+        <Navigation />
         <BlogHeader />
 
         <BlogPostList posts={mockPosts} />
