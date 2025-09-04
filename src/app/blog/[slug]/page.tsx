@@ -1,9 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
-import type { Metadata, ResolvingMetadata } from 'next';
 import type { BlogPost } from '@/types/blog';
 import BlogPostComponent from '@/components/BlogPost';
 import RelatedPosts from '@/components/RelatedPosts';
+import Navigation from '@/components/Navigation';
 
 // Mock blog post data - in a real app, this would come from a CMS or database
 const mockPosts: BlogPost[] = [
@@ -630,7 +630,7 @@ const getPostBySlug = (slug: string) => {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
   const post = getPostBySlug(resolvedParams.slug);
-  
+
   if (!post) {
     return {
       title: 'Post Not Found',
@@ -639,7 +639,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   const cleanDescription = post.content.replace(/<[^>]*>/g, '').substring(0, 160);
-  
+
   return {
     title: `${post.title} | WeThinkDigital Blog`,
     description: cleanDescription,
@@ -679,7 +679,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
   const post = getPostBySlug(resolvedParams.slug);
-  
+
   if (!post) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -700,8 +700,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto py-12">
+        <Navigation />
         <BlogPostComponent post={post} />
-        
+
         <div className="mt-12 pt-8 border-t border-gray-700/50">
           <div className="flex justify-between">
             <Link
@@ -719,7 +720,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         </div>
       </div>
-      
+
       {/* Related Posts Section */}
       <RelatedPosts currentPostId={post.id} />
     </div>
