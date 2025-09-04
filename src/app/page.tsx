@@ -1,5 +1,5 @@
 import React from 'react';
-import ThreeHero from '@/components/ThreeHero';
+import VideoHero from '@/components/VideoHero';
 import LazySection from '@/components/LazySection';
 import dynamic from 'next/dynamic';
 
@@ -50,7 +50,7 @@ const Footer = dynamic(() => import('@/components/Footer'), {
 export default function Home() {
   return (
     <main className="bg-background">
-      <ThreeHero />
+      <VideoHero />
       
       <LazySection 
         rootMargin="200px" 
