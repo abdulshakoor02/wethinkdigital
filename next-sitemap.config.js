@@ -37,6 +37,7 @@ module.exports = {
       { slug: 'website-design-development-services-in-dubai', date: '2025-08-12' },
       { slug: 'top-10-digital-marketing-company-in-dubai', date: '2025-08-10' },
       { slug: 'top-5-digital-marketing-company-in-dubai', date: '2025-08-08' },
+      { slug: 'free-crm-software-for-small-business-dubai', date: '2025-09-05' },
     ];
     
     return blogPosts.map(post => ({
