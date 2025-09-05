@@ -109,6 +109,16 @@ const mockPosts: BlogPost[] = [
     author: 'WeThinkDigital Team',
     readTime: '10 min read',
   },
+  {
+    id: '10',
+    slug: 'free-crm-software-for-small-business-dubai',
+    title: 'Free CRM Software for Small Business in Dubai: The 7 Best Options That Actually Work',
+    excerpt: 'Discover the best free CRM software options for small businesses in Dubai. Real solutions that drive growth without breaking the bank.',
+    content: '',
+    date: '2025-09-05',
+    author: 'WeThinkDigital Team',
+    readTime: '12 min read',
+  },
 ];
 
 export default function BlogPage() {
