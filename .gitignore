@@ -72,3 +72,5 @@ claude-flow.ps1
 hive-mind-prompt-*.txt
 memory/
 .claude*
+!README.md
+*.md

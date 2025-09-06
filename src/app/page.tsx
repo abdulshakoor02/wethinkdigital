@@ -39,7 +39,7 @@ const ContactForm = dynamic(() => import('@/components/ContactForm'), {
   loading: () => <div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />
 });
 
-const RecentBlogPosts = dynamic(() => import('@/components/RecentBlogPosts'), {
+const LatestNews = dynamic(() => import('@/components/LatestNews'), {
   loading: () => <div className="h-96 bg-gray-900/20 animate-pulse rounded-lg" />
 });
 
@@ -101,11 +101,11 @@ export default function Home() {
         <Process />
       </LazySection>
       
-      <LazySection 
+      <LazySection
         rootMargin="100px"
         fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
-        <RecentBlogPosts />
+        <LatestNews />
       </LazySection>
       
       <LazySection 

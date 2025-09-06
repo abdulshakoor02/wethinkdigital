@@ -9,6 +9,14 @@ export interface BlogPost {
   readTime?: string;
   tags?: string[];
   image?: string;
+  category?: 'Taxsaving' | 'Wealth' | 'Business' | 'Market Trends' | 'Investment';
+  featured?: boolean;
+}
+
+export interface BlogCategory {
+  name: 'Taxsaving' | 'Wealth' | 'Business' | 'Market Trends' | 'Investment';
+  color: string;
+  bgColor: string;
 }
 
 export interface BlogPostMetadata {
@@ -19,4 +27,5 @@ export interface BlogPostMetadata {
   readTime?: string;
   tags?: string[];
   image?: string;
+  category?: 'Taxsaving' | 'Wealth' | 'Business' | 'Market Trends' | 'Investment';
 }

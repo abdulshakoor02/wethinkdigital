@@ -85,7 +85,7 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
           className="absolute inset-0 w-full h-full object-cover"
           onLoadedData={() => setIsLoaded(true)}
         >
-          <source src="/hero2.mp4" type="video/mp4" />
+          <source src="/dev.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         

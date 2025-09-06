@@ -27,35 +27,56 @@ export default function Footer() {
     ]
   };
 
+  const socialIcons = {
+    twitter: (
+      <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+    ),
+    linkedin: (
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z" />
+    ),
+    github: (
+      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+    ),
+    instagram: (
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    )
+  };
+
   return (
-    <footer className="bg-slate-900 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-5 gap-8">
-          {/* Company Info */}
-          <div className="col-span-1 md:col-span-2">
+    <footer className="relative bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 overflow-hidden">
+      {/* Warm gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-100/80 via-amber-50/80 to-peach-100/80 backdrop-blur-sm" />
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* Company Info Card - Takes up more space */}
+          <div className="lg:col-span-5">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="mb-6"
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-lg shadow-orange-200/50 border border-orange-200/30 h-full"
             >
-              <h3 className="text-2xl font-bold gradient-text mb-4">WeThinkDigital</h3>
-              <p className="text-gray-400 mb-4 max-w-sm">
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mb-4">
+                WeThinkDigital
+              </h3>
+              <p className="text-gray-700 mb-6 text-lg leading-relaxed">
                 Transforming businesses through innovative digital solutions and data-driven growth strategies.
               </p>
               
               {/* Social Links */}
               <div className="flex space-x-4">
-                {['twitter', 'linkedin', 'github', 'instagram'].map((social) => (
+                {Object.entries(socialIcons).map(([social, icon]) => (
                   <motion.a
                     key={social}
                     href={`#${social}`}
-                    whileHover={{ scale: 1.1 }}
-                    className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary transition-colors"
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-300/40 hover:shadow-xl hover:shadow-orange-400/60 transition-all duration-300"
                   >
                     <span className="sr-only">{social}</span>
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      {/* Placeholder for social icons */}
-                      <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" />
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      {icon}
                     </svg>
                   </motion.a>
                 ))}
@@ -63,92 +84,115 @@ export default function Footer() {
             </motion.div>
           </div>
 
-          {/* Services */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <h4 className="text-lg font-semibold text-white mb-4">Services</h4>
-            <ul className="space-y-2">
-              {footerLinks.services.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          {/* Navigation Cards Grid */}
+          <div className="lg:col-span-7 grid md:grid-cols-3 gap-6">
+            {/* Services Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              transition={{ delay: 0.1 }}
+              className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg shadow-orange-200/50 border border-orange-200/30 hover:shadow-xl hover:shadow-orange-300/60 transition-all duration-300"
+            >
+              <h4 className="text-xl font-semibold text-gray-800 mb-6 text-center">Services</h4>
+              <ul className="space-y-3">
+                {footerLinks.services.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-600 hover:text-orange-600 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
 
-          {/* Company */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h4 className="text-lg font-semibold text-white mb-4">Company</h4>
-            <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            {/* Company Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              transition={{ delay: 0.2 }}
+              className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg shadow-orange-200/50 border border-orange-200/30 hover:shadow-xl hover:shadow-orange-300/60 transition-all duration-300"
+            >
+              <h4 className="text-xl font-semibold text-gray-800 mb-6 text-center">Company</h4>
+              <ul className="space-y-3">
+                {footerLinks.company.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-600 hover:text-orange-600 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
 
-          {/* Resources */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <h4 className="text-lg font-semibold text-white mb-4">Resources</h4>
-            <ul className="space-y-2">
-              {footerLinks.resources.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            {/* Resources Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              transition={{ delay: 0.3 }}
+              className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg shadow-orange-200/50 border border-orange-200/30 hover:shadow-xl hover:shadow-orange-300/60 transition-all duration-300"
+            >
+              <h4 className="text-xl font-semibold text-gray-800 mb-6 text-center">Resources</h4>
+              <ul className="space-y-3">
+                {footerLinks.resources.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-600 hover:text-orange-600 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-slate-800 mt-12 pt-8">
+        {/* Bottom Bar Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-12 bg-white/60 backdrop-blur-md rounded-2xl p-6 shadow-lg shadow-orange-200/50 border border-orange-200/30"
+        >
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 mb-4 md:mb-0">
+            <p className="text-gray-600 mb-4 md:mb-0 font-medium">
               © {currentYear} WeThinkDigital. All rights reserved.
             </p>
             
-            <div className="flex space-x-6">
-              <Link href="#privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+            <div className="flex space-x-8">
+              <Link
+                href="#privacy"
+                className="text-gray-500 hover:text-orange-600 text-sm font-medium transition-colors duration-300"
+              >
                 Privacy Policy
               </Link>
               
-              <Link href="#terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <Link
+                href="#terms"
+                className="text-gray-500 hover:text-orange-600 text-sm font-medium transition-colors duration-300"
+              >
                 Terms of Service
               </Link>
               
-              <Link href="#sitemap" className="text-gray-400 hover:text-white text-sm transition-colors">
+              <Link
+                href="#sitemap"
+                className="text-gray-500 hover:text-orange-600 text-sm font-medium transition-colors duration-300"
+              >
                 Sitemap
               </Link>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </footer>
   );
