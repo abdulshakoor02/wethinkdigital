@@ -68,7 +68,18 @@ export default function CaseStudies() {
   const [selectedCase, setSelectedCase] = useState(0);
 
   return (
-    <section id="case-studies" className="py-24 bg-background">
+    <section id="case-studies" className="py-24 relative overflow-hidden"
+      style={{
+        background: `
+          radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
+          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+        `
+      }}
+    >
+      {/* Glassmorphism Background Pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -76,8 +87,16 @@ export default function CaseStudies() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Don&apos;t Just Take My Word for It. Here&apos;s the Proof.</span>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6"
+            style={{
+              background: 'linear-gradient(90deg, #ffffff 0%, #f0abfc 25%, #a78bfa 50%, #60a5fa 75%, #ffffff 100%)',
+              backgroundSize: '200% 200%',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
+          >
+            Don&apos;t Just Take My Word for It. Here&apos;s the Proof.
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             I get results. It&apos;s that simple. Here&apos;s a look at how I&apos;ve helped businesses just like yours dominate the market in Dubai and the UAE.
@@ -92,9 +111,19 @@ export default function CaseStudies() {
                 key={study.id}
                 onClick={() => setSelectedCase(index)}
                 className={`px-4 py-2 rounded-lg transition-all ${selectedCase === index
-                    ? 'bg-primary text-white'
+                    ? 'text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
+                style={selectedCase === index ? {
+                  background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+                } : {
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
               >
                 {study.client}
               </button>
@@ -108,7 +137,13 @@ export default function CaseStudies() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="glass rounded-xl p-8 md:p-12"
+          className="rounded-xl p-8 md:p-12"
+          style={{
+            background: 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(20px) saturate(150%)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: '0 20px 40px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.08) inset'
+          }}
         >
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Image and Results */}
@@ -163,7 +198,12 @@ export default function CaseStudies() {
                   {caseStudies[selectedCase].technologies.map((tech) => (
                     <span
                       key={tech}
-                      className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm"
+                      className="px-3 py-1 rounded-full text-sm text-white"
+                      style={{
+                        background: 'rgba(168, 85, 247, 0.3)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}
                     >
                       {tech}
                     </span>
@@ -172,7 +212,14 @@ export default function CaseStudies() {
               </div>
 
               {/* Testimonial */}
-              <div className="glass rounded-lg p-6">
+              <div className="rounded-lg p-6"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(15px) saturate(120%)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+                }}
+              >
                 <blockquote className="text-gray-300 italic mb-4">
 &quot;{caseStudies[selectedCase].testimonial.text}&quot;
                 </blockquote>
@@ -195,7 +242,13 @@ export default function CaseStudies() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="btn-primary px-8 py-4 text-lg"
+            className="px-8 py-4 text-lg font-semibold text-white rounded-full transition-all duration-300"
+            style={{
+              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+            }}
           >
             Start Your Success Story
           </motion.button>

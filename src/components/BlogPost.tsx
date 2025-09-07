@@ -8,10 +8,17 @@ interface BlogPostProps {
 
 export default function BlogPost({ post }: BlogPostProps) {
   return (
-    <article className="bg-gray-800/50 rounded-xl p-6 md:p-8 border border-gray-700/50">
-      <Link 
-        href="/blog" 
-        className="inline-flex items-center text-primary hover:text-primary/80 mb-6 transition-colors"
+    <article className="rounded-xl p-6 md:p-8"
+      style={{
+        background: 'rgba(255, 255, 255, 0.12)',
+        backdropFilter: 'blur(20px) saturate(150%)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        boxShadow: '0 20px 40px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.08) inset'
+      }}
+    >
+      <Link
+        href="/blog"
+        className="inline-flex items-center mb-6 transition-colors text-white hover:text-purple-300"
       >
         ← Back to Blog
       </Link>

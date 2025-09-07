@@ -159,7 +159,18 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
   }
 
   return (
-    <section className="py-16 bg-slate-900/30 border-t border-gray-700/50">
+    <section className="py-16 relative overflow-hidden border-t border-white/10"
+      style={{
+        background: `
+          radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
+          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+        `
+      }}
+    >
+      {/* Glassmorphism Background Pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -182,10 +193,16 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/50 transition-colors border border-gray-700/30 hover:border-primary/30 group"
+              className="rounded-lg p-6 transition-colors group"
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(15px) saturate(120%)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+              }}
             >
               <Link href={`/blog/${post.slug}`} className="block">
-                <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-purple-300 transition-colors line-clamp-2">
                   {post.title}
                 </h3>
                 
@@ -202,7 +219,7 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
                   <span>{post.readTime}</span>
                 </div>
                 
-                <div className="flex items-center text-primary text-sm font-medium mt-4 group-hover:text-primary/80 transition-colors">
+                <div className="flex items-center text-purple-300 text-sm font-medium mt-4 group-hover:text-purple-200 transition-colors">
                   <span>Read Article</span>
                   <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -221,7 +238,13 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
         >
           <Link
             href="/blog"
-            className="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex items-center px-6 py-3 text-white font-medium rounded-lg transition-colors"
+            style={{
+              background: 'rgba(255, 255, 255, 0.12)',
+              backdropFilter: 'blur(15px) saturate(120%)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 10px 20px rgba(139, 92, 246, 0.3)'
+            }}
           >
             View All Articles
             <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

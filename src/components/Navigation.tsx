@@ -33,8 +33,13 @@ export default function Navigation() {
   return (
     <motion.nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-background/90 backdrop-blur-md border-b border-white/10' : 'bg-transparent'
+        isScrolled ? 'border-b border-white/10' : 'bg-transparent'
       }`}
+      style={isScrolled ? {
+        background: 'rgba(15, 17, 41, 0.9)',
+        backdropFilter: 'blur(20px) saturate(150%)',
+        boxShadow: '0 10px 30px rgba(139, 92, 246, 0.1)'
+      } : {}}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
@@ -43,7 +48,14 @@ export default function Navigation() {
             whileHover={{ scale: 1.05 }}
             className="flex items-center"
           >
-            <Link href="/" className="text-2xl font-bold gradient-text">
+            <Link href="/" className="text-2xl font-bold"
+              style={{
+                background: 'linear-gradient(135deg, #a78bfa 0%, #f0abfc 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
               WeThinkDigital
             </Link>
           </motion.div>
@@ -129,7 +141,13 @@ export default function Navigation() {
                 }
                 setIsMobileMenuOpen(false);
               }}
-              className="btn-primary px-6 py-2"
+              className="px-6 py-2 font-semibold text-white rounded-full transition-all duration-300"
+              style={{
+                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+              }}
             >
               Get Started
             </motion.button>
@@ -160,9 +178,15 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         <div
-          className={`md:hidden overflow-hidden bg-background/95 backdrop-blur-md transition-all duration-200 ease-in-out ${
+          className={`md:hidden overflow-hidden transition-all duration-200 ease-in-out ${
             isMobileMenuOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0'
           }`}
+          style={{
+            background: 'rgba(15, 17, 41, 0.95)',
+            backdropFilter: 'blur(20px) saturate(150%)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 20px 40px rgba(139, 92, 246, 0.2)'
+          }}
         >
           <div className="px-4 py-4 space-y-4">
             {navItems.map((item) => (
@@ -221,7 +245,13 @@ export default function Navigation() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="btn-primary w-full py-2"
+              className="w-full py-2 font-semibold text-white rounded-full transition-all duration-300"
+              style={{
+                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+              }}
               onClick={(e) => {
                 e.preventDefault();
                 // Only run on client side

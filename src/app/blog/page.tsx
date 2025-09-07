@@ -123,8 +123,20 @@ const mockPosts: BlogPost[] = [
 
 export default function BlogPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto py-12">
+    <div className="min-h-screen relative overflow-hidden"
+      style={{
+        background: `
+          radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
+          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+        `
+      }}
+    >
+      {/* Glassmorphism Background Pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
+      
+      <div className="relative z-10 max-w-4xl mx-auto py-12">
         <Navigation />
         <BlogHeader />
 
