@@ -4,19 +4,19 @@ import React from 'react';
 import { BlogCategory } from '@/types/blog';
 
 interface CategoryTagProps {
-  category: 'Taxsaving' | 'Wealth' | 'Business' | 'Market Trends' | 'Investment';
+  category: 'Seo' | 'Development' | 'Business' | 'Market Trends' | 'Investment';
   size?: 'sm' | 'md';
   className?: string;
 }
 
 const categoryConfig: Record<string, BlogCategory> = {
-  'Taxsaving': {
-    name: 'Taxsaving',
+  'Seo': {
+    name: 'Seo',
     color: 'text-emerald-100',
     bgColor: 'bg-emerald-600/80'
   },
-  'Wealth': {
-    name: 'Wealth',
+  'Development': {
+    name: 'Development',
     color: 'text-blue-100',
     bgColor: 'bg-blue-600/80'
   },
