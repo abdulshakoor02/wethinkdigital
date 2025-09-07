@@ -169,8 +169,9 @@ export default function ContactForm() {
                   <select
                     {...register('projectType', { required: 'Project type is required' })}
                     className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-white/40 text-lg transition-all duration-300"
+                    defaultValue=""
                   >
-                    <option value="" selected>Select Project Type</option>
+                    <option value="">Select Project Type</option>
                     <option value="web-development">Web Development</option>
                     <option value="mobile-app">Mobile App</option>
                     <option value="ecommerce">E-commerce</option>
