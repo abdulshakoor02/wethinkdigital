@@ -936,47 +936,52 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
           linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
         `
-      }}
-    >
+      }}>
+
+      <div className="max-w-4xl mx-auto py-12">
+        <Navigation/>
       {/* Glassmorphism Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
       
-      <div className="relative z-10 max-w-3xl mx-auto py-12">
-        <Navigation />
-        <BlogPostComponent post={post} />
+      <div className="relative z-10">
+        
+        <div className="max-w-3xl mx-auto pt-24 pb-12 px-4">
+          <BlogPostComponent post={post} />
 
-        <div className="mt-12 pt-8 border-t border-white/10">
-          <div className="flex justify-between">
-            <Link
-              href="/blog"
-              className="px-6 py-3 text-white rounded-lg transition-colors"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(15px) saturate(120%)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 10px 20px rgba(139, 92, 246, 0.2)'
-              }}
-            >
-              ← Back to Blog
-            </Link>
-            <Link
-              href="/#contact"
-              className="px-6 py-3 text-white rounded-lg transition-colors"
-              style={{
-                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
-              }}
-            >
-              Get in Touch
-            </Link>
+          <div className="mt-12 pt-8 border-t border-white/10">
+            <div className="flex justify-between">
+              <Link
+                href="/blog"
+                className="px-6 py-3 text-white rounded-lg transition-colors"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(15px) saturate(120%)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 10px 20px rgba(139, 92, 246, 0.2)'
+                }}
+              >
+                ← Back to Blog
+              </Link>
+              <Link
+                href="/#contact"
+                className="px-6 py-3 text-white rounded-lg transition-colors"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+                }}
+              >
+                Get in Touch
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Related Posts Section */}
       <RelatedPosts currentPostId={post.id} />
+</div>
     </div>
   );
 }

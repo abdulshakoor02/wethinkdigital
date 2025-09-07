@@ -136,11 +136,13 @@ export default function BlogPage() {
       {/* Glassmorphism Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
       
-      <div className="relative z-10 max-w-4xl mx-auto py-12">
+      <div className="max-w-4xl mx-auto py-12">
         <Navigation />
-        <BlogHeader />
-
-        <BlogPostList posts={mockPosts} />
+        
+        <div className="max-w-4xl mx-auto pt-24 pb-12 px-4">
+          <BlogHeader />
+          <BlogPostList posts={mockPosts} />
+        </div>
       </div>
     </div>
   );
