@@ -21,6 +21,29 @@ export default function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isMobileMenuOpen && !target.closest('nav')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+      // Prevent scrolling when mobile menu is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
   const navItems = [
     { id: 'services', name: 'Services', href: '#services' },
     { id: 'case-studies', name: 'Case Studies', href: '#case-studies' },
@@ -181,17 +204,17 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         <div
-          className={`md:hidden overflow-hidden transition-all duration-200 ease-in-out ${
-            isMobileMenuOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0'
-          }`}
+          className={`md:hidden transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+          } overflow-hidden border-t border-white/10`}
           style={{
             background: 'rgba(15, 17, 41, 0.95)',
             backdropFilter: 'blur(20px) saturate(150%)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 20px 40px rgba(139, 92, 246, 0.2)'
+            border: isMobileMenuOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+            boxShadow: isMobileMenuOpen ? '0 20px 40px rgba(139, 92, 246, 0.2)' : 'none'
           }}
         >
-          <div className="px-4 py-4 space-y-4">
+          <div className="px-4 py-3 space-y-3">
             {navItems.map((item) => (
               <motion.div
                 key={item.id}
@@ -227,7 +250,7 @@ export default function Navigation() {
                         findAndScroll();
                       }
                     }}
-                    className="block text-gray-300 hover:text-white transition-colors"
+                    className="block py-2 text-gray-300 hover:text-white transition-colors"
                   >
                     {item.name}
                   </a>
@@ -238,7 +261,7 @@ export default function Navigation() {
                       e.preventDefault();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="block text-gray-300 hover:text-white transition-colors"
+                    className="block py-2 text-gray-300 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -248,7 +271,7 @@ export default function Navigation() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-full py-2 font-semibold text-white rounded-full transition-all duration-300"
+              className="w-full py-2 px-4 mt-2 font-semibold text-white rounded-full transition-all duration-300 text-sm"
               style={{
                 background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
                 backdropFilter: 'blur(10px)',
