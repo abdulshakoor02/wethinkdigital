@@ -212,17 +212,17 @@ const KeywordTag: React.FC<KeywordTagProps> = ({ keyword, size, category, index,
   };
 
   const categoryColors = {
-    primary: 'rgba(139, 92, 246, 0.3)',
-    secondary: 'rgba(59, 130, 246, 0.25)',
-    lsi: 'rgba(236, 72, 153, 0.2)'
+    primary: 'rgba(139, 92, 246, 0.15)',
+    secondary: 'rgba(59, 130, 246, 0.12)',
+    lsi: 'rgba(236, 72, 153, 0.1)'
   };
 
   return (
     <motion.div
       ref={tagRef}
-      className={`relative rounded-full backdrop-blur-sm border border-white/10 text-white text-center cursor-pointer select-none will-change-transform ${sizeStyles[size]}`}
+      className={`relative rounded-full backdrop-blur-sm border border-gray-300/30 text-gray-700 text-center cursor-pointer select-none will-change-transform ${sizeStyles[size]}`}
       style={{
-        background: `linear-gradient(135deg, ${categoryColors[category]}, rgba(255, 255, 255, 0.08))`,
+        background: `linear-gradient(135deg, ${categoryColors[category]}, rgba(255, 255, 255, 0.5))`,
         backdropFilter: 'blur(12px) saturate(100%)'
       }}
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -240,7 +240,7 @@ const KeywordTag: React.FC<KeywordTagProps> = ({ keyword, size, category, index,
         scale: 1.1,
         y: -5,
         boxShadow: `0 20px 40px ${categoryColors[category]}, 0 0 0 1px rgba(255, 255, 255, 0.2) inset`,
-        background: `linear-gradient(135deg, ${categoryColors[category].replace('0.3', '0.5').replace('0.25', '0.4').replace('0.2', '0.35')}, rgba(255, 255, 255, 0.15))`,
+        background: `linear-gradient(135deg, ${categoryColors[category].replace('0.15', '0.25').replace('0.12', '0.2').replace('0.1', '0.18')}, rgba(255, 255, 255, 0.6))`,
         transition: { duration: 0.2 }
       }}
       whileTap={{ scale: 0.95 }}
@@ -329,10 +329,10 @@ export default function Keywords() {
       className="relative min-h-screen py-24 overflow-hidden"
       style={{
         background: `
-          radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.4) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.4) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
-          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+          radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
         `
       }}
     >
@@ -357,22 +357,15 @@ export default function Keywords() {
         >
           <GlassCard level={1} className="max-w-4xl mx-auto">
             <motion.h2 
-              className="text-4xl md:text-6xl font-bold mb-8 text-white"
+              className="text-4xl md:text-6xl font-bold mb-8 text-gray-800"
               animate={{
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
               }}
               transition={{ duration: 3, repeat: Infinity }}
-              style={{
-                background: 'linear-gradient(90deg, #ffffff 0%, #f0abfc 25%, #a78bfa 50%, #60a5fa 75%, #ffffff 100%)',
-                backgroundSize: '200% 200%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
             >
               💫 Ready to Stop Guessing and Start Growing?
             </motion.h2>
-            <p className="text-xl md:text-2xl text-gray-200 leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
               Transform your digital presence with our proven strategies
               <br className="hidden md:block" />
               that deliver real results, not just pretty metrics
@@ -389,7 +382,7 @@ export default function Keywords() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <GlassCard level={2}>
-              <h3 className="text-3xl font-bold mb-8 text-white flex items-center">
+              <h3 className="text-3xl font-bold mb-8 text-gray-800 flex items-center">
                 💡 Your Questions, Answered
               </h3>
               <div className="space-y-6">
@@ -408,9 +401,9 @@ export default function Keywords() {
                   >
                     <div className="flex items-start gap-3 mb-2">
                       <span className="text-2xl">{item.icon}</span>
-                      <h4 className="text-lg font-semibold text-white">{item.q}</h4>
+                      <h4 className="text-lg font-semibold text-gray-800">{item.q}</h4>
                     </div>
-                    <p className="text-gray-300 ml-11">{item.a}</p>
+                    <p className="text-gray-600 ml-11">{item.a}</p>
                   </motion.div>
                 ))}
               </div>
@@ -424,14 +417,14 @@ export default function Keywords() {
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             <GlassCard level={2} className="h-full">
-              <h3 className="text-3xl font-bold mb-8 text-white flex items-center">
+              <h3 className="text-3xl font-bold mb-8 text-gray-800 flex items-center">
                 🔥 The Raw Truth About Digital Marketing
               </h3>
               <div className="space-y-6">
-                <p className="text-xl text-gray-200 leading-relaxed">
+                <p className="text-xl text-gray-600 leading-relaxed">
                   Most of what you've been told about online marketing is wrong.
                 </p>
-                <p className="text-lg text-gray-300 leading-relaxed">
+                <p className="text-lg text-gray-600 leading-relaxed">
                   It's not about posting pretty pictures or getting a million followers who never buy anything.
                 </p>
                 <motion.div 
@@ -441,7 +434,7 @@ export default function Keywords() {
                     backdropFilter: 'blur(10px)'
                   }}
                 >
-                  <p className="text-2xl font-bold text-white text-center">
+                  <p className="text-2xl font-bold text-gray-800 text-center">
                     It's about one thing: <span className="text-yellow-300">ROI</span>
                   </p>
                 </motion.div>
@@ -458,7 +451,7 @@ export default function Keywords() {
           className="mb-20"
         >
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
               <span style={{
                 background: 'linear-gradient(135deg, #a78bfa 0%, #f0abfc 100%)',
                 WebkitBackgroundClip: 'text',
@@ -468,7 +461,7 @@ export default function Keywords() {
                 My Approach to Digital Marketing Strategy
               </span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               I don't do fluff. I don't do vanity metrics. I build systems that get you more customers and make you more money.
             </p>
           </div>
@@ -502,11 +495,11 @@ export default function Keywords() {
               >
                 <GlassCard level={3}>
                   <div className="text-6xl mb-6 text-center">{item.icon}</div>
-                  <h3 className="text-2xl font-bold mb-4 text-white text-center">{item.title}</h3>
-                  <p className="text-gray-300 mb-6 text-center leading-relaxed">{item.desc}</p>
+                  <h3 className="text-2xl font-bold mb-4 text-gray-800 text-center">{item.title}</h3>
+                  <p className="text-gray-600 mb-6 text-center leading-relaxed">{item.desc}</p>
                   <ul className="space-y-3">
                     {item.points.map((point, idx) => (
-                      <li key={idx} className="flex items-center text-gray-300">
+                      <li key={idx} className="flex items-center text-gray-600">
                         <span className="w-2 h-2 bg-purple-400 rounded-full mr-3 flex-shrink-0"></span>
                         {point}
                       </li>
@@ -526,8 +519,8 @@ export default function Keywords() {
           className="mb-16"
         >
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold mb-4 text-white">🏷️ Our Expertise Tags</h3>
-            <p className="text-gray-300">Interactive keyword cloud showcasing our digital marketing capabilities</p>
+            <h3 className="text-3xl font-bold mb-4 text-gray-800">🏷️ Our Expertise Tags</h3>
+            <p className="text-gray-600">Interactive keyword cloud showcasing our digital marketing capabilities</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -549,7 +542,7 @@ export default function Keywords() {
             <div className="text-center">
               <motion.button
                 onClick={() => setShowAll(true)}
-                className="relative px-8 py-4 rounded-full text-white font-semibold overflow-hidden"
+                className="relative px-8 py-4 rounded-full text-gray-700 font-semibold overflow-hidden"
                 style={{
                   background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.2) 100%)',
                   backdropFilter: 'blur(20px)',
@@ -577,7 +570,7 @@ export default function Keywords() {
         >
           <GlassCard level={5} className="max-w-2xl mx-auto">
             <motion.button
-              className="text-2xl md:text-3xl font-bold text-white mb-6 w-full"
+              className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 w-full"
               onClick={() => {
                 const contactElement = document.getElementById('contact');
                 if (contactElement) {
@@ -589,7 +582,7 @@ export default function Keywords() {
             >
               🚀 Book a Free Strategy Call
             </motion.button>
-            <p className="text-gray-200 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed">
               Let's talk about how we can 10x your business. No fluff, no hard sell. 
               Just a real conversation about your goals.
             </p>

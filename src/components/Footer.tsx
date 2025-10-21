@@ -46,15 +46,15 @@ export default function Footer() {
     <footer className="relative overflow-hidden"
       style={{
         background: `
-          radial-gradient(circle at 25% 85%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 75% 15%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 45% 45%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
-          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+          radial-gradient(circle at 25% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 75% 15%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 45% 45%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+          linear-gradient(135deg, #f8fafc 0%, #f1f5f9 25%, #e2e8f0 50%, #cbd5e1 100%)
         `
       }}
     >
       {/* Glassmorphism gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-100/30 via-violet-50/20 to-fuchsia-50/20 backdrop-blur-sm" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid lg:grid-cols-12 gap-8">
@@ -66,10 +66,10 @@ export default function Footer() {
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               className="rounded-2xl p-8 h-full"
               style={{
-                background: 'rgba(255, 255, 255, 0.12)',
+                background: 'rgba(255, 255, 255, 0.8)',
                 backdropFilter: 'blur(20px) saturate(150%)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                boxShadow: '0 20px 40px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.08) inset'
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
               }}
             >
               <h3 className="text-3xl font-bold mb-4"
@@ -82,7 +82,7 @@ export default function Footer() {
               >
                 WeThinkDigital
               </h3>
-              <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+              <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                 Transforming businesses through innovative digital solutions and data-driven growth strategies.
               </p>
               
@@ -122,10 +122,10 @@ export default function Footer() {
               transition={{ delay: 0.1 }}
               className="rounded-2xl p-6 transition-all duration-300"
               style={{
-                background: 'rgba(255, 255, 255, 0.08)',
+                background: 'rgba(255, 255, 255, 0.6)',
                 backdropFilter: 'blur(15px) saturate(120%)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+                boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
               }}
             >
               <h4 className="text-xl font-semibold text-gray-800 mb-6 text-center">Services</h4>
@@ -134,7 +134,7 @@ export default function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-gray-300 hover:text-purple-300 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                      className="text-gray-600 hover:text-purple-600 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
                     >
                       {link.name}
                     </Link>
@@ -151,10 +151,10 @@ export default function Footer() {
               transition={{ delay: 0.2 }}
               className="rounded-2xl p-6 transition-all duration-300"
               style={{
-                background: 'rgba(255, 255, 255, 0.08)',
+                background: 'rgba(255, 255, 255, 0.6)',
                 backdropFilter: 'blur(15px) saturate(120%)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+                boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
               }}
             >
               <h4 className="text-xl font-semibold text-gray-800 mb-6 text-center">Company</h4>
@@ -163,7 +163,7 @@ export default function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-gray-300 hover:text-purple-300 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                      className="text-gray-600 hover:text-purple-600 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
                     >
                       {link.name}
                     </Link>
@@ -180,10 +180,10 @@ export default function Footer() {
               transition={{ delay: 0.3 }}
               className="rounded-2xl p-6 transition-all duration-300"
               style={{
-                background: 'rgba(255, 255, 255, 0.08)',
+                background: 'rgba(255, 255, 255, 0.6)',
                 backdropFilter: 'blur(15px) saturate(120%)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+                boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
               }}
             >
               <h4 className="text-xl font-semibold text-gray-800 mb-6 text-center">Resources</h4>
@@ -192,7 +192,7 @@ export default function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-gray-300 hover:text-purple-300 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                      className="text-gray-600 hover:text-purple-600 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
                     >
                       {link.name}
                     </Link>
@@ -210,35 +210,35 @@ export default function Footer() {
           transition={{ delay: 0.4 }}
           className="mt-12 rounded-2xl p-6"
           style={{
-            background: 'rgba(255, 255, 255, 0.06)',
+            background: 'rgba(255, 255, 255, 0.4)',
             backdropFilter: 'blur(12px) saturate(100%)',
-            border: '0.5px solid rgba(255, 255, 255, 0.08)',
-            boxShadow: '0 10px 30px rgba(139, 92, 246, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.04) inset'
+            border: '0.5px solid rgba(0, 0, 0, 0.05)',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(255, 255, 255, 0.7) inset'
           }}
         >
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-300 mb-4 md:mb-0 font-medium">
+            <p className="text-gray-600 mb-4 md:mb-0 font-medium">
               © {currentYear} WeThinkDigital. All rights reserved.
             </p>
             
             <div className="flex space-x-8">
               <Link
                 href="#privacy"
-                className="text-gray-400 hover:text-purple-300 text-sm font-medium transition-colors duration-300"
+                className="text-gray-500 hover:text-purple-600 text-sm font-medium transition-colors duration-300"
               >
                 Privacy Policy
               </Link>
               
               <Link
                 href="#terms"
-                className="text-gray-400 hover:text-purple-300 text-sm font-medium transition-colors duration-300"
+                className="text-gray-500 hover:text-purple-600 text-sm font-medium transition-colors duration-300"
               >
                 Terms of Service
               </Link>
               
               <Link
                 href="#sitemap"
-                className="text-gray-400 hover:text-purple-300 text-sm font-medium transition-colors duration-300"
+                className="text-gray-500 hover:text-purple-600 text-sm font-medium transition-colors duration-300"
               >
                 Sitemap
               </Link>

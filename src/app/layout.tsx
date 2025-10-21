@@ -60,7 +60,7 @@ export default function RootLayout({
         {/* Critical CSS inlined for faster rendering */}
         <style dangerouslySetInnerHTML={{
           __html: `
-            :root{--background:#0f172a;--foreground:#f8fafc;--primary:#6b46c1;--secondary:#3b82f6;--accent:#10b981;--muted:#64748b}
+            :root{--background:#ffffff;--foreground:#1f2937;--primary:#6b46c1;--secondary:#3b82f6;--accent:#10b981;--muted:#64748b}
             body{background:var(--background);color:var(--foreground);margin:0;overflow-x:hidden}
             .gradient-text{background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
             .btn-primary{background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;color:white;padding:12px 24px;border-radius:8px;font-weight:600;transition:all 0.3s ease;cursor:pointer}

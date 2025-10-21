@@ -179,7 +179,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
             key={category.id}
             onClick={() => onCategoryChange(category.id)}
             className={`w-full text-left p-6 rounded-2xl transition-all duration-300 relative overflow-hidden group ${
-              isActive ? 'text-white' : 'text-gray-300 hover:text-white'
+              isActive ? 'text-white' : 'text-gray-700 hover:text-gray-900'
             }`}
             style={{
               background: isActive 
@@ -207,8 +207,8 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
                 <span className="text-2xl mr-3">{category.icon}</span>
                 <span className="font-semibold text-lg">{category.name}</span>
               </div>
-              <p className="text-sm opacity-80 mb-1">{category.description}</p>
-              <span className="text-xs opacity-60">{faqCount} questions</span>
+              <p className="text-sm opacity-90 mb-1 text-gray-600">{category.description}</p>
+              <span className="text-xs opacity-80 text-gray-600">{faqCount} questions</span>
             </div>
             
             {/* Active indicator */}
@@ -290,7 +290,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                 aria-controls={`faq-answer-${item.id}`}
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white pr-4 leading-relaxed">
+                  <h3 className="text-lg font-semibold text-gray-800 pr-4 leading-relaxed">
                     {item.question}
                   </h3>
                   <motion.div
@@ -303,7 +303,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                       border: '1px solid rgba(255, 255, 255, 0.2)'
                     }}
                   >
-                    <span className="text-white font-bold text-lg">
+                    <span className="text-gray-800 font-bold text-lg">
                       {isOpen ? '−' : '+'}
                     </span>
                   </motion.div>
@@ -330,12 +330,12 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                       <div 
                         className="p-4 rounded-xl"
                         style={{
-                          background: 'rgba(255, 255, 255, 0.03)',
+                          background: 'rgba(255, 255, 255, 0.6)',
                           backdropFilter: 'blur(8px)',
-                          border: '1px solid rgba(255, 255, 255, 0.08)'
+                          border: '1px solid rgba(0, 0, 0, 0.05)'
                         }}
                       >
-                        <p className="text-gray-300 leading-relaxed">
+                        <p className="text-gray-800 leading-relaxed">
                           {item.answer}
                         </p>
                       </div>
@@ -380,10 +380,10 @@ export default function FAQ() {
       ref={ref}
       style={{
         background: `
-          radial-gradient(circle at 30% 80%, rgba(120, 119, 198, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 70% 20%, rgba(255, 119, 198, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.25) 0%, transparent 50%),
-          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+          radial-gradient(circle at 30% 80%, rgba(120, 119, 198, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 70% 20%, rgba(255, 119, 198, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
         `
       }}
     >
@@ -409,29 +409,16 @@ export default function FAQ() {
           <div 
             className="relative max-w-4xl mx-auto p-12 rounded-3xl"
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
+              background: 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(25px) saturate(200%)',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+              border: '2px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
             }}
           >
-            <motion.h2 
-              className="text-4xl md:text-6xl font-bold mb-8 text-white"
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-              style={{
-                background: 'linear-gradient(90deg, #ffffff 0%, #f0abfc 25%, #a78bfa 50%, #60a5fa 75%, #ffffff 100%)',
-                backgroundSize: '200% 200%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
-            >
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gray-800">
               ❓ Frequently Asked Questions
-            </motion.h2>
-            <p className="text-xl md:text-2xl text-gray-200 leading-relaxed">
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
               Get answers about our digital marketing services and SEO solutions from industry experts
             </p>
           </div>
@@ -474,7 +461,7 @@ export default function FAQ() {
                 key={category.id}
                 onClick={() => handleCategoryChange(category.id)}
                 className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                  activeCategory === category.id ? 'text-white' : 'text-gray-300'
+                  activeCategory === category.id ? 'text-white' : 'text-gray-700'
                 }`}
                 style={{
                   background: activeCategory === category.id 
@@ -509,11 +496,11 @@ export default function FAQ() {
               boxShadow: '0 30px 60px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
             }}
           >
-            <p className="text-gray-200 mb-6 text-lg">
+            <p className="text-gray-700 mb-6 text-lg">
               Still have questions about our SEO services in Dubai?
             </p>
             <motion.button
-              className="text-2xl md:text-3xl font-bold text-white mb-4 w-full"
+              className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 w-full"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
@@ -525,7 +512,7 @@ export default function FAQ() {
             >
               🚀 Get Your Free Consultation
             </motion.button>
-            <p className="text-gray-300 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed">
               Let's talk about how we can help you dominate your market with proven digital strategies.
             </p>
           </div>

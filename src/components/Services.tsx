@@ -401,7 +401,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
 
         {/* Title */}
         <motion.h3
-          className="text-xl md:text-2xl font-bold mb-4 text-white leading-tight"
+          className="text-xl md:text-2xl font-bold mb-4 text-gray-800 leading-tight"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
@@ -411,7 +411,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
 
         {/* Description */}
         <motion.p
-          className="text-gray-300 mb-6 text-sm md:text-base leading-relaxed"
+          className="text-gray-600 mb-6 text-sm md:text-base leading-relaxed"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
@@ -463,14 +463,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-6">
-                <h4 className="text-white font-semibold mb-3 flex items-center">
+                <h4 className="text-gray-800 font-semibold mb-3 flex items-center">
                   ✨ What You Get:
                 </h4>
                 <ul className="space-y-2">
                   {service.features.slice(0, 4).map((feature, i) => (
                     <motion.li
                       key={feature}
-                      className="flex items-center text-gray-300 text-sm"
+                      className="flex items-center text-gray-600 text-sm"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.1 }}
@@ -485,7 +485,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
               <div className="mb-6">
                 <div className="flex items-center mb-2">
                   <span className="text-2xl mr-2">📊</span>
-                  <span className="text-white font-semibold">Recent Success:</span>
+                  <span className="text-gray-800 font-semibold">Recent Success:</span>
                 </div>
                 <p className={`font-bold bg-gradient-to-r ${service.color} bg-clip-text text-transparent`}>
                   {service.stats.roi}
@@ -496,7 +496,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
                 <button className={`flex-1 py-3 rounded-xl bg-gradient-to-r ${service.color} text-white font-semibold hover:shadow-lg transition-all duration-300`}>
                   Get Quote
                 </button>
-                <button className="flex-1 py-3 rounded-xl border border-white/20 text-gray-300 font-semibold hover:bg-white/5 transition-all duration-300">
+                <button className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition-all duration-300">
                   Portfolio
                 </button>
               </div>
@@ -516,20 +516,20 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
             >
               {/* Proven Results */}
               <div className="mb-4">
-                <h4 className="text-white font-semibold mb-3 flex items-center">
+                <h4 className="text-gray-800 font-semibold mb-3 flex items-center">
                   📊 Proven Results:
                 </h4>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="text-gray-300">• {service.stats.roi}</div>
-                  <div className="text-gray-300">• {service.stats.performance}</div>
-                  <div className="text-gray-300">• {service.stats.projects}</div>
-                  <div className="text-gray-300">• ⭐ {service.stats.rating}/5 ({service.stats.reviews} reviews)</div>
+                  <div className="text-gray-600">• {service.stats.roi}</div>
+                  <div className="text-gray-600">• {service.stats.performance}</div>
+                  <div className="text-gray-600">• {service.stats.projects}</div>
+                  <div className="text-gray-600">• ⭐ {service.stats.rating}/5 ({service.stats.reviews} reviews)</div>
                 </div>
               </div>
 
               {/* Package Selection */}
               <div className="mb-4">
-                <h4 className="text-white font-semibold mb-3">💼 Choose Your Package:</h4>
+                <h4 className="text-gray-800 font-semibold mb-3">💼 Choose Your Package:</h4>
                 <div className="grid grid-cols-3 gap-2">
                   {service.packages.map((pkg) => (
                     <button
@@ -541,7 +541,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
                       className={`p-2 rounded-lg text-xs font-semibold transition-all duration-300 ${
                         selectedPackage === pkg.name
                           ? `bg-gradient-to-r ${service.color} text-white`
-                          : 'border border-white/20 text-gray-300 hover:bg-white/5'
+                          : 'border border-gray-300 text-gray-600 hover:bg-gray-50'
                       } ${pkg.popular ? 'ring-2 ring-white/30' : ''}`}
                     >
                       <div>{pkg.name}</div>
@@ -553,15 +553,15 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
 
               {/* Perfect For */}
               <div className="mb-4">
-                <p className="text-gray-300 text-xs">
+                <p className="text-gray-600 text-xs">
                   🎯 Perfect for: {service.perfectFor.join(', ')}
                 </p>
               </div>
 
               {/* Testimonial */}
-              <div className="mb-4 p-3 rounded-lg bg-white/5">
-                <p className="text-gray-300 text-xs italic mb-1">"{service.testimonial.text}"</p>
-                <p className="text-gray-400 text-xs">- {service.testimonial.author}</p>
+              <div className="mb-4 p-3 rounded-lg bg-gray-50">
+                <p className="text-gray-600 text-xs italic mb-1">"{service.testimonial.text}"</p>
+                <p className="text-gray-500 text-xs">- {service.testimonial.author}</p>
               </div>
 
               {/* Action Buttons */}
@@ -569,7 +569,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
                 <button className={`flex-1 py-2 rounded-lg bg-gradient-to-r ${service.color} text-white font-semibold text-xs hover:shadow-lg transition-all duration-300 flex items-center justify-center`}>
                   <FaPhone className="mr-2" /> Quick Call
                 </button>
-                <button className="flex-1 py-2 rounded-lg border border-white/20 text-gray-300 font-semibold text-xs hover:bg-white/5 transition-all duration-300 flex items-center justify-center">
+                <button className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-600 font-semibold text-xs hover:bg-gray-50 transition-all duration-300 flex items-center justify-center">
                   <FaEnvelope className="mr-2" /> Proposal
                 </button>
               </div>
@@ -592,10 +592,10 @@ export default function Services() {
       ref={ref}
       style={{
         background: `
-          radial-gradient(circle at 25% 85%, rgba(120, 119, 198, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 75% 15%, rgba(255, 119, 198, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 45% 45%, rgba(59, 130, 246, 0.25) 0%, transparent 50%),
-          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+          radial-gradient(circle at 25% 85%, rgba(120, 119, 198, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 75% 15%, rgba(255, 119, 198, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 45% 45%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
         `
       }}
     >
@@ -621,14 +621,14 @@ export default function Services() {
           <div
             className="relative max-w-5xl mx-auto p-12 rounded-3xl"
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
+              background: 'rgba(255, 255, 255, 0.8)',
               backdropFilter: 'blur(25px) saturate(200%)',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+              border: '2px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
             }}
           >
             <motion.h2
-              className="text-4xl md:text-6xl font-bold mb-8 text-white"
+              className="text-4xl md:text-6xl font-bold mb-8"
               animate={{
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
               }}
@@ -643,7 +643,7 @@ export default function Services() {
             >
               🎯 Transform Your Business with Premium Digital Solutions
             </motion.h2>
-            <p className="text-xl md:text-2xl text-gray-200 leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
               I don't just deliver services - I deliver measurable growth. I'm your partner in dominating your market with proven digital solutions that drive real revenue.
             </p>
           </div>
@@ -676,20 +676,20 @@ export default function Services() {
           <div
             className="max-w-2xl mx-auto p-8 rounded-3xl"
             style={{
-              background: 'rgba(139, 92, 246, 0.15)',
+              background: 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(30px) saturate(180%)',
-              border: '2px solid rgba(139, 92, 246, 0.25)',
-              boxShadow: '0 30px 60px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+              border: '2px solid rgba(139, 92, 246, 0.2)',
+              boxShadow: '0 30px 60px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
             }}
           >
             <motion.button
-              className="text-2xl md:text-3xl font-bold text-white mb-6 w-full"
+              className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 w-full"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               🚀 Get Your Free Strategy Session
             </motion.button>
-            <p className="text-gray-200 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed">
               Ready to dominate your market? Let's talk about how we can 10x your business with proven strategies that deliver real results.
             </p>
           </div>

@@ -42,10 +42,10 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
         <div className="absolute inset-0 w-full h-full flex items-center justify-center"
           style={{
             background: `
-              radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-              radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
-              linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+              radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+              linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #cbd5e1 50%, #94a3b8 100%)
             `
           }}
         >
@@ -56,25 +56,19 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
         <div className="relative z-10 flex items-center justify-center w-full h-full">
           <div className="text-center px-4 max-w-4xl mx-auto p-8 rounded-3xl"
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(20px) saturate(150%)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: '0 20px 40px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08) inset'
+              border: '1px solid rgba(0, 0, 0, 0.15)',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
             }}
           >
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span style={{
-                background: 'linear-gradient(90deg, #ffffff 0%, #f0abfc 25%, #a78bfa 50%, #60a5fa 75%, #ffffff 100%)',
-                backgroundSize: '200% 200%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>Build Tomorrow's</span>
+              <span className="gradient-text">Build Tomorrow's</span>
               <br />
-              <span className="text-white">Digital Experiences Today</span>
+              <span className="text-gray-800">Digital Experiences Today</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Full-stack development + growth marketing that scales from MVP to millions
             </p>
             

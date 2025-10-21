@@ -54,15 +54,15 @@ export default function ContactForm() {
     <section id="contact" className="relative py-24 overflow-hidden"
       style={{
         background: `
-          radial-gradient(circle at 25% 85%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 75% 15%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 45% 45%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
-          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+          radial-gradient(circle at 25% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 75% 15%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 45% 45%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
         `
       }}
     >
       {/* Glassmorphism Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-violet-50/20 to-fuchsia-50/20" />
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -71,7 +71,7 @@ export default function ContactForm() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <div className="inline-block px-4 py-2 rounded-full text-sm font-medium text-white/90 mb-6"
+          <div className="inline-block px-4 py-2 rounded-full text-sm font-medium text-gray-700 mb-6"
             style={{
               background: 'rgba(255, 255, 255, 0.12)',
               backdropFilter: 'blur(15px) saturate(120%)',
@@ -81,10 +81,10 @@ export default function ContactForm() {
           >
             Contact Us
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
             Let&apos;s Build Your Empire
           </h2>
-          <p className="text-xl text-white/80 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             You&apos;ve see the proof.You know what we can do.Now it&apos;s your turn.
           </p>
         </motion.div>
@@ -95,17 +95,17 @@ export default function ContactForm() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="rounded-3xl shadow-2xl p-8 md:p-12"
           style={{
-            background: 'rgba(255, 255, 255, 0.12)',
+            background: 'rgba(255, 255, 255, 0.9)',
             backdropFilter: 'blur(20px) saturate(150%)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            boxShadow: '0 25px 45px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
           }}
         >
           {submitSuccess ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🎉</div>
-              <h3 className="text-3xl font-bold mb-4 text-white">Thank You!</h3>
-              <p className="text-xl text-gray-300 mb-6">
+              <h3 className="text-3xl font-bold mb-4 text-gray-800">Thank You!</h3>
+              <p className="text-xl text-gray-600 mb-6">
                 Your message has been sent successfully. We&apos;ll get back to you within 24 hours.
               </p>
               <motion.button
@@ -129,7 +129,7 @@ export default function ContactForm() {
                   <input
                     type="text"
                     {...register('name', { required: 'Name is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-white/40 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     placeholder="Full Name"
                   />
                   {errors.name && <span className="text-red-300 text-sm mt-2 block">{errors.name.message}</span>}
@@ -139,7 +139,7 @@ export default function ContactForm() {
                   <input
                     type="text"
                     {...register('email', { required: 'email is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-white/40 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     placeholder="email address"
                   />
                   {errors.email && <span className="text-red-300 text-sm mt-2 block">{errors.email.message}</span>}
@@ -149,7 +149,7 @@ export default function ContactForm() {
                   <input
                     type="text"
                     {...register('company', { required: 'Company Name is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-white/40 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     placeholder="Company Name"
                   />
                   {errors.company && <span className="text-red-300 text-sm mt-2 block">{errors.company.message}</span>}
@@ -159,7 +159,7 @@ export default function ContactForm() {
                   <input
                     type="text"
                     {...register('phone', { required: 'Phone is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-white/40 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     placeholder="phone e.g +971 (58) 1233-567"
                   />
                   {errors.phone && <span className="text-red-300 text-sm mt-2 block">{errors.phone.message}</span>}
@@ -168,7 +168,7 @@ export default function ContactForm() {
                 <div>
                   <select
                     {...register('projectType', { required: 'Project type is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-white/40 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     defaultValue=""
                   >
                     <option value="">Select Project Type</option>
@@ -184,7 +184,7 @@ export default function ContactForm() {
                 <div>
                   <select
                     {...register('budget', { required: 'Budget is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-white/40 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                   >
                     <option value="">Select Budget Range</option>
                     <option value="100-1k">AED100 - AED1000</option>
@@ -200,7 +200,7 @@ export default function ContactForm() {
                 <textarea
                   {...register('message', { required: 'Project Details are required' })}
                   rows={4}
-                  className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-white/40 text-lg transition-all duration-300 resize-none"
+                  className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300 resize-none"
                   placeholder="Project Details"
                 />
                 {errors.message && <span className="text-red-300 text-sm mt-2 block">{errors.message.message}</span>}
@@ -236,65 +236,65 @@ export default function ContactForm() {
         >
           <div className="rounded-2xl p-8 transition-all duration-300"
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.8)',
               backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
             }}
           >
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl"
               style={{
-                background: 'rgba(255, 255, 255, 0.15)',
+                background: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '1px solid rgba(0, 0, 0, 0.1)'
               }}
             >
               📧
             </div>
-            <h3 className="text-xl font-bold mb-2 text-white">Email Us</h3>
-            <p className="text-white/80">info@wethinkdigital.solutions</p>
+            <h3 className="text-xl font-bold mb-2 text-gray-800">Email Us</h3>
+            <p className="text-gray-600">info@wethinkdigital.solutions</p>
           </div>
 
           <div className="rounded-2xl p-8 transition-all duration-300"
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.8)',
               backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
             }}
           >
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl"
               style={{
-                background: 'rgba(255, 255, 255, 0.15)',
+                background: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '1px solid rgba(0, 0, 0, 0.1)'
               }}
             >
               📱
             </div>
-            <h3 className="text-xl font-bold mb-2 text-white">Call Us</h3>
-            <p className="text-white/80">+971 (564) 713-394</p>
+            <h3 className="text-xl font-bold mb-2 text-gray-800">Call Us</h3>
+            <p className="text-gray-600">+971 (564) 713-394</p>
           </div>
 
           <div className="rounded-2xl p-8 transition-all duration-300"
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.8)',
               backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
             }}
           >
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl"
               style={{
-                background: 'rgba(255, 255, 255, 0.15)',
+                background: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '1px solid rgba(0, 0, 0, 0.1)'
               }}
             >
               📍
             </div>
-            <h3 className="text-xl font-bold mb-2 text-white">Visit Us</h3>
-            <p className="text-white/80">Dubai, UAE</p>
+            <h3 className="text-xl font-bold mb-2 text-gray-800">Visit Us</h3>
+            <p className="text-gray-600">Dubai, UAE</p>
           </div>
         </motion.div>
       </div>

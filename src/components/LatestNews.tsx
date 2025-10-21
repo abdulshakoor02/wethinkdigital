@@ -88,7 +88,7 @@ export default function LatestNews() {
           radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
           radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
           radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
-          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
+          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
         `
       }}
       ref={ref}
@@ -110,10 +110,10 @@ export default function LatestNews() {
           className="flex justify-between items-start mb-16"
         >
           <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
               Latest news
             </h2>
-            <p className="text-lg text-gray-300">
+            <p className="text-lg text-gray-600">
               Stay informed! Explore our latest updates on tax laws, economic insights, and industry trends.
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function LatestNews() {
           >
             <Link
               href="/blog"
-              className="inline-flex items-center px-6 py-3 text-white font-medium rounded-full transition-all duration-300"
+              className="inline-flex items-center px-6 py-3 text-gray-800 font-medium rounded-full transition-all duration-300"
               style={{
                 background: 'rgba(255, 255, 255, 0.12)',
                 backdropFilter: 'blur(15px) saturate(120%)',
@@ -176,15 +176,11 @@ export default function LatestNews() {
                   </div>
                   
                   <div className="p-6 lg:p-8">
-                    <h3 className="text-xl lg:text-2xl font-bold text-white mb-4 transition-colors"
-                      style={{
-                        color: 'white'
-                      }}
-                    >
+                    <h3 className="text-xl lg:text-2xl font-bold text-gray-800 mb-4 transition-colors">
                       {featuredPost.title}
                     </h3>
                     
-                    <p className="text-gray-400 mb-6 line-clamp-3">
+                    <p className="text-gray-600 mb-6 line-clamp-3">
                       {featuredPost.excerpt}
                     </p>
                     
@@ -241,7 +237,7 @@ export default function LatestNews() {
                     </div>
                     
                     <div className="p-6">
-                      <h3 className="text-lg font-bold text-white mb-3 transition-colors line-clamp-2">
+                      <h3 className="text-lg font-bold text-gray-800 mb-3 transition-colors line-clamp-2">
                         {post.title}
                       </h3>
                       
@@ -272,7 +268,7 @@ export default function LatestNews() {
         >
           <Link
             href="/blog"
-            className="inline-flex items-center px-6 py-3 text-white font-medium rounded-full transition-all duration-300"
+            className="inline-flex items-center px-6 py-3 text-gray-800 font-medium rounded-full transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.12)',
               backdropFilter: 'blur(15px) saturate(120%)',

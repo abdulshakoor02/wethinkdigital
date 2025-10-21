@@ -56,14 +56,14 @@ export default function Navigation() {
   return (
     <motion.nav
       className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
-        isScrolled ? 'border-b border-white/10' : 'bg-transparent'
+        isScrolled ? 'border-b border-gray-200' : 'bg-transparent'
       }`}
       style={isScrolled ? {
-        background: 'rgba(15, 17, 41, 0.95)',
+        background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(20px) saturate(150%)',
-        boxShadow: '0 10px 30px rgba(139, 92, 246, 0.1)'
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
       } : {
-        background: 'rgba(15, 17, 41, 0.3)',
+        background: 'rgba(255, 255, 255, 0.8)',
         backdropFilter: 'blur(10px)'
       }}
     >
@@ -122,14 +122,14 @@ export default function Navigation() {
                         findAndScroll();
                       }
                     }}
-                    className="text-gray-300 hover:text-white transition-colors"
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     {item.name}
                   </a>
                 ) : (
                   <Link
                     href={item.href}
-                    className="text-gray-300 hover:text-white transition-colors"
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -188,7 +188,7 @@ export default function Navigation() {
                 e.preventDefault();
                 setIsMobileMenuOpen(!isMobileMenuOpen);
               }}
-              className="text-white p-2"
+              className="text-gray-700 p-2"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -206,12 +206,12 @@ export default function Navigation() {
         <div
           className={`md:hidden transition-all duration-300 ease-in-out ${
             isMobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
-          } overflow-hidden border-t border-white/10`}
+          } overflow-hidden border-t border-gray-200`}
           style={{
-            background: 'rgba(15, 17, 41, 0.95)',
+            background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px) saturate(150%)',
-            border: isMobileMenuOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-            boxShadow: isMobileMenuOpen ? '0 20px 40px rgba(139, 92, 246, 0.2)' : 'none'
+            border: isMobileMenuOpen ? '1px solid rgba(0, 0, 0, 0.1)' : 'none',
+            boxShadow: isMobileMenuOpen ? '0 20px 40px rgba(0, 0, 0, 0.1)' : 'none'
           }}
         >
           <div className="px-4 py-3 space-y-3">
@@ -250,7 +250,7 @@ export default function Navigation() {
                         findAndScroll();
                       }
                     }}
-                    className="block py-2 text-gray-300 hover:text-white transition-colors"
+                    className="block py-2 text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     {item.name}
                   </a>
@@ -261,7 +261,7 @@ export default function Navigation() {
                       e.preventDefault();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="block py-2 text-gray-300 hover:text-white transition-colors"
+                    className="block py-2 text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     {item.name}
                   </Link>
