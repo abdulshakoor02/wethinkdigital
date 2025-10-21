@@ -112,34 +112,36 @@ const GlassCard: React.FC<GlassCardProps> = ({
   const rotateX = useTransform(mouseY, [-300, 300], [5, -5]);
   const rotateY = useTransform(mouseX, [-300, 300], [-5, 5]);
 
+  const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
+  
   const glassStyles = {
     1: {
-      backdropFilter: 'blur(25px) saturate(200%)',
-      background: 'rgba(255, 255, 255, 0.15)',
+      backdropFilter: isMobileDevice ? 'blur(10px) saturate(150%)' : 'blur(25px) saturate(200%)',
+      background: isMobileDevice ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.15)',
       border: '2px solid rgba(255, 255, 255, 0.2)',
       boxShadow: '0 25px 45px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
     },
     2: {
-      backdropFilter: 'blur(20px) saturate(150%)',
-      background: 'rgba(255, 255, 255, 0.12)',
+      backdropFilter: isMobileDevice ? 'blur(8px) saturate(120%)' : 'blur(20px) saturate(150%)',
+      background: isMobileDevice ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.12)',
       border: '1px solid rgba(255, 255, 255, 0.15)',
       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.08) inset'
     },
     3: {
-      backdropFilter: 'blur(15px) saturate(120%)',
-      background: 'rgba(255, 255, 255, 0.08)',
+      backdropFilter: isMobileDevice ? 'blur(8px) saturate(100%)' : 'blur(15px) saturate(120%)',
+      background: isMobileDevice ? 'rgba(255, 255, 255, 0.75)' : 'rgba(255, 255, 255, 0.08)',
       border: '1px solid rgba(255, 255, 255, 0.1)',
       boxShadow: '0 15px 35px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
     },
     4: {
-      backdropFilter: 'blur(12px) saturate(100%)',
-      background: 'rgba(255, 255, 255, 0.06)',
+      backdropFilter: isMobileDevice ? 'blur(6px) saturate(100%)' : 'blur(12px) saturate(100%)',
+      background: isMobileDevice ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.06)',
       border: '0.5px solid rgba(255, 255, 255, 0.08)',
       boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.04) inset'
     },
     5: {
-      backdropFilter: 'blur(30px) saturate(180%)',
-      background: 'rgba(139, 92, 246, 0.2)',
+      backdropFilter: isMobileDevice ? 'blur(10px) saturate(150%)' : 'blur(30px) saturate(180%)',
+      background: isMobileDevice ? 'rgba(139, 92, 246, 0.25)' : 'rgba(139, 92, 246, 0.2)',
       border: '2px solid rgba(139, 92, 246, 0.3)',
       boxShadow: '0 30px 60px rgba(139, 92, 246, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
     }
@@ -159,29 +161,35 @@ const GlassCard: React.FC<GlassCardProps> = ({
     mouseY.set(0);
   };
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <motion.div
       ref={cardRef}
-      className={`relative rounded-3xl p-8 cursor-pointer will-change-transform ${className}`}
+      className={`relative rounded-3xl p-8 cursor-pointer ${className}`}
       style={{
         ...glassStyles[level],
-        rotateX: hover ? rotateX : 0,
-        rotateY: hover ? rotateY : 0,
-        transformStyle: 'preserve-3d'
+        WebkitBackdropFilter: glassStyles[level].backdropFilter,
+        WebkitTransform: 'translateZ(0)',
+        ...(isMobile ? {} : {
+          rotateX: hover ? rotateX : 0,
+          rotateY: hover ? rotateY : 0,
+          transformStyle: 'preserve-3d'
+        })
       }}
-      onMouseMove={hover ? handleMouseMove : undefined}
-      onMouseLeave={hover ? handleMouseLeave : undefined}
+      onMouseMove={hover && !isMobile ? handleMouseMove : undefined}
+      onMouseLeave={hover && !isMobile ? handleMouseLeave : undefined}
       onClick={onClick}
-      whileHover={hover ? {
+      whileHover={hover && !isMobile ? {
         scale: 1.02,
         y: -5,
         transition: { duration: 0.3 }
       } : undefined}
-      animate={{
+      animate={isMobile ? {} : {
         y: [0, -5, 0],
         rotateZ: [0, 0.5, 0, -0.5, 0]
       }}
-      transition={{
+      transition={isMobile ? {} : {
         duration: 8,
         repeat: Infinity,
         ease: "easeInOut"
@@ -220,10 +228,12 @@ const KeywordTag: React.FC<KeywordTagProps> = ({ keyword, size, category, index,
   return (
     <motion.div
       ref={tagRef}
-      className={`relative rounded-full backdrop-blur-sm border border-gray-300/30 text-gray-700 text-center cursor-pointer select-none will-change-transform ${sizeStyles[size]}`}
+      className={`relative rounded-full border border-gray-300/30 text-gray-700 text-center cursor-pointer select-none ${sizeStyles[size]}`}
       style={{
-        background: `linear-gradient(135deg, ${categoryColors[category]}, rgba(255, 255, 255, 0.5))`,
-        backdropFilter: 'blur(12px) saturate(100%)'
+        background: `linear-gradient(135deg, ${categoryColors[category]}, rgba(255, 255, 255, 0.8))`,
+        backdropFilter: 'blur(8px) saturate(100%)',
+        WebkitBackdropFilter: 'blur(8px) saturate(100%)',
+        WebkitTransform: 'translateZ(0)'
       }}
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ 
@@ -435,7 +445,7 @@ export default function Keywords() {
                   }}
                 >
                   <p className="text-2xl font-bold text-gray-800 text-center">
-                    It's about one thing: <span className="text-yellow-300">ROI</span>
+                    It's about one thing: <span className="text-purple-600 font-extrabold">ROI</span>
                   </p>
                 </motion.div>
               </div>
@@ -451,15 +461,8 @@ export default function Keywords() {
           className="mb-20"
         >
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span style={{
-                background: 'linear-gradient(135deg, #a78bfa 0%, #f0abfc 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>
-                My Approach to Digital Marketing Strategy
-              </span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+              My Approach to Digital Marketing Strategy
             </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               I don't do fluff. I don't do vanity metrics. I build systems that get you more customers and make you more money.
