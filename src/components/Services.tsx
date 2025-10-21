@@ -281,6 +281,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
   const [cardState, setCardState] = useState<'initial' | 'hover' | 'expanded'>('initial');
   const [selectedPackage, setSelectedPackage] = useState(service.packages.find(p => p.popular)?.name || service.packages[0].name);
   const cardRef = useRef<HTMLDivElement>(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   
   // Magnetic hover effect
   const mouseX = useMotionValue(0);
@@ -329,23 +330,27 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
   return (
     <motion.div
       ref={cardRef}
-      className="relative overflow-hidden cursor-pointer group will-change-transform rounded-3xl"
+      className="relative overflow-hidden cursor-pointer group rounded-3xl"
       style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(20px) saturate(150%)',
+        background: isMobile ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: isMobile ? 'blur(10px) saturate(120%)' : 'blur(20px) saturate(150%)',
+        WebkitBackdropFilter: isMobile ? 'blur(10px) saturate(120%)' : 'blur(20px) saturate(150%)',
         border: '1px solid rgba(255, 255, 255, 0.15)',
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.08) inset',
-        rotateX,
-        rotateY,
-        transformStyle: 'preserve-3d'
+        WebkitTransform: 'translateZ(0)',
+        ...(isMobile ? {} : {
+          rotateX,
+          rotateY,
+          transformStyle: 'preserve-3d'
+        })
       }}
       variants={cardVariants}
       initial="initial"
       animate={cardState}
       transition={cardTransition}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setCardState('hover')}
-      onMouseLeave={handleMouseLeave}
+      onMouseMove={isMobile ? undefined : handleMouseMove}
+      onMouseEnter={isMobile ? undefined : () => setCardState('hover')}
+      onMouseLeave={isMobile ? undefined : handleMouseLeave}
       onClick={() => setCardState(cardState === 'expanded' ? 'hover' : 'expanded')}
       whileHover={{
         boxShadow: `0 25px 50px -12px rgba(${service.color.includes('purple') ? '139, 92, 246' :
@@ -621,25 +626,16 @@ export default function Services() {
           <div
             className="relative max-w-5xl mx-auto p-12 rounded-3xl"
             style={{
-              background: 'rgba(255, 255, 255, 0.8)',
-              backdropFilter: 'blur(25px) saturate(200%)',
+              background: typeof window !== 'undefined' && window.innerWidth < 768 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(10px) saturate(150%)' : 'blur(25px) saturate(200%)',
+              WebkitBackdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(10px) saturate(150%)' : 'blur(25px) saturate(200%)',
               border: '2px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
+              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
+              WebkitTransform: 'translateZ(0)'
             }}
           >
             <motion.h2
-              className="text-4xl md:text-6xl font-bold mb-8"
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-              style={{
-                background: 'linear-gradient(90deg, #ffffff 0%, #f0abfc 25%, #a78bfa 50%, #60a5fa 75%, #ffffff 100%)',
-                backgroundSize: '200% 200%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
+              className="text-4xl md:text-6xl font-bold mb-8 text-gray-800"
             >
               🎯 Transform Your Business with Premium Digital Solutions
             </motion.h2>
@@ -676,10 +672,12 @@ export default function Services() {
           <div
             className="max-w-2xl mx-auto p-8 rounded-3xl"
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(30px) saturate(180%)',
+              background: typeof window !== 'undefined' && window.innerWidth < 768 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(10px) saturate(150%)' : 'blur(30px) saturate(180%)',
+              WebkitBackdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(10px) saturate(150%)' : 'blur(30px) saturate(180%)',
               border: '2px solid rgba(139, 92, 246, 0.2)',
-              boxShadow: '0 30px 60px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
+              boxShadow: '0 30px 60px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
+              WebkitTransform: 'translateZ(0)'
             }}
           >
             <motion.button
