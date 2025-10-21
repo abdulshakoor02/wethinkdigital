@@ -332,12 +332,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
       ref={cardRef}
       className="relative overflow-hidden cursor-pointer group rounded-3xl"
       style={{
-        background: isMobile ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: isMobile ? 'blur(10px) saturate(120%)' : 'blur(20px) saturate(150%)',
-        WebkitBackdropFilter: isMobile ? 'blur(10px) saturate(120%)' : 'blur(20px) saturate(150%)',
-        border: '1px solid rgba(255, 255, 255, 0.15)',
+        background: isMobile ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: isMobile ? 'none' : 'blur(20px) saturate(150%)',
+        WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px) saturate(150%)',
+        border: '1px solid rgba(200, 200, 200, 0.3)',
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.08) inset',
-        WebkitTransform: 'translateZ(0)',
+        WebkitTransform: 'translate3d(0,0,0)',
+        transform: 'translate3d(0,0,0)',
         ...(isMobile ? {} : {
           rotateX,
           rotateY,
@@ -626,12 +627,13 @@ export default function Services() {
           <div
             className="relative max-w-5xl mx-auto p-12 rounded-3xl"
             style={{
-              background: typeof window !== 'undefined' && window.innerWidth < 768 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)',
-              backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(10px) saturate(150%)' : 'blur(25px) saturate(200%)',
-              WebkitBackdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(10px) saturate(150%)' : 'blur(25px) saturate(200%)',
+              background: typeof window !== 'undefined' && window.innerWidth < 768 ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : 'blur(25px) saturate(200%)',
+              WebkitBackdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : 'blur(25px) saturate(200%)',
               border: '2px solid rgba(0, 0, 0, 0.1)',
               boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
-              WebkitTransform: 'translateZ(0)'
+              WebkitTransform: 'translate3d(0,0,0)',
+              transform: 'translate3d(0,0,0)'
             }}
           >
             <motion.h2
@@ -672,12 +674,13 @@ export default function Services() {
           <div
             className="max-w-2xl mx-auto p-8 rounded-3xl"
             style={{
-              background: typeof window !== 'undefined' && window.innerWidth < 768 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(10px) saturate(150%)' : 'blur(30px) saturate(180%)',
-              WebkitBackdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(10px) saturate(150%)' : 'blur(30px) saturate(180%)',
+              background: typeof window !== 'undefined' && window.innerWidth < 768 ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : 'blur(30px) saturate(180%)',
+              WebkitBackdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : 'blur(30px) saturate(180%)',
               border: '2px solid rgba(139, 92, 246, 0.2)',
               boxShadow: '0 30px 60px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
-              WebkitTransform: 'translateZ(0)'
+              WebkitTransform: 'translate3d(0,0,0)',
+              transform: 'translate3d(0,0,0)'
             }}
           >
             <motion.button
