@@ -159,18 +159,7 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
   }
 
   return (
-    <section className="py-16 relative overflow-hidden border-t border-white/10"
-      style={{
-        background: `
-          radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
-          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
-        `
-      }}
-    >
-      {/* Glassmorphism Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
+    <section className="py-16 bg-gray-50 border-t border-gray-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -178,10 +167,10 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
           transition={{ duration: 0.6 }}
           className="mb-12"
         >
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Related Articles
           </h2>
-          <p className="text-gray-400">
+          <p className="text-gray-600">
             Continue learning about SEO services in Dubai and digital marketing strategies
           </p>
         </motion.div>
@@ -193,20 +182,14 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="rounded-lg p-6 transition-colors group"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(15px) saturate(120%)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
-              }}
+              className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all group"
             >
               <Link href={`/blog/${post.slug}`} className="block">
-                <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-purple-300 transition-colors line-clamp-2">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors line-clamp-2">
                   {post.title}
                 </h3>
                 
-                <p className="text-gray-400 text-sm mb-4 line-clamp-3">
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                   {post.excerpt}
                 </p>
                 
@@ -219,7 +202,7 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
                   <span>{post.readTime}</span>
                 </div>
                 
-                <div className="flex items-center text-purple-300 text-sm font-medium mt-4 group-hover:text-purple-200 transition-colors">
+                <div className="flex items-center text-purple-600 text-sm font-medium mt-4 group-hover:text-purple-700 transition-colors">
                   <span>Read Article</span>
                   <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -238,13 +221,7 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
         >
           <Link
             href="/blog"
-            className="inline-flex items-center px-6 py-3 text-white font-medium rounded-lg transition-colors"
-            style={{
-              background: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 10px 20px rgba(139, 92, 246, 0.3)'
-            }}
+            className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors shadow-md"
           >
             View All Articles
             <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

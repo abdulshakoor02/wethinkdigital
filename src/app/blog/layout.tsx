@@ -1,6 +1,7 @@
 import React from 'react';
 import Navigation from '@/components/Navigation';
 import Breadcrumb from '@/components/Breadcrumb';
+import Footer from '@/components/Footer';
 
 export default function BlogLayout({
   children,
@@ -8,12 +9,13 @@ export default function BlogLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <Navigation />
       <Breadcrumb />
       <div className="pt-0">
         {children}
       </div>
+      <Footer />
     </div>
   );
 }

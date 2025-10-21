@@ -895,30 +895,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   if (!post) {
     return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center"
-        style={{
-          background: `
-            radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
-            linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
-          `
-        }}
-      >
-        {/* Glassmorphism Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
-        <div className="text-center relative z-10">
-          <h1 className="text-4xl font-bold text-white mb-4">Post Not Found</h1>
-          <p className="text-gray-400 mb-8">The requested blog post could not be found.</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Post Not Found</h1>
+          <p className="text-gray-600 mb-8">The requested blog post could not be found.</p>
           <Link
             href="/blog"
-            className="px-6 py-3 text-white rounded-lg transition-colors"
-            style={{
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
-            }}
+            className="inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors shadow-md"
           >
             Back to Blog
           </Link>
@@ -928,49 +911,24 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden"
-      style={{
-        background: `
-          radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
-          linear-gradient(135deg, #0f1129 0%, #1a1b3b 25%, #2d1b69 50%, #4c1d95 100%)
-        `
-      }}>
-
+    <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto py-12">
         <Navigation/>
-      {/* Glassmorphism Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-violet-800/15 to-fuchsia-900/20" />
       
-      <div className="relative z-10">
-        
         <div className="max-w-3xl mx-auto pt-24 pb-12 px-4">
           <BlogPostComponent post={post} />
 
-          <div className="mt-12 pt-8 border-t border-white/10">
+          <div className="mt-12 pt-8 border-t border-gray-200">
             <div className="flex justify-between">
               <Link
                 href="/blog"
-                className="px-6 py-3 text-white rounded-lg transition-colors"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(15px) saturate(120%)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  boxShadow: '0 10px 20px rgba(139, 92, 246, 0.2)'
-                }}
+                className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg transition-colors shadow-sm"
               >
                 ← Back to Blog
               </Link>
               <Link
                 href="/#contact"
-                className="px-6 py-3 text-white rounded-lg transition-colors"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
-                }}
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors shadow-md"
               >
                 Get in Touch
               </Link>
@@ -981,7 +939,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       {/* Related Posts Section */}
       <RelatedPosts currentPostId={post.id} />
-</div>
     </div>
   );
 }
