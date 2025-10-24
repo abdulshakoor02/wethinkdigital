@@ -114,6 +114,40 @@ html {
   background: var(--primary);
   color: white;
 }
+/* iOS-specific fixes */
+.ios-services-section {
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.ios-services-section * {
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .ios-services-section {
+    min-height: -webkit-fill-available;
+  }
+  
+  .ios-services-section .group:hover {
+    transform: none !important;
+  }
+  
+  .ios-services-section [style*="backdrop-filter"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+  }
+}
+
 /* Blog content styles */
 .prose {
   color: #374151;

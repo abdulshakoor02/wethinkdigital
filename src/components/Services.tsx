@@ -3,7 +3,7 @@
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
-import { FaRocket, FaChartLine, FaChartBar, FaStore, FaMobileAlt, FaWordpress, FaStar, FaCheck, FaArrowRight, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaRocket, FaChartLine, FaChartBar, FaStore, FaMobileAlt, FaWordpress, FaCheck, FaArrowRight, FaPhone, FaEnvelope } from 'react-icons/fa';
 
 // Floating Particles Component (matching Keywords section)
 interface Particle {
@@ -274,14 +274,23 @@ const services: ServiceData[] = [
 
 interface ServiceCardProps {
   service: ServiceData;
-  index: number;
 }
 
-const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
+const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
   const [cardState, setCardState] = useState<'initial' | 'hover' | 'expanded'>('initial');
   const [selectedPackage, setSelectedPackage] = useState(service.packages.find(p => p.popular)?.name || service.packages[0].name);
   const cardRef = useRef<HTMLDivElement>(null);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Magnetic hover effect
   const mouseX = useMotionValue(0);
@@ -332,13 +341,16 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
       ref={cardRef}
       className="relative overflow-hidden cursor-pointer group rounded-3xl"
       style={{
-        background: isMobile ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.1)',
+        background: isMobile ? 'rgba(255, 255, 255, 0.98)' : 'rgba(255, 255, 255, 0.1)',
         backdropFilter: isMobile ? 'none' : 'blur(20px) saturate(150%)',
         WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px) saturate(150%)',
-        border: '1px solid rgba(200, 200, 200, 0.3)',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.08) inset',
+        border: isMobile ? '1px solid rgba(200, 200, 200, 0.5)' : '1px solid rgba(200, 200, 200, 0.3)',
+        boxShadow: isMobile 
+          ? '0 4px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset'
+          : '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.08) inset',
         WebkitTransform: 'translate3d(0,0,0)',
         transform: 'translate3d(0,0,0)',
+        willChange: 'transform, opacity',
         ...(isMobile ? {} : {
           rotateX,
           rotateY,
@@ -352,7 +364,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
       onMouseMove={isMobile ? undefined : handleMouseMove}
       onMouseEnter={isMobile ? undefined : () => setCardState('hover')}
       onMouseLeave={isMobile ? undefined : handleMouseLeave}
-      onClick={() => setCardState(cardState === 'expanded' ? 'hover' : 'expanded')}
+      onClick={() => {
+        if (isMobile) {
+          setCardState(cardState === 'expanded' ? 'initial' : 'expanded');
+        } else {
+          setCardState(cardState === 'expanded' ? 'hover' : 'expanded');
+        }
+      }}
       whileHover={{
         boxShadow: `0 25px 50px -12px rgba(${service.color.includes('purple') ? '139, 92, 246' :
                                                 service.color.includes('blue') ? '59, 130, 246' :
@@ -566,7 +584,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
 
               {/* Testimonial */}
               <div className="mb-4 p-3 rounded-lg bg-gray-50">
-                <p className="text-gray-600 text-xs italic mb-1">"{service.testimonial.text}"</p>
+                <p className="text-gray-600 text-xs italic mb-1">&ldquo;{service.testimonial.text}&rdquo;</p>
                 <p className="text-gray-500 text-xs">- {service.testimonial.author}</p>
               </div>
 
@@ -590,11 +608,27 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, index }) => {
 export default function Services() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const [isMobile, setIsMobile] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth < 768);
+      // Check for iOS devices
+      const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                          (/Macintosh/.test(navigator.userAgent) && 'ontouchend' in document);
+      setIsIOS(isIOSDevice);
+    };
+    
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
 
   return (
     <section
       id="services"
-      className="relative min-h-screen py-24 overflow-hidden"
+      className={`relative min-h-screen py-24 overflow-hidden ${isIOS ? 'ios-services-section' : ''}`}
       ref={ref}
       style={{
         background: `
@@ -627,13 +661,16 @@ export default function Services() {
           <div
             className="relative max-w-5xl mx-auto p-12 rounded-3xl"
             style={{
-              background: typeof window !== 'undefined' && window.innerWidth < 768 ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.8)',
-              backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : 'blur(25px) saturate(200%)',
-              WebkitBackdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : 'blur(25px) saturate(200%)',
-              border: '2px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
+              background: isMobile ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: isMobile ? 'none' : 'blur(25px) saturate(200%)',
+              WebkitBackdropFilter: isMobile ? 'none' : 'blur(25px) saturate(200%)',
+              border: isMobile ? '1px solid rgba(200, 200, 200, 0.3)' : '2px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: isMobile 
+                ? '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.5) inset'
+                : '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
               WebkitTransform: 'translate3d(0,0,0)',
-              transform: 'translate3d(0,0,0)'
+              transform: 'translate3d(0,0,0)',
+              willChange: 'transform, opacity'
             }}
           >
             <motion.h2
@@ -642,7 +679,7 @@ export default function Services() {
               🎯 Transform Your Business with Premium Digital Solutions
             </motion.h2>
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
-              I don't just deliver services - I deliver measurable growth. I'm your partner in dominating your market with proven digital solutions that drive real revenue.
+              I don&apos;t just deliver services - I deliver measurable growth. I&apos;m your partner in dominating your market with proven digital solutions that drive real revenue.
             </p>
           </div>
         </motion.div>
@@ -659,7 +696,7 @@ export default function Services() {
                 ease: "easeOut"
               }}
             >
-              <ServiceCard service={service} index={index} />
+              <ServiceCard service={service} />
             </motion.div>
           ))}
         </div>
@@ -674,13 +711,16 @@ export default function Services() {
           <div
             className="max-w-2xl mx-auto p-8 rounded-3xl"
             style={{
-              background: typeof window !== 'undefined' && window.innerWidth < 768 ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : 'blur(30px) saturate(180%)',
-              WebkitBackdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'none' : 'blur(30px) saturate(180%)',
-              border: '2px solid rgba(139, 92, 246, 0.2)',
-              boxShadow: '0 30px 60px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
+              background: isMobile ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: isMobile ? 'none' : 'blur(30px) saturate(180%)',
+              WebkitBackdropFilter: isMobile ? 'none' : 'blur(30px) saturate(180%)',
+              border: isMobile ? '1px solid rgba(139, 92, 246, 0.3)' : '2px solid rgba(139, 92, 246, 0.2)',
+              boxShadow: isMobile 
+                ? '0 15px 40px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5) inset'
+                : '0 30px 60px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
               WebkitTransform: 'translate3d(0,0,0)',
-              transform: 'translate3d(0,0,0)'
+              transform: 'translate3d(0,0,0)',
+              willChange: 'transform, opacity'
             }}
           >
             <motion.button
@@ -691,7 +731,7 @@ export default function Services() {
               🚀 Get Your Free Strategy Session
             </motion.button>
             <p className="text-gray-600 leading-relaxed">
-              Ready to dominate your market? Let's talk about how we can 10x your business with proven strategies that deliver real results.
+              Ready to dominate your market? Let&apos;s talk about how we can 10x your business with proven strategies that deliver real results.
             </p>
           </div>
         </motion.div>
