@@ -145,11 +145,12 @@ const mockPosts: BlogPost[] = [
   {
     id: '5',
     slug: 'best-seo-services-in-dubai',
-    title: 'Best SEO Services in Dubai: The 5 Services That Actually Drive Revenue',
+    title: 'SEO Services in Dubai: The 5 Best for Revenue Growth',
     excerpt: 'Not all SEO services are created equal. Here are the 5 SEO services in Dubai that actually drive business results and revenue growth.',
+    image: '/blog/seo-services-dubai.jpg',
     content: `
       <h2>Most SEO Services in Dubai Are a Waste of Money</h2>
-      <p>If you've ever purchased SEO services in Dubai, you know the drill:</p>
+      <p>If you've ever purchased <a href="/#services" class="text-purple-600 hover:underline">SEO services in Dubai</a>, you know the drill:</p>
       <ul>
         <li>Monthly reports filled with meaningless metrics</li>
         <li>Promises of #1 rankings for keywords no one searches for</li>
@@ -168,7 +169,8 @@ const mockPosts: BlogPost[] = [
         <li>Have a reasonable competition-to-opportunity ratio</li>
         <li>Fit into your overall business strategy</li>
       </ul>
-      <p>This isn't about ranking for "Dubai marketing agency." It's about ranking for "Dubai SEO services for e-commerce businesses making $1M+ annually."</p>
+      <p><strong>Why it matters:</strong> Ranking for "what is SEO" might bring 1,000 visitors, but ranking for "SEO agency Dubai" brings 100 visitors who are actually looking to hire you.</p>
+      <p><strong>Real-world example:</strong> We helped a Dubai real estate firm pivot from ranking for generic terms like "Dubai property news" to specific buying intent keywords like "buy villa in Palm Jumeirah". Traffic dropped by 20%, but qualified leads increased by 150%.</p>
       
       <h3>2. Conversion-Optimized Content Creation</h3>
       <p>Content creation services in Dubai often focus on word count rather than conversion potential. The best SEO services create content that:</p>
@@ -178,6 +180,7 @@ const mockPosts: BlogPost[] = [
         <li>Is structured for maximum readability and engagement</li>
         <li>Supports your overall sales funnel</li>
       </ul>
+      <p><strong>Why it matters:</strong> Traffic without conversion is vanity. Your content needs to guide the user from "just looking" to "ready to buy".</p>
       
       <h3>3. Technical SEO Audits with Revenue Impact Analysis</h3>
       <p>Technical SEO services should come with a clear ROI calculation. Before fixing any technical issue, the best SEO services in Dubai answer:</p>
@@ -187,6 +190,7 @@ const mockPosts: BlogPost[] = [
         <li>How does this compare to other optimization opportunities?</li>
         <li>What's the expected timeline for seeing results?</li>
       </ul>
+      <p><strong>Why it matters:</strong> You don't have unlimited budget. You need to prioritize technical fixes that will actually improve your rankings and user experience.</p>
       
       <h3>4. Link Building with Business Value Focus</h3>
       <p>Link building services in Dubai often chase quantity over quality. The best approach focuses on links that:</p>
@@ -196,6 +200,7 @@ const mockPosts: BlogPost[] = [
         <li>Position your brand as a thought leader</li>
         <li>Support your overall marketing objectives</li>
       </ul>
+      <p><strong>Why it matters:</strong> One link from a reputable industry publication like <em>Gulf Business</em> or <em>Khaleej Times</em> is worth more than 100 low-quality directory links.</p>
       
       <h3>5. Performance Tracking with Business Metrics</h3>
       <p>The best SEO services in Dubai don't just track rankings. They track:</p>
@@ -215,9 +220,21 @@ const mockPosts: BlogPost[] = [
         <li>How do you ensure content drives conversions, not just traffic?</li>
         <li>What happens if we don't see results?</li>
       </ol>
+
+      <h2>Frequently Asked Questions About SEO Services in Dubai</h2>
+      
+      <h3>How much do SEO services cost in Dubai?</h3>
+      <p>Quality SEO services in Dubai typically range from AED 3,000 to AED 15,000+ per month, depending on the scope of work and the agency's expertise. Be wary of agencies offering packages below AED 2,000, as they often use automated or low-quality tactics that can harm your site.</p>
+
+      <h3>How long does it take to see results from SEO?</h3>
+      <p>SEO is a long-term strategy. While you may see some quick wins in the first 1-3 months (especially from technical fixes), significant revenue growth usually kicks in around months 4-6. Consistency is key.</p>
+
+      <h3>Do I really need SEO for my Dubai business?</h3>
+      <p>If your customers use Google to find products or services like yours, then yes. SEO is often the most cost-effective long-term marketing channel because you're capturing demand that already exists.</p>
       
       <h2>Your Next Step</h2>
       <p>Dubai's SEO landscape is crowded with agencies offering similar services. The difference is in execution and focus. If you're looking for SEO services that actually drive business results, you need a partner that thinks like a business owner, not just an SEO technician.</p>
+      <p>Ready to grow? <a href="/#contact" class="text-purple-600 hover:underline">Get a free SEO audit</a> for your business today.</p>
     `,
     date: '2025-08-18',
     author: 'WeThinkDigital Team',
@@ -851,7 +868,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  const cleanDescription = post.content.replace(/<[^>]*>/g, '').substring(0, 160);
+  const cleanDescription = post.excerpt || post.content.replace(/<[^>]*>/g, '').substring(0, 160);
 
   return {
     title: `${post.title} | WeThinkDigital Blog`,
@@ -870,7 +887,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       locale: 'en_US',
       images: [
         {
-          url: 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+          url: post.image || 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
           width: 1200,
           height: 630,
           alt: post.title,
@@ -881,7 +898,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: 'summary_large_image',
       title: post.title,
       description: cleanDescription,
-      images: ['https://www.wethinkdigital.solutions/wethinkdigital.ico'],
+      images: [post.image || 'https://www.wethinkdigital.solutions/wethinkdigital.ico'],
     },
     alternates: {
       canonical: `https://www.wethinkdigital.solutions/blog/${resolvedParams.slug}`,
@@ -910,8 +927,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     );
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt || post.content.replace(/<[^>]*>/g, '').substring(0, 160),
+    image: post.image ? `https://www.wethinkdigital.solutions${post.image}` : 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+    datePublished: new Date(post.date).toISOString(),
+    dateModified: new Date(post.date).toISOString(),
+    author: {
+      '@type': 'Organization',
+      name: post.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'WeThinkDigital',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://www.wethinkdigital.solutions/blog/${resolvedParams.slug}`,
+    },
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-4xl mx-auto py-12">
         <Navigation/>
       
