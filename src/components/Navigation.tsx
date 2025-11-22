@@ -14,7 +14,7 @@ export default function Navigation() {
     // Only run on client side to prevent hydration issues
 
     const handleScroll = () => {
-        setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -55,9 +55,8 @@ export default function Navigation() {
 
   return (
     <motion.nav
-      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
-        isScrolled ? 'border-b border-gray-200' : 'bg-transparent'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${isScrolled ? 'border-b border-gray-200' : 'bg-transparent'
+        }`}
       style={isScrolled ? {
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(20px) saturate(150%)',
@@ -108,7 +107,7 @@ export default function Navigation() {
                         // This handles lazy-loaded sections
                         let attempts = 0;
                         const maxAttempts = 50; // Try for up to 5 seconds (50 * 100ms)
-                        
+
                         const findAndScroll = () => {
                           const delayedElement = document.getElementById(elementId);
                           if (delayedElement) {
@@ -118,7 +117,7 @@ export default function Navigation() {
                             setTimeout(findAndScroll, 100);
                           }
                         };
-                        
+
                         findAndScroll();
                       }
                     }}
@@ -141,30 +140,8 @@ export default function Navigation() {
               whileTap={{ scale: 0.95 }}
               onClick={(e) => {
                 e.preventDefault();
-                // Only run on client side
-                if (typeof window !== 'undefined') {
-                  const contactElement = document.getElementById('contact');
-                  if (contactElement) {
-                    contactElement.scrollIntoView({ behavior: 'smooth' });
-                  } else {
-                    // If element is not found, keep trying to find it for a longer period
-                    // This handles lazy-loaded sections
-                    let attempts = 0;
-                    const maxAttempts = 50; // Try for up to 5 seconds (50 * 100ms)
-                    
-                    const findAndScroll = () => {
-                      const delayedElement = document.getElementById('contact');
-                      if (delayedElement) {
-                        delayedElement.scrollIntoView({ behavior: 'smooth' });
-                      } else if (attempts < maxAttempts) {
-                        attempts++;
-                        setTimeout(findAndScroll, 100);
-                      }
-                    };
-                    
-                    findAndScroll();
-                  }
-                }
+                // Dispatch custom event to open modal
+                window.dispatchEvent(new CustomEvent('openContactModal'));
                 setIsMobileMenuOpen(false);
               }}
               className="px-6 py-2 font-semibold text-white rounded-full transition-all duration-300"
@@ -204,9 +181,8 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         <div
-          className={`md:hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
-          } overflow-hidden border-t border-gray-200`}
+          className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+            } overflow-hidden border-t border-gray-200`}
           style={{
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px) saturate(150%)',
@@ -236,7 +212,7 @@ export default function Navigation() {
                         // This handles lazy-loaded sections
                         let attempts = 0;
                         const maxAttempts = 50; // Try for up to 5 seconds (50 * 100ms)
-                        
+
                         const findAndScroll = () => {
                           const delayedElement = document.getElementById(elementId);
                           if (delayedElement) {
@@ -246,7 +222,7 @@ export default function Navigation() {
                             setTimeout(findAndScroll, 100);
                           }
                         };
-                        
+
                         findAndScroll();
                       }
                     }}
@@ -280,30 +256,8 @@ export default function Navigation() {
               }}
               onClick={(e) => {
                 e.preventDefault();
-                // Only run on client side
-                if (typeof window !== 'undefined') {
-                  const contactElement = document.getElementById('contact');
-                  if (contactElement) {
-                    contactElement.scrollIntoView({ behavior: 'smooth' });
-                  } else {
-                    // If element is not found, keep trying to find it for a longer period
-                    // This handles lazy-loaded sections
-                    let attempts = 0;
-                    const maxAttempts = 50; // Try for up to 5 seconds (50 * 100ms)
-                    
-                    const findAndScroll = () => {
-                      const delayedElement = document.getElementById('contact');
-                      if (delayedElement) {
-                        delayedElement.scrollIntoView({ behavior: 'smooth' });
-                      } else if (attempts < maxAttempts) {
-                        attempts++;
-                        setTimeout(findAndScroll, 100);
-                      }
-                    };
-                    
-                    findAndScroll();
-                  }
-                }
+                // Dispatch custom event to open modal
+                window.dispatchEvent(new CustomEvent('openContactModal'));
                 setIsMobileMenuOpen(false);
               }}
             >

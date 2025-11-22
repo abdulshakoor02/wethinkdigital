@@ -47,81 +47,85 @@ const Footer = dynamic(() => import('@/components/Footer'), {
   loading: () => <div className="h-32 bg-gray-900/20 animate-pulse" />
 });
 
+const AutoContactModal = dynamic(() => import('@/components/AutoContactModal'));
+
 export default function Home() {
   return (
     <main className="bg-background">
       <VideoHero />
-      
-      <LazySection 
-        rootMargin="200px" 
+
+      <LazySection
+        rootMargin="200px"
         fallback={<div className="h-64 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <Keywords />
       </LazySection>
-      
-      <LazySection 
+
+      <LazySection
         rootMargin="200px"
         fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <Services />
       </LazySection>
-      
-      <LazySection 
+
+      <LazySection
         rootMargin="150px"
         fallback={<div className="h-80 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <DubaiDomination />
       </LazySection>
-      
-      <LazySection 
+
+      <LazySection
         rootMargin="150px"
         fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <ROICalculator />
       </LazySection>
-      
-      <LazySection 
+
+      <LazySection
         rootMargin="100px"
         fallback={<div className="h-80 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <FAQ />
       </LazySection>
-      
-      <LazySection 
+
+      <LazySection
         rootMargin="100px"
         fallback={<div className="h-80 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <CaseStudies />
       </LazySection>
-      
-      <LazySection 
+
+      <LazySection
         rootMargin="100px"
         fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <Process />
       </LazySection>
-      
+
       <LazySection
         rootMargin="100px"
         fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <LatestNews />
       </LazySection>
-      
-      <LazySection 
+
+      <LazySection
         rootMargin="50px"
         fallback={<div className="h-96 bg-gray-900/10 animate-pulse rounded-lg" />}
       >
         <ContactForm />
       </LazySection>
-      
-      <LazySection 
+
+      <LazySection
         rootMargin="0px"
         fallback={<div className="h-32 bg-gray-900/10 animate-pulse" />}
       >
         <Footer />
       </LazySection>
-      
+
+      <AutoContactModal />
+
       <noscript>
         <style>{`.animate-spin{animation:none}`}</style>
       </noscript>
