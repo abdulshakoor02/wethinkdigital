@@ -123,7 +123,7 @@ const mockPosts: BlogPost[] = [
 
 export default function BlogPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#1e1e20]">
       <div className="max-w-4xl mx-auto py-12">
         <Navigation />
         

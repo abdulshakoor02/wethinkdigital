@@ -52,15 +52,15 @@ export default function ROICalculator() {
     <section id="calculator" className="py-24 relative overflow-hidden"
       style={{
         background: `
-          radial-gradient(circle at 25% 85%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 75% 15%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 45% 45%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
+          radial-gradient(circle at 25% 85%, rgba(209, 213, 219, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 75% 15%, rgba(156, 163, 175, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 45% 45%, rgba(209, 213, 219, 0.25) 0%, transparent 50%),
           linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
         `
       }}
     >
       {/* Glassmorphism Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-violet-50/20 to-fuchsia-50/20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#18191a]/30 via-gray-50/20 to-[#18191a]/20" />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -68,10 +68,10 @@ export default function ROICalculator() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-100">
             Calculate Your Potential ROI
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             See exactly how much revenue we can help you generate with data-driven improvements.
           </p>
         </motion.div>
@@ -84,23 +84,23 @@ export default function ROICalculator() {
             transition={{ duration: 0.8 }}
             className="rounded-xl p-8"
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
+              background: 'rgba(24, 25, 26, 0.9)',
               backdropFilter: 'blur(20px) saturate(150%)',
               border: '1px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
             }}
           >
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-200 mb-2">
                   Monthly Website Traffic
                 </label>
                 <input
                   type="number"
                   {...register('monthlyTraffic', { min: 100, max: 10000000 })}
-                  className="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-lg text-gray-100 focus:outline-none transition-all duration-300"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
+                    background: 'rgba(24, 25, 26, 0.8)',
                     border: '1px solid rgba(0, 0, 0, 0.15)',
                     backdropFilter: 'blur(10px)'
                   }}
@@ -109,16 +109,16 @@ export default function ROICalculator() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-200 mb-2">
                   Current Conversion Rate (%)
                 </label>
                 <input
                   type="number"
                   step="0.1"
                   {...register('conversionRate', { min: 0.1, max: 100 })}
-                  className="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-lg text-gray-100 focus:outline-none transition-all duration-300"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
+                    background: 'rgba(24, 25, 26, 0.8)',
                     border: '1px solid rgba(0, 0, 0, 0.15)',
                     backdropFilter: 'blur(10px)'
                   }}
@@ -127,15 +127,15 @@ export default function ROICalculator() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-200 mb-2">
                   Average Order Value ($)
                 </label>
                 <input
                   type="number"
                   {...register('averageOrderValue', { min: 1, max: 10000 })}
-                  className="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-lg text-gray-100 focus:outline-none transition-all duration-300"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
+                    background: 'rgba(24, 25, 26, 0.8)',
                     border: '1px solid rgba(0, 0, 0, 0.15)',
                     backdropFilter: 'blur(10px)'
                   }}
@@ -144,16 +144,16 @@ export default function ROICalculator() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-200 mb-2">
                   Target Conversion Rate (%)
                 </label>
                 <input
                   type="number"
                   step="0.1"
                   {...register('targetConversionRate', { min: 0.1, max: 100 })}
-                  className="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-lg text-gray-100 focus:outline-none transition-all duration-300"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
+                    background: 'rgba(24, 25, 26, 0.8)',
                     border: '1px solid rgba(0, 0, 0, 0.15)',
                     backdropFilter: 'blur(10px)'
                   }}
@@ -165,10 +165,10 @@ export default function ROICalculator() {
                 type="submit"
                 className="w-full py-3 text-lg font-semibold text-white rounded-full transition-all duration-300"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                  background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
                   backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+                  border: '1px solid rgba(24, 25, 26, 0.2)',
+                  boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
                 }}
               >
                 Calculate My ROI
@@ -186,32 +186,32 @@ export default function ROICalculator() {
             {results && showResults ? (
               <div className="rounded-xl p-8"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.9)',
+                  background: 'rgba(24, 25, 26, 0.9)',
                   backdropFilter: 'blur(20px) saturate(150%)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
-                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
+                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
                 }}
               >
-                <h3 className="text-2xl font-bold mb-6 text-center text-gray-800">Your ROI Projection</h3>
+                <h3 className="text-2xl font-bold mb-6 text-center text-gray-100">Your ROI Projection</h3>
                 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Current Monthly Revenue:</span>
-                    <span className="text-2xl font-bold text-gray-800">${results.currentRevenue.toLocaleString()}</span>
+                    <span className="text-gray-400">Current Monthly Revenue:</span>
+                    <span className="text-2xl font-bold text-gray-100">${results.currentRevenue.toLocaleString()}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Potential Monthly Revenue:</span>
+                    <span className="text-gray-400">Potential Monthly Revenue:</span>
                     <span className="text-2xl font-bold text-green-400">${results.targetRevenue.toLocaleString()}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Monthly Increase:</span>
+                    <span className="text-gray-400">Monthly Increase:</span>
                     <span className="text-2xl font-bold text-primary">${results.potentialIncrease.toLocaleString()}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Percentage Increase:</span>
+                    <span className="text-gray-400">Percentage Increase:</span>
                     <span className="text-2xl font-bold text-accent">{results.percentageIncrease.toFixed(1)}%</span>
                   </div>
                 </div>
@@ -222,10 +222,10 @@ export default function ROICalculator() {
                     whileTap={{ scale: 0.95 }}
                     className="w-full py-3 font-semibold text-white rounded-full transition-all duration-300"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                      background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
                       backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+                      border: '1px solid rgba(24, 25, 26, 0.2)',
+                      boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
                     }}
                   >
                     Schedule Free Strategy Call
@@ -235,15 +235,15 @@ export default function ROICalculator() {
             ) : (
               <div className="rounded-xl p-8 text-center"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.8)',
+                  background: 'rgba(24, 25, 26, 0.8)',
                   backdropFilter: 'blur(15px) saturate(120%)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
-                  boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
+                  boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.8) inset'
                 }}
               >
                 <div className="text-6xl mb-4">💡</div>
-                <h3 className="text-2xl font-bold mb-4 text-gray-800">Ready to See Your Potential?</h3>
-                <p className="text-gray-600">
+                <h3 className="text-2xl font-bold mb-4 text-gray-100">Ready to See Your Potential?</h3>
+                <p className="text-gray-400">
                   Fill in your details to get an instant ROI projection and discover how much 
                   additional revenue we can help you generate.
                 </p>
@@ -254,30 +254,30 @@ export default function ROICalculator() {
             <div className="grid grid-cols-2 gap-4 mt-6">
               <div className="rounded-lg p-4 text-center"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
+                  background: 'rgba(24, 25, 26, 0.06)',
                   backdropFilter: 'blur(12px) saturate(100%)',
-                  border: '0.5px solid rgba(255, 255, 255, 0.08)',
-                  boxShadow: '0 10px 30px rgba(139, 92, 246, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.04) inset'
+                  border: '0.5px solid rgba(24, 25, 26, 0.08)',
+                  boxShadow: '0 10px 30px rgba(209, 213, 219, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.04) inset'
                 }}
               >
                 <div className="text-2xl font-bold text-primary">
                   {Math.round(watchedValues.monthlyTraffic * watchedValues.conversionRate / 100)}
                 </div>
-                <p className="text-sm text-gray-600">Monthly Conversions</p>
+                <p className="text-sm text-gray-400">Monthly Conversions</p>
               </div>
               
               <div className="rounded-lg p-4 text-center"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
+                  background: 'rgba(24, 25, 26, 0.06)',
                   backdropFilter: 'blur(12px) saturate(100%)',
-                  border: '0.5px solid rgba(255, 255, 255, 0.08)',
-                  boxShadow: '0 10px 30px rgba(139, 92, 246, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.04) inset'
+                  border: '0.5px solid rgba(24, 25, 26, 0.08)',
+                  boxShadow: '0 10px 30px rgba(209, 213, 219, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.04) inset'
                 }}
               >
                 <div className="text-2xl font-bold text-accent">
                   ${Math.round(watchedValues.monthlyTraffic * watchedValues.conversionRate / 100 * watchedValues.averageOrderValue).toLocaleString()}
                 </div>
-                <p className="text-sm text-gray-600">Current Revenue</p>
+                <p className="text-sm text-gray-400">Current Revenue</p>
               </div>
             </div>
           </motion.div>

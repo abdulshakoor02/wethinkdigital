@@ -159,7 +159,7 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
   }
 
   return (
-    <section className="py-16 bg-gray-50 border-t border-gray-200">
+    <section className="py-16 bg-[#18191a] border-t border-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -167,10 +167,10 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
           transition={{ duration: 0.6 }}
           className="mb-12"
         >
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl font-bold text-gray-50 mb-4">
             Related Articles
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-400">
             Continue learning about SEO services in Dubai and digital marketing strategies
           </p>
         </motion.div>
@@ -182,14 +182,14 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all group"
+              className="bg-[#1e1e20] rounded-lg p-6 border border-gray-800 shadow-sm hover:shadow-md transition-all group"
             >
               <Link href={`/blog/${post.slug}`} className="block">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors line-clamp-2">
+                <h3 className="text-lg font-semibold text-gray-50 mb-3 group-hover:text-gray-400 transition-colors line-clamp-2">
                   {post.title}
                 </h3>
                 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                <p className="text-gray-400 text-sm mb-4 line-clamp-3">
                   {post.excerpt}
                 </p>
                 
@@ -202,7 +202,7 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
                   <span>{post.readTime}</span>
                 </div>
                 
-                <div className="flex items-center text-purple-600 text-sm font-medium mt-4 group-hover:text-purple-700 transition-colors">
+                <div className="flex items-center text-gray-400 text-sm font-medium mt-4 group-hover:text-gray-200 transition-colors">
                   <span>Read Article</span>
                   <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -221,7 +221,7 @@ export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }
         >
           <Link
             href="/blog"
-            className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors shadow-md"
+            className="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors shadow-md"
           >
             View All Articles
             <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -21,26 +21,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Best SEO Services in Dubai | Top Digital Marketing Company - WeThinkDigital",
-  description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue. Get #1 rankings with Dubai's leading SEO service provider.",
-  keywords: "seo services in dubai, best digital marketing company in dubai, top digital marketing companies in dubai, seo service in dubai, best seo company dubai, digital marketing services dubai uae, social media marketing agency dubai, ppc advertising company dubai, content marketing services uae, email marketing agency dubai, website design companies dubai uae, custom web development dubai, ecommerce website development uae, responsive web design dubai, mobile app development dubai, wordpress development company dubai",
-  authors: [{ name: "WeThinkDigital Team" }],
-  creator: "WeThinkDigital",
+  title: "CRM Solutions Dubai | Customer Relationship Management - ebusiness+",
+  description: "ebusiness+ provides top-tier CRM solutions in Dubai. Streamline customer relationships, automate sales workflows, and boost productivity with our integrated CRM system.",
+  keywords: "CRM software Dubai, customer relationship management, CRM system Dubai, sales CRM, CRM for small business, cloud CRM, CRM for sales teams, business management software, marketing automation Dubai",
+  authors: [{ name: "ebusiness+ Team" }],
+  creator: "ebusiness+",
   openGraph: {
-    title: "Best SEO Services in Dubai | Top Digital Marketing Company - WeThinkDigital",
-    description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue. Get #1 rankings with Dubai's leading SEO service provider.",
+    title: "CRM Solutions Dubai | Customer Relationship Management - ebusiness+",
+    description: "ebusiness+ provides top-tier CRM solutions in Dubai. Streamline customer relationships, automate sales workflows, and boost productivity with our integrated CRM system.",
     type: "website",
-    url: "https://www.wethinkdigital.solutions",
-    siteName: "WeThinkDigital",
+    url: "https://www.ebusinessplus.ae",
+    siteName: "ebusiness+",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Best SEO Services in Dubai | Top Digital Marketing Company",
-    description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue.",
+    title: "CRM Solutions Dubai | ebusiness+",
+    description: "Streamline your customer relationships with powerful CRM solutions from ebusiness+ in Dubai.",
   },
   alternates: {
-    canonical: "https://www.wethinkdigital.solutions",
+    canonical: "https://www.ebusinessplus.ae",
   },
 };
 
@@ -56,11 +56,11 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
+
         {/* Critical CSS inlined for faster rendering */}
         <style dangerouslySetInnerHTML={{
           __html: `
-            :root{--background:#ffffff;--foreground:#1f2937;--primary:#6b46c1;--secondary:#3b82f6;--accent:#10b981;--muted:#64748b}
+            :root{--background:#18191a;--foreground:#f4f4f5;--primary:#d1d5db;--secondary:#9ca3af;--accent:#52525b;--muted:#a1a1aa}
             body{background:var(--background);color:var(--foreground);margin:0;overflow-x:hidden}
             .gradient-text{background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
             .btn-primary{background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;color:white;padding:12px 24px;border-radius:8px;font-weight:600;transition:all 0.3s ease;cursor:pointer}
@@ -68,31 +68,31 @@ export default function RootLayout({
             nav{position:fixed;top:0;left:0;right:0;z-index:50}
           `
         }} />
-        
+
         {/* Optimize critical CSS delivery */}
         <link rel="preload" href="/wethinkdigital.ico" as="image" type="image/x-icon" />
-        
+
         <Script
           id="json-ld-organization"
           type="application/ld+json"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        
+
         <Script
           id="json-ld-localbusiness"
           type="application/ld+json"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
         />
-        
+
         <Script
           id="json-ld-service"
           type="application/ld+json"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceSchema) }}
         />
-        
+
         <Script
           id="json-ld-blog"
           type="application/ld+json"
@@ -101,13 +101,13 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Blog",
-              "name": "WeThinkDigital Blog",
-              "url": "https://www.wethinkdigital.solutions/blog",
-              "description": "Latest insights, tips, and news from WeThinkDigital about digital marketing, web development, and SEO strategies."
+              "name": "ebusiness+ Blog",
+              "url": "https://www.ebusinessplus.ae/blog",
+              "description": "Latest insights, tips, and news from ebusiness+ about ERP, CRM, and business automation strategies."
             })
           }}
         />
-        
+
         {process.env.NODE_ENV === 'production' && (
           <>
             <Script
@@ -128,9 +128,9 @@ export default function RootLayout({
             />
           </>
         )}
-        
+
         <link rel="icon" href="/wethinkdigital.ico" />
-        
+
         {/* Mobile-optimized font preloading */}
         <link
           rel="preload"
@@ -140,7 +140,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           media="(min-width: 768px)"
         />
-        
+
         {/* Critical font subset for mobile */}
         <style dangerouslySetInnerHTML={{
           __html: `

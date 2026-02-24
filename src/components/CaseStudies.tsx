@@ -71,15 +71,15 @@ export default function CaseStudies() {
     <section id="case-studies" className="py-24 relative overflow-hidden"
       style={{
         background: `
-          radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
+          radial-gradient(circle at 20% 80%, rgba(209, 213, 219, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(156, 163, 175, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(209, 213, 219, 0.25) 0%, transparent 50%),
           linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
         `
       }}
     >
       {/* Glassmorphism Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-violet-50/20 to-fuchsia-50/20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#18191a]/30 via-gray-50/20 to-[#18191a]/20" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -87,10 +87,10 @@ export default function CaseStudies() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-100">
             Don&apos;t Just Take My Word for It. Here&apos;s the Proof.
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
             I get results. It&apos;s that simple. Here&apos;s a look at how I&apos;ve helped businesses just like yours dominate the market in Dubai and the UAE.
           </p>
         </motion.div>
@@ -104,15 +104,15 @@ export default function CaseStudies() {
                 onClick={() => setSelectedCase(index)}
                 className={`px-4 py-2 rounded-lg transition-all ${selectedCase === index
                     ? 'text-white'
-                    : 'text-gray-600 hover:text-gray-800'
+                    : 'text-gray-400 hover:text-gray-100'
                 }`}
                 style={selectedCase === index ? {
-                  background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                  background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
                   backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+                  border: '1px solid rgba(24, 25, 26, 0.2)',
+                  boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
                 } : {
-                  background: 'rgba(255, 255, 255, 0.7)',
+                  background: 'rgba(24, 25, 26, 0.7)',
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(0, 0, 0, 0.1)'
                 }}
@@ -131,10 +131,10 @@ export default function CaseStudies() {
           transition={{ duration: 0.5 }}
           className="rounded-xl p-8 md:p-12"
           style={{
-            background: 'rgba(255, 255, 255, 0.9)',
+            background: 'rgba(24, 25, 26, 0.9)',
             backdropFilter: 'blur(20px) saturate(150%)',
             border: '1px solid rgba(0, 0, 0, 0.1)',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
           }}
         >
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -167,7 +167,7 @@ export default function CaseStudies() {
                     <div className="text-2xl font-bold text-green-400">
                       {result.value}
                     </div>
-                    <div className="text-sm text-gray-600">{result.metric}</div>
+                    <div className="text-sm text-gray-400">{result.metric}</div>
                   </motion.div>
                 ))}
               </div>
@@ -175,26 +175,26 @@ export default function CaseStudies() {
 
             {/* Content */}
             <div>
-              <h3 className="text-3xl font-bold mb-4 text-gray-800">
+              <h3 className="text-3xl font-bold mb-4 text-gray-100">
                 {caseStudies[selectedCase].title}
               </h3>
               
-              <p className="text-gray-600 mb-6 text-lg">
+              <p className="text-gray-400 mb-6 text-lg">
                 {caseStudies[selectedCase].description}
               </p>
 
               {/* Technologies */}
               <div className="mb-6">
-                <h4 className="text-lg font-semibold mb-3 text-gray-800">Technologies Used</h4>
+                <h4 className="text-lg font-semibold mb-3 text-gray-100">Technologies Used</h4>
                 <div className="flex flex-wrap gap-2">
                   {caseStudies[selectedCase].technologies.map((tech) => (
                     <span
                       key={tech}
-                      className="px-3 py-1 rounded-full text-sm text-gray-800"
+                      className="px-3 py-1 rounded-full text-sm text-gray-100"
                       style={{
-                        background: 'rgba(168, 85, 247, 0.3)',
+                        background: 'rgba(209, 213, 219, 0.3)',
                         backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                        border: '1px solid rgba(24, 25, 26, 0.2)'
                       }}
                     >
                       {tech}
@@ -206,18 +206,18 @@ export default function CaseStudies() {
               {/* Testimonial */}
               <div className="rounded-lg p-6"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.7)',
+                  background: 'rgba(24, 25, 26, 0.7)',
                   backdropFilter: 'blur(15px) saturate(120%)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
-                  boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
+                  boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.8) inset'
                 }}
               >
-                <blockquote className="text-gray-600 italic mb-4">
+                <blockquote className="text-gray-400 italic mb-4">
 &quot;{caseStudies[selectedCase].testimonial.text}&quot;
                 </blockquote>
-                <div className="text-gray-800">
+                <div className="text-gray-100">
                   <div className="font-semibold">{caseStudies[selectedCase].testimonial.author}</div>
-                  <div className="text-sm text-gray-600">{caseStudies[selectedCase].testimonial.position}</div>
+                  <div className="text-sm text-gray-400">{caseStudies[selectedCase].testimonial.position}</div>
                 </div>
               </div>
             </div>
@@ -236,10 +236,10 @@ export default function CaseStudies() {
             whileTap={{ scale: 0.95 }}
             className="px-8 py-4 text-lg font-semibold text-white rounded-full transition-all duration-300"
             style={{
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+              background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+              border: '1px solid rgba(24, 25, 26, 0.2)',
+              boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
             }}
           >
             Start Your Success Story

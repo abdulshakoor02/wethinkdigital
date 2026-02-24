@@ -49,20 +49,20 @@ export default function Navigation() {
     { id: 'case-studies', name: 'Case Studies', href: '#case-studies' },
     { id: 'process', name: 'Process', href: '#process' },
     { id: 'blog', name: 'Blog', href: '/blog' },
-    { id: 'team', name: 'Team', href: '#team' },
+    { id: 'team', name: 'Solutions', href: '#services' },
     { id: 'contact', name: 'Contact', href: '#contact' }
   ];
 
   return (
     <motion.nav
-      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${isScrolled ? 'border-b border-gray-200' : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${isScrolled ? 'border-b border-gray-800' : 'bg-transparent'
         }`}
       style={isScrolled ? {
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: 'rgba(24, 25, 26, 0.95)',
         backdropFilter: 'blur(20px) saturate(150%)',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
       } : {
-        background: 'rgba(255, 255, 255, 0.8)',
+        background: 'rgba(24, 25, 26, 0.8)',
         backdropFilter: 'blur(10px)'
       }}
     >
@@ -75,13 +75,13 @@ export default function Navigation() {
           >
             <Link href="/" className="text-2xl font-bold"
               style={{
-                background: 'linear-gradient(135deg, #a78bfa 0%, #f0abfc 100%)',
+                background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
               }}
             >
-              WeThinkDigital
+              ebusiness+
             </Link>
           </motion.div>
 
@@ -121,14 +121,14 @@ export default function Navigation() {
                         findAndScroll();
                       }
                     }}
-                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    className="text-gray-400 hover:text-gray-50 transition-colors"
                   >
                     {item.name}
                   </a>
                 ) : (
                   <Link
                     href={item.href}
-                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                    className="text-gray-400 hover:text-gray-50 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -146,10 +146,10 @@ export default function Navigation() {
               }}
               className="px-6 py-2 font-semibold text-white rounded-full transition-all duration-300"
               style={{
-                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+                border: '1px solid rgba(24, 25, 26, 0.2)',
+                boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
               }}
             >
               Get Started
@@ -165,7 +165,7 @@ export default function Navigation() {
                 e.preventDefault();
                 setIsMobileMenuOpen(!isMobileMenuOpen);
               }}
-              className="text-gray-700 p-2"
+              className="text-gray-200 p-2"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -182,9 +182,9 @@ export default function Navigation() {
         {/* Mobile Menu */}
         <div
           className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
-            } overflow-hidden border-t border-gray-200`}
+            } overflow-hidden border-t border-gray-800`}
           style={{
-            background: 'rgba(255, 255, 255, 0.95)',
+            background: 'rgba(24, 25, 26, 0.95)',
             backdropFilter: 'blur(20px) saturate(150%)',
             border: isMobileMenuOpen ? '1px solid rgba(0, 0, 0, 0.1)' : 'none',
             boxShadow: isMobileMenuOpen ? '0 20px 40px rgba(0, 0, 0, 0.1)' : 'none'
@@ -226,7 +226,7 @@ export default function Navigation() {
                         findAndScroll();
                       }
                     }}
-                    className="block py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                    className="block py-2 text-gray-400 hover:text-gray-50 transition-colors"
                   >
                     {item.name}
                   </a>
@@ -237,7 +237,7 @@ export default function Navigation() {
                       e.preventDefault();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="block py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                    className="block py-2 text-gray-400 hover:text-gray-50 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -249,10 +249,10 @@ export default function Navigation() {
               whileTap={{ scale: 0.95 }}
               className="w-full py-2 px-4 mt-2 font-semibold text-white rounded-full transition-all duration-300 text-sm"
               style={{
-                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+                border: '1px solid rgba(24, 25, 26, 0.2)',
+                boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
               }}
               onClick={(e) => {
                 e.preventDefault();

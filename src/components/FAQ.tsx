@@ -29,10 +29,10 @@ const FloatingParticles: React.FC = () => {
         y: Math.random() * 100,
         size: Math.random() * (i < 6 ? 4 : i < 12 ? 25 : 120) + (i < 6 ? 2 : i < 12 ? 15 : 80),
         color: [
-          'rgba(139, 92, 246, 0.25)',
-          'rgba(236, 72, 153, 0.2)', 
+          'rgba(209, 213, 219, 0.25)',
+          'rgba(156, 163, 175, 0.2)', 
           'rgba(59, 130, 246, 0.2)',
-          'rgba(168, 85, 247, 0.15)',
+          'rgba(209, 213, 219, 0.15)',
           'rgba(14, 165, 233, 0.1)'
         ][Math.floor(Math.random() * 5)],
         speed: Math.random() * 0.3 + 0.1,
@@ -54,7 +54,7 @@ const FloatingParticles: React.FC = () => {
             width: particle.size,
             height: particle.size,
             background: particle.type === 'dot' 
-              ? 'rgba(255, 255, 255, 0.2)'
+              ? 'rgba(24, 25, 26, 0.2)'
               : `radial-gradient(circle, ${particle.color} 0%, transparent 70%)`,
             filter: particle.type !== 'dot' ? 'blur(1px)' : 'none',
             left: `${particle.x}%`,
@@ -93,30 +93,29 @@ interface Category {
 }
 
 const categories: Category[] = [
-  { id: 'seo', name: 'SEO Services', icon: '🎯', description: 'Search Engine Optimization' },
-  { id: 'marketing', name: 'Digital Marketing', icon: '💼', description: 'Marketing Strategies' },
-  { id: 'local', name: 'Local Business', icon: '🌐', description: 'Dubai & UAE Focus' },
+  { id: 'crm', name: 'CRM Solutions', icon: '💼', description: 'Customer Relationship Management' },
+  { id: 'implementation', name: 'Implementation', icon: '🌐', description: 'Dubai & UAE Focus' },
   { id: 'general', name: 'General Questions', icon: '❓', description: 'Common Inquiries' }
 ];
 
 const faqData: FAQItem[] = [
   {
-    id: 'best-digital-marketing-company',
-    category: 'seo',
-    question: 'What makes WeThinkDigital the best digital marketing company in Dubai?',
-    answer: 'WeThinkDigital stands out as the best digital marketing company in Dubai because we focus on revenue, not vanity metrics. We deliver measurable results with our data-driven approach, combining expert SEO services, conversion optimization, and deep understanding of the UAE market. Our clients see an average ROI of 300%+ within the first year.',
+    id: 'best-crm-company',
+    category: 'crm',
+    question: 'What makes ebusiness+ the best CRM solutions provider in Dubai?',
+    answer: 'ebusiness+ stands out as the best CRM solutions provider in Dubai because we focus on customer relationships, not just software. We deliver measurable results with our data-driven approach, combining expert CRM implementation, process optimization, and deep understanding of the UAE market. Our clients see an average 40% increase in sales productivity within the first year.',
   },
   {
-    id: 'seo-services-cost',
-    category: 'seo',
-    question: 'How much do SEO services in Dubai cost with WeThinkDigital?',
-    answer: 'Our SEO services in Dubai are priced based on results, not hours. We offer performance-based pricing starting from AED 5,000/month for small businesses. Unlike other SEO companies in Dubai, we align our success with yours - you only pay premium rates when we deliver premium results. Contact us for a custom quote based on your business goals.',
+    id: 'crm-cost',
+    category: 'crm',
+    question: 'How much do CRM solutions in Dubai cost with ebusiness+?',
+    answer: 'Our CRM solutions in Dubai are priced based on your business needs. We offer flexible pricing starting from AED 7,500 for small businesses. Unlike other CRM providers in Dubai, we align our success with yours - we customize the solution to fit your budget and deliver real ROI. Contact us for a custom quote based on your business goals.',
   },
   {
-    id: 'why-choose-wethinkdigital',
-    category: 'seo',
-    question: 'Why choose WeThinkDigital for SEO service in Dubai over other agencies?',
-    answer: 'WeThinkDigital is Dubai\'s leading SEO service provider because we treat your business like our own. We don\'t just optimize websites - we optimize entire revenue funnels. Our team understands Dubai\'s unique market dynamics, uses white-hat SEO techniques, and provides complete transparency. We\'ve helped businesses achieve 723% traffic increases and $2.3M+ in additional revenue.',
+    id: 'why-choose-ebusinessplus',
+    category: 'crm',
+    question: 'Why choose ebusiness+ for CRM solutions in Dubai over other providers?',
+    answer: 'ebusiness+ is Dubai\'s leading CRM solutions provider because we treat your customer relationships like our own. We don\'t just implement CRM - we optimize your entire sales and customer service process. Our team understands Dubai\'s unique market dynamics, provides complete transparency, and delivers measurable results. We\'ve helped businesses achieve 300% increases in lead conversion and significant revenue growth.',
   },
   {
     id: 'digital-marketing-results-timeline',
@@ -179,22 +178,22 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
             key={category.id}
             onClick={() => onCategoryChange(category.id)}
             className={`w-full text-left p-6 rounded-2xl transition-all duration-300 relative overflow-hidden group ${
-              isActive ? 'text-white' : 'text-gray-700 hover:text-gray-900'
+              isActive ? 'text-white' : 'text-gray-200 hover:text-gray-50'
             }`}
             style={{
               background: isActive 
-                ? 'rgba(139, 92, 246, 0.15)' 
-                : 'rgba(255, 255, 255, 0.06)',
+                ? 'rgba(209, 213, 219, 0.15)' 
+                : 'rgba(24, 25, 26, 0.06)',
               backdropFilter: 'blur(20px) saturate(140%)',
               border: isActive 
-                ? '2px solid rgba(139, 92, 246, 0.3)' 
-                : '1px solid rgba(255, 255, 255, 0.1)',
+                ? '2px solid rgba(209, 213, 219, 0.3)' 
+                : '1px solid rgba(24, 25, 26, 0.1)',
               boxShadow: isActive 
-                ? '0 0 25px rgba(139, 92, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
-                : '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.04) inset'
+                ? '0 0 25px rgba(209, 213, 219, 0.4), 0 0 0 1px rgba(24, 25, 26, 0.1) inset'
+                : '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.04) inset'
             }}
             whileHover={!isActive ? {
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'rgba(24, 25, 26, 0.08)',
               scale: 1.02,
               transition: { duration: 0.2 }
             } : {}}
@@ -207,15 +206,15 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
                 <span className="text-2xl mr-3">{category.icon}</span>
                 <span className="font-semibold text-lg">{category.name}</span>
               </div>
-              <p className="text-sm opacity-90 mb-1 text-gray-600">{category.description}</p>
-              <span className="text-xs opacity-80 text-gray-600">{faqCount} questions</span>
+              <p className="text-sm opacity-90 mb-1 text-gray-400">{category.description}</p>
+              <span className="text-xs opacity-80 text-gray-400">{faqCount} questions</span>
             </div>
             
             {/* Active indicator */}
             {isActive && (
               <motion.div
                 className="absolute right-4 top-1/2 w-1 h-8 rounded-full"
-                style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #f0abfc 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%)' }}
                 initial={{ scale: 0, y: '-50%' }}
                 animate={{ scale: 1, y: '-50%' }}
                 transition={{ type: "spring", stiffness: 300 }}
@@ -226,7 +225,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
             <div className={`absolute inset-0 rounded-2xl transition-opacity duration-300 ${
               isActive ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
             }`}
-                 style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.2) 100%)' }}
+                 style={{ background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.3) 0%, rgba(156, 163, 175, 0.2) 100%)' }}
             />
           </motion.button>
         );
@@ -261,23 +260,23 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
               className="relative overflow-hidden rounded-2xl group cursor-pointer"
               style={{
                 background: isOpen 
-                  ? 'rgba(255, 255, 255, 0.12)' 
-                  : 'rgba(255, 255, 255, 0.08)',
+                  ? 'rgba(24, 25, 26, 0.12)' 
+                  : 'rgba(24, 25, 26, 0.08)',
                 backdropFilter: isOpen 
                   ? 'blur(18px) saturate(140%)' 
                   : 'blur(15px) saturate(120%)',
                 border: isOpen 
-                  ? '1px solid rgba(255, 255, 255, 0.15)' 
-                  : '1px solid rgba(255, 255, 255, 0.1)',
+                  ? '1px solid rgba(24, 25, 26, 0.15)' 
+                  : '1px solid rgba(24, 25, 26, 0.1)',
                 boxShadow: isOpen
-                  ? '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.08) inset'
-                  : '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.04) inset'
+                  ? '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.08) inset'
+                  : '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.04) inset'
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{
-                background: 'rgba(255, 255, 255, 0.1)',
+                background: 'rgba(24, 25, 26, 0.1)',
                 scale: 1.01,
                 transition: { duration: 0.2 }
               }}
@@ -290,7 +289,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                 aria-controls={`faq-answer-${item.id}`}
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-800 pr-4 leading-relaxed">
+                  <h3 className="text-lg font-semibold text-gray-100 pr-4 leading-relaxed">
                     {item.question}
                   </h3>
                   <motion.div
@@ -298,12 +297,12 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                     transition={{ duration: 0.3 }}
                     className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
                     style={{
-                      background: 'rgba(139, 92, 246, 0.2)',
+                      background: 'rgba(209, 213, 219, 0.2)',
                       backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                      border: '1px solid rgba(24, 25, 26, 0.2)'
                     }}
                   >
-                    <span className="text-gray-800 font-bold text-lg">
+                    <span className="text-gray-100 font-bold text-lg">
                       {isOpen ? '−' : '+'}
                     </span>
                   </motion.div>
@@ -330,12 +329,12 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                       <div 
                         className="p-4 rounded-xl"
                         style={{
-                          background: 'rgba(255, 255, 255, 0.6)',
+                          background: 'rgba(24, 25, 26, 0.6)',
                           backdropFilter: 'blur(8px)',
                           border: '1px solid rgba(0, 0, 0, 0.05)'
                         }}
                       >
-                        <p className="text-gray-800 leading-relaxed">
+                        <p className="text-gray-100 leading-relaxed">
                           {item.answer}
                         </p>
                       </div>
@@ -409,16 +408,16 @@ export default function FAQ() {
           <div 
             className="relative max-w-4xl mx-auto p-12 rounded-3xl"
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
+              background: 'rgba(24, 25, 26, 0.9)',
               backdropFilter: 'blur(25px) saturate(200%)',
               border: '2px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset'
+              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
             }}
           >
-            <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gray-800">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gray-100">
               ❓ Frequently Asked Questions
             </h2>
-            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-400 leading-relaxed">
               Get answers about our digital marketing services and SEO solutions from industry experts
             </p>
           </div>
@@ -461,16 +460,16 @@ export default function FAQ() {
                 key={category.id}
                 onClick={() => handleCategoryChange(category.id)}
                 className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                  activeCategory === category.id ? 'text-white' : 'text-gray-700'
+                  activeCategory === category.id ? 'text-white' : 'text-gray-200'
                 }`}
                 style={{
                   background: activeCategory === category.id 
-                    ? 'rgba(139, 92, 246, 0.3)' 
-                    : 'rgba(255, 255, 255, 0.08)',
+                    ? 'rgba(209, 213, 219, 0.3)' 
+                    : 'rgba(24, 25, 26, 0.08)',
                   backdropFilter: 'blur(15px)',
                   border: activeCategory === category.id 
-                    ? '1px solid rgba(139, 92, 246, 0.4)' 
-                    : '1px solid rgba(255, 255, 255, 0.1)'
+                    ? '1px solid rgba(209, 213, 219, 0.4)' 
+                    : '1px solid rgba(24, 25, 26, 0.1)'
                 }}
               >
                 <span className="mr-2">{category.icon}</span>
@@ -490,17 +489,17 @@ export default function FAQ() {
           <div
             className="max-w-2xl mx-auto p-8 rounded-3xl"
             style={{
-              background: 'rgba(139, 92, 246, 0.15)',
+              background: 'rgba(209, 213, 219, 0.15)',
               backdropFilter: 'blur(30px) saturate(180%)',
-              border: '2px solid rgba(139, 92, 246, 0.25)',
-              boxShadow: '0 30px 60px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+              border: '2px solid rgba(209, 213, 219, 0.25)',
+              boxShadow: '0 30px 60px rgba(209, 213, 219, 0.2), 0 0 0 1px rgba(24, 25, 26, 0.1) inset'
             }}
           >
-            <p className="text-gray-700 mb-6 text-lg">
+            <p className="text-gray-200 mb-6 text-lg">
               Still have questions about our SEO services in Dubai?
             </p>
             <motion.button
-              className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 w-full"
+              className="text-2xl md:text-3xl font-bold text-gray-100 mb-4 w-full"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
@@ -512,7 +511,7 @@ export default function FAQ() {
             >
               🚀 Get Your Free Consultation
             </motion.button>
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-200 leading-relaxed">
               Let's talk about how we can help you dominate your market with proven digital strategies.
             </p>
           </div>

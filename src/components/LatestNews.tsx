@@ -85,9 +85,9 @@ export default function LatestNews() {
       className="py-24 relative overflow-hidden"
       style={{
         background: `
-          radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
+          radial-gradient(circle at 20% 80%, rgba(209, 213, 219, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(156, 163, 175, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(209, 213, 219, 0.25) 0%, transparent 50%),
           linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
         `
       }}
@@ -96,7 +96,7 @@ export default function LatestNews() {
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(168, 85, 247, 0.15) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(209, 213, 219, 0.15) 1px, transparent 0)`,
           backgroundSize: '20px 20px'
         }}></div>
       </div>
@@ -110,10 +110,10 @@ export default function LatestNews() {
           className="flex justify-between items-start mb-16"
         >
           <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
               Latest news
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-400">
               Stay informed! Explore our latest updates on tax laws, economic insights, and industry trends.
             </p>
           </div>
@@ -126,12 +126,12 @@ export default function LatestNews() {
           >
             <Link
               href="/blog"
-              className="inline-flex items-center px-6 py-3 text-gray-800 font-medium rounded-full transition-all duration-300"
+              className="inline-flex items-center px-6 py-3 text-gray-100 font-medium rounded-full transition-all duration-300"
               style={{
-                background: 'rgba(255, 255, 255, 0.12)',
+                background: 'rgba(24, 25, 26, 0.12)',
                 backdropFilter: 'blur(15px) saturate(120%)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 10px 20px rgba(139, 92, 246, 0.3)'
+                border: '1px solid rgba(24, 25, 26, 0.2)',
+                boxShadow: '0 10px 20px rgba(209, 213, 219, 0.3)'
               }}
             >
               View all blogs
@@ -152,10 +152,10 @@ export default function LatestNews() {
               <Link href={`/blog/${featuredPost.slug}`} className="block h-full">
                 <div className="relative h-full rounded-2xl overflow-hidden transition-all duration-300"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.08)',
+                    background: 'rgba(24, 25, 26, 0.08)',
                     backdropFilter: 'blur(15px) saturate(120%)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+                    border: '1px solid rgba(24, 25, 26, 0.1)',
+                    boxShadow: '0 15px 35px rgba(209, 213, 219, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.06) inset'
                   }}
                 >
                   <div className="relative h-64 lg:h-80 overflow-hidden">
@@ -176,11 +176,11 @@ export default function LatestNews() {
                   </div>
                   
                   <div className="p-6 lg:p-8">
-                    <h3 className="text-xl lg:text-2xl font-bold text-gray-800 mb-4 transition-colors">
+                    <h3 className="text-xl lg:text-2xl font-bold text-gray-100 mb-4 transition-colors">
                       {featuredPost.title}
                     </h3>
                     
-                    <p className="text-gray-600 mb-6 line-clamp-3">
+                    <p className="text-gray-400 mb-6 line-clamp-3">
                       {featuredPost.excerpt}
                     </p>
                     
@@ -213,10 +213,10 @@ export default function LatestNews() {
                 <Link href={`/blog/${post.slug}`} className="block h-full">
                   <div className="relative h-full rounded-2xl overflow-hidden transition-all duration-300"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.08)',
+                      background: 'rgba(24, 25, 26, 0.08)',
                       backdropFilter: 'blur(15px) saturate(120%)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      boxShadow: '0 15px 35px rgba(139, 92, 246, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.06) inset'
+                      border: '1px solid rgba(24, 25, 26, 0.1)',
+                      boxShadow: '0 15px 35px rgba(209, 213, 219, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.06) inset'
                     }}
                   >
                     <div className="relative h-48 overflow-hidden">
@@ -237,7 +237,7 @@ export default function LatestNews() {
                     </div>
                     
                     <div className="p-6">
-                      <h3 className="text-lg font-bold text-gray-800 mb-3 transition-colors line-clamp-2">
+                      <h3 className="text-lg font-bold text-gray-100 mb-3 transition-colors line-clamp-2">
                         {post.title}
                       </h3>
                       
@@ -268,12 +268,12 @@ export default function LatestNews() {
         >
           <Link
             href="/blog"
-            className="inline-flex items-center px-6 py-3 text-gray-800 font-medium rounded-full transition-all duration-300"
+            className="inline-flex items-center px-6 py-3 text-gray-100 font-medium rounded-full transition-all duration-300"
             style={{
-              background: 'rgba(255, 255, 255, 0.12)',
+              background: 'rgba(24, 25, 26, 0.12)',
               backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 10px 20px rgba(139, 92, 246, 0.3)'
+              border: '1px solid rgba(24, 25, 26, 0.2)',
+              boxShadow: '0 10px 20px rgba(209, 213, 219, 0.3)'
             }}
           >
             View all blogs

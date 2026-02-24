@@ -3,16 +3,16 @@
 // Enhanced LocalBusiness Schema with SEO focus
 export const localBusinessSchema = {
   "@context": "https://schema.org",
-  "@type": ["LocalBusiness", "DigitalMarketingAgency"],
-  "@id": "https://www.wethinkdigital.solutions#organization",
-  "name": "WeThinkDigital",
-  "alternateName": "WeThinkDigital Solutions",
-  "description": "Best SEO services in Dubai and top digital marketing company offering proven strategies for business growth. Leading SEO service provider in Dubai, UAE.",
-  "image": "https://www.wethinkdigital.solutions/wethinkdigital.ico",
-  "logo": "https://www.wethinkdigital.solutions/wethinkdigital.ico",
-  "url": "https://www.wethinkdigital.solutions",
+  "@type": ["LocalBusiness", "ProfessionalService"],
+  "@id": "https://www.ebusinessplus.ae#organization",
+  "name": "ebusiness+",
+  "alternateName": "ebusiness+ Solutions",
+  "description": "Leading CRM solutions provider in Dubai. We help businesses streamline customer relationships, automate sales workflows, and boost productivity with our integrated CRM platform.",
+  "image": "https://www.ebusinessplus.ae/favicon.ico",
+  "logo": "https://www.ebusinessplus.ae/favicon.ico",
+  "url": "https://www.ebusinessplus.ae",
   "telephone": "+971 58 929 3060",
-  "email": "hello@wethinkdigital.solutions",
+  "email": "info@ebusinessplus.ae",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Business Bay",
@@ -49,31 +49,53 @@ export const localBusinessSchema = {
     "opens": "09:00",
     "closes": "18:00"
   },
-  "priceRange": "AED 5000 - AED 50000",
+  "priceRange": "AED 10000 - AED 100000",
   "currenciesAccepted": "AED",
   "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer"],
   "hasOfferCatalog": {
     "@type": "OfferCatalog",
-    "name": "Digital Marketing Services",
+    "name": "CRM Solutions",
     "itemListElement": [
       {
         "@type": "OfferCatalog",
-        "name": "SEO Services in Dubai",
+        "name": "CRM Services",
         "itemListElement": [
           {
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Local SEO Dubai",
-              "description": "Local SEO services to help Dubai businesses rank higher in local search results"
+              "name": "CRM Implementation",
+              "description": "Complete CRM system implementation for businesses in Dubai"
             }
           },
           {
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Technical SEO Audit",
-              "description": "Comprehensive technical SEO audit and optimization for Dubai websites"
+              "name": "Cloud CRM Solutions",
+              "description": "Cloud-based CRM systems for scalable business operations"
+            }
+          }
+        ]
+      },
+      {
+        "@type": "OfferCatalog",
+        "name": "CRM Solutions",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "CRM Implementation",
+              "description": "Customer relationship management system setup and customization"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Sales Automation",
+              "description": "Automate your sales pipeline and improve customer engagement"
             }
           }
         ]
@@ -81,15 +103,13 @@ export const localBusinessSchema = {
     ]
   },
   "sameAs": [
-    "https://www.facebook.com/wethinkdigital",
-    "https://www.twitter.com/wethinkdigital",
-    "https://www.linkedin.com/company/wethinkdigital",
-    "https://www.instagram.com/wethinkdigital"
+    "https://www.facebook.com/ebusinessplus",
+    "https://www.linkedin.com/company/ebusinessplus"
   ],
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "4.9",
-    "reviewCount": "127",
+    "reviewCount": "50",
     "bestRating": "5",
     "worstRating": "1"
   }
@@ -99,16 +119,16 @@ export const localBusinessSchema = {
 export const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "@id": "https://www.wethinkdigital.solutions#organization",
-  "name": "WeThinkDigital",
-  "url": "https://www.wethinkdigital.solutions",
-  "logo": "https://www.wethinkdigital.solutions/wethinkdigital.ico",
-  "description": "Best digital marketing company in Dubai offering top-tier SEO services, web development, and digital marketing solutions for businesses in UAE.",
+  "@id": "https://www.ebusinessplus.ae#organization",
+  "name": "ebusiness+",
+  "url": "https://www.ebusinessplus.ae",
+  "logo": "https://www.ebusinessplus.ae/favicon.ico",
+  "description": "Leading CRM solutions provider in Dubai, helping businesses streamline customer relationships and boost productivity.",
   "foundingDate": "2020",
   "founders": [
     {
       "@type": "Person",
-      "name": "WeThinkDigital Founder"
+      "name": "ebusiness+ Founder"
     }
   ],
   "contactPoint": {
@@ -124,9 +144,8 @@ export const organizationSchema = {
     "addressCountry": "AE"
   },
   "sameAs": [
-    "https://www.facebook.com/wethinkdigital",
-    "https://www.twitter.com/wethinkdigital",
-    "https://www.linkedin.com/company/wethinkdigital"
+    "https://www.facebook.com/ebusinessplus",
+    "https://www.linkedin.com/company/ebusinessplus"
   ]
 };
 
@@ -134,10 +153,10 @@ export const organizationSchema = {
 export const professionalServiceSchema = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
-  "name": "WeThinkDigital - SEO Services Dubai",
-  "description": "Professional SEO services in Dubai providing comprehensive digital marketing solutions including search engine optimization, web development, and online marketing strategies.",
+  "name": "ebusiness+ - ERP & CRM Solutions Dubai",
+  "description": "Professional ERP and CRM solutions in Dubai providing comprehensive business management systems, automation, and integration services.",
   "provider": {
-    "@id": "https://www.wethinkdigital.solutions#organization"
+    "@id": "https://www.ebusinessplus.ae#organization"
   },
   "areaServed": {
     "@type": "City",
@@ -146,22 +165,30 @@ export const professionalServiceSchema = {
   },
   "hasOfferCatalog": {
     "@type": "OfferCatalog",
-    "name": "SEO and Digital Marketing Services",
+    "name": "ERP and CRM Services",
     "itemListElement": [
       {
         "@type": "Offer",
         "itemOffered": {
           "@type": "Service",
-          "name": "SEO Services Dubai",
-          "description": "Comprehensive SEO services to improve search engine rankings and drive organic traffic for Dubai businesses"
+          "name": "ERP Solutions Dubai",
+          "description": "Enterprise resource planning solutions to streamline business operations"
         }
       },
       {
         "@type": "Offer",
         "itemOffered": {
           "@type": "Service",
-          "name": "Digital Marketing Dubai",
-          "description": "Full-service digital marketing including PPC, social media marketing, content marketing, and online advertising"
+          "name": "CRM Solutions Dubai",
+          "description": "Customer relationship management systems to improve customer engagement and sales"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Business Automation",
+          "description": "Automate repetitive tasks and streamline business workflows"
         }
       }
     ]

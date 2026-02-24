@@ -9,7 +9,7 @@ export default function BlogLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#1e1e20]">
       <Navigation />
       <Breadcrumb />
       <div className="pt-0">

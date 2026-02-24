@@ -42,9 +42,9 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
         <div className="absolute inset-0 w-full h-full flex items-center justify-center"
           style={{
             background: `
-              radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 20% 80%, rgba(209, 213, 219, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(156, 163, 175, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(209, 213, 219, 0.1) 0%, transparent 50%),
               linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #cbd5e1 50%, #94a3b8 100%)
             `
           }}
@@ -56,29 +56,29 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
         <div className="relative z-10 flex items-center justify-center w-full h-full">
           <div className="text-center px-4 max-w-4xl mx-auto p-8 rounded-3xl"
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
+              background: 'rgba(24, 25, 26, 0.9)',
               backdropFilter: 'blur(20px) saturate(150%)',
               border: '1px solid rgba(0, 0, 0, 0.15)',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.8) inset'
             }}
           >
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="gradient-text">Build Tomorrow's</span>
+              <span className="gradient-text">CRM Solutions</span>
               <br />
-              <span className="text-gray-800">Digital Experiences Today</span>
+              <span className="text-gray-100">for Modern Business</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Full-stack development + growth marketing that scales from MVP to millions
+            <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto">
+              Streamline customer relationships, automate sales workflows, and boost productivity with our powerful CRM platform
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="btn-primary px-8 py-4 text-lg">
-                Start Your Project
+                Get a Demo
               </button>
               
               <button className="btn-secondary px-8 py-4 text-lg">
-                View Our Work
+                Our Services
               </button>
             </div>
           </div>
@@ -118,13 +118,13 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
           className="text-center px-4 max-w-4xl mx-auto"
         >
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            <span className="gradient-text">Build Tomorrow's</span>
+            <span className="gradient-text">CRM Solutions</span>
             <br />
-            <span className="text-white">Digital Experiences Today</span>
+            <span className="text-white">for Modern Business</span>
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            <span className="gradient-text">Full-stack development + growth marketing that scales from MVP to millions</span>
+            <span className="gradient-text">Streamline customer relationships, automate sales workflows, and boost productivity</span>
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -139,13 +139,13 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
               }}
               className="px-8 py-4 text-lg font-semibold text-white rounded-full transition-all duration-300"
               style={{
-                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.6) 100%)',
+                background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)'
+                border: '1px solid rgba(24, 25, 26, 0.2)',
+                boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
               }}
             >
-              Start Your Project
+              Get a Demo
             </motion.button>
             
             <motion.button
@@ -153,13 +153,13 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 text-lg font-semibold text-white rounded-full transition-all duration-300"
               style={{
-                background: 'rgba(255, 255, 255, 0.1)',
+                background: 'rgba(24, 25, 26, 0.1)',
                 backdropFilter: 'blur(15px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 10px 30px rgba(139, 92, 246, 0.2)'
+                border: '1px solid rgba(24, 25, 26, 0.2)',
+                boxShadow: '0 10px 30px rgba(209, 213, 219, 0.2)'
               }}
             >
-              View Our Work
+              Our Services
             </motion.button>
           </div>
         </motion.div>
