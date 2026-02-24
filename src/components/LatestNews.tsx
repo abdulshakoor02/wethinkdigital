@@ -99,30 +99,32 @@ export default function LatestNews() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="flex justify-between items-start mb-16"
+          className="mb-16"
         >
-          <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-              Latest news
-            </h2>
-            <p className="text-lg text-gray-600">
-              Stay informed! Explore our latest updates on tax laws, economic insights, and industry trends.
-            </p>
-          </div>
+          <div className="max-w-5xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="max-w-2xl">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                Latest news
+              </h2>
+              <p className="text-lg text-gray-600">
+                Stay informed! Explore our latest updates on tax laws, economic insights, and industry trends.
+              </p>
+            </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="hidden md:block"
-          >
-            <Link
-              href="/blog"
-              className="inline-flex items-center px-6 py-3 font-medium rounded-full transition-all duration-300 bg-[#1e1e20] text-gray-800 border border-gray-300 hover:bg-[#18191a] hover:shadow-lg"
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="hidden md:block"
             >
-              View all blogs
-            </Link>
-          </motion.div>
+              <Link
+                href="/blog"
+                className="inline-flex items-center px-6 py-3 font-medium rounded-full transition-all duration-300 bg-[#18191a] text-gray-800 border border-gray-300 hover:bg-[#252528] hover:shadow-lg"
+              >
+                View all blogs
+              </Link>
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* Masonry Grid Layout */}
@@ -190,14 +192,7 @@ export default function LatestNews() {
                 className="group cursor-pointer"
               >
                 <Link href={`/blog/${post.slug}`} className="block h-full">
-                  <div className="relative h-full rounded-2xl overflow-hidden transition-all duration-300"
-                    style={{
-                      background: 'rgba(24, 25, 26, 0.08)',
-                      backdropFilter: 'blur(15px) saturate(120%)',
-                      border: '1px solid rgba(24, 25, 26, 0.1)',
-                      boxShadow: '0 15px 35px rgba(209, 213, 219, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.06) inset'
-                    }}
-                  >
+                  <div className="relative h-full bg-[#1e1e20] rounded-2xl overflow-hidden transition-all duration-300 border border-gray-300 hover:shadow-xl hover:border-gray-400">
                     <div className="relative h-48 overflow-hidden">
                       <Image
                         src={post.image || ''}
@@ -247,13 +242,7 @@ export default function LatestNews() {
         >
           <Link
             href="/blog"
-            className="inline-flex items-center px-6 py-3 text-gray-800 font-medium rounded-full transition-all duration-300"
-            style={{
-              background: 'rgba(24, 25, 26, 0.12)',
-              backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(24, 25, 26, 0.2)',
-              boxShadow: '0 10px 20px rgba(209, 213, 219, 0.3)'
-            }}
+            className="inline-flex items-center px-6 py-3 font-medium rounded-full transition-all duration-300 bg-[#1e1e20] text-gray-800 border border-gray-300 hover:bg-[#252528] hover:shadow-lg"
           >
             View all blogs
           </Link>

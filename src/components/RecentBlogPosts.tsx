@@ -68,13 +68,15 @@ export default function RecentBlogPosts() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Latest Insights on SEO Services in Dubai</span>
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Stay ahead of the competition with expert insights from Dubai's leading digital marketing company. 
-            Learn how the best SEO services in Dubai can transform your business.
-          </p>
+          <div className="max-w-5xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="gradient-text">Latest Insights on SEO Services in Dubai</span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Stay ahead of the competition with expert insights from Dubai's leading digital marketing company.
+              Learn how the best SEO services in Dubai can transform your business.
+            </p>
+          </div>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -84,26 +86,26 @@ export default function RecentBlogPosts() {
               initial={{ opacity: 0, y: 50 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: index * 0.2 }}
-              className="bg-gray-800/50 rounded-xl p-6 hover:bg-gray-800/70 transition-all duration-300 border border-gray-700/50 hover:border-primary/50 group"
+              className="bg-[#1e1e20] rounded-xl p-6 hover:shadow-xl transition-all duration-300 border border-gray-300 hover:border-gray-400 group"
             >
               <Link href={`/blog/${post.slug}`} className="block">
                 <h3 className="text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors line-clamp-3">
                   {post.title}
                 </h3>
-                
+
                 <p className="text-gray-600 mb-4 line-clamp-3">
                   {post.excerpt}
                 </p>
-                
+
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <span>{new Date(post.date).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
+                  <span>{new Date(post.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
                   })}</span>
                   <span>{post.readTime}</span>
                 </div>
-                
+
                 <div className="flex items-center text-primary font-medium group-hover:text-primary/80 transition-colors">
                   <span>Read More</span>
                   <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +134,7 @@ export default function RecentBlogPosts() {
           </Link>
         </motion.div>
       </div>
-      
+
       {/* JSON-LD for Blog Section */}
       <script
         type="application/ld+json"

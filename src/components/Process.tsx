@@ -53,19 +53,21 @@ export default function Process() {
     <section id="process" className="py-24 relative overflow-hidden bg-[#18191a]">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#18191a] via-[#1e1e20] to-[#18191a]" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-6xl font-bold mb-6 text-gray-800">
-            🚀 Our Proven Process
-          </h2>
-          <p className="text-lg md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            From initial concept to market domination, our 5-step process ensures your success at every stage.
-          </p>
+          <div className="max-w-5xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-3xl md:text-6xl font-bold mb-6 text-gray-800">
+              🚀 Our Proven Process
+            </h2>
+            <p className="text-lg md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              From initial concept to market domination, our 5-step process ensures your success at every stage.
+            </p>
+          </div>
         </motion.div>
 
         <div ref={ref} className="relative">

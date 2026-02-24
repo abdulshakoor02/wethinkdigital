@@ -70,19 +70,21 @@ export default function CaseStudies() {
   return (
     <section id="case-studies" className="py-24 relative overflow-hidden bg-[#18191a]">
       <div className="absolute inset-0 bg-gradient-to-br from-[#18191a]/30 via-gray-900/20 to-[#18191a]/20" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-6xl font-bold mb-6 text-gray-800">
-            🏆 Don&apos;t Just Take My Word for It. Here&apos;s the Proof.
-          </h2>
-          <p className="text-lg md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            I get results. It&apos;s that simple. Here&apos;s a look at how I&apos;ve helped businesses just like yours dominate the market in Dubai and the UAE.
-          </p>
+          <div className="max-w-5xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-3xl md:text-6xl font-bold mb-6 md:mb-8 text-gray-800">
+              🏆 Don&apos;t Just Take My Word for It. Here&apos;s the Proof.
+            </h2>
+            <p className="text-lg md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              I get results. It&apos;s that simple. Here&apos;s a look at how I&apos;ve helped businesses just like yours dominate the market in Dubai and the UAE.
+            </p>
+          </div>
         </motion.div>
 
         {/* Case Study Navigation */}
@@ -193,13 +195,15 @@ export default function CaseStudies() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="text-center mt-16"
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 text-lg font-semibold text-white rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-xl transition-all duration-300"
-          >
-            Start Your Success Story
-          </motion.button>
+          <div className="max-w-2xl mx-auto p-6 md:p-8 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 text-lg font-semibold text-white rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-xl transition-all duration-300 w-full md:w-auto"
+            >
+              Start Your Success Story
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     </section>

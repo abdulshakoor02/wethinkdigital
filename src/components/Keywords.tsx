@@ -219,22 +219,22 @@ const KeywordTag: React.FC<KeywordTagProps> = ({ keyword, size, category, index,
     large: 'px-6 py-4 text-base font-semibold'
   };
 
-  const categoryColors = {
-    primary: 'rgba(59, 130, 246, 0.25)',
-    secondary: 'rgba(14, 165, 233, 0.2)',
-    lsi: 'rgba(156, 163, 175, 0.15)'
+  const categoryStyles = {
+    primary: 'border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]',
+    secondary: 'border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]',
+    lsi: 'border-gray-500/50 shadow-[0_0_10px_rgba(156,163,175,0.2)]'
+  };
+
+  const categoryHoverShadow = {
+    primary: '0 15px 30px rgba(59, 130, 246, 0.4)',
+    secondary: '0 15px 30px rgba(6, 182, 212, 0.4)',
+    lsi: '0 15px 30px rgba(156, 163, 175, 0.4)'
   };
 
   return (
     <motion.div
       ref={tagRef}
-      className={`relative rounded-full border border-gray-300/50 text-gray-100 text-center cursor-pointer select-none ${sizeStyles[size]}`}
-      style={{
-        background: `linear-gradient(135deg, ${categoryColors[category]}, rgba(30, 30, 32, 0.9))`,
-        backdropFilter: 'blur(8px) saturate(100%)',
-        WebkitBackdropFilter: 'blur(8px) saturate(100%)',
-        WebkitTransform: 'translateZ(0)'
-      }}
+      className={`relative rounded-full border bg-[#1e1e20] text-gray-800 text-center cursor-pointer select-none ${sizeStyles[size]} ${categoryStyles[category]}`}
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{
         opacity: isVisible ? 1 : 0,
@@ -249,8 +249,7 @@ const KeywordTag: React.FC<KeywordTagProps> = ({ keyword, size, category, index,
       whileHover={{
         scale: 1.1,
         y: -5,
-        boxShadow: `0 20px 40px ${categoryColors[category]}, 0 0 0 1px rgba(24, 25, 26, 0.2) inset`,
-        background: `linear-gradient(135deg, ${categoryColors[category].replace('0.15', '0.25').replace('0.12', '0.2').replace('0.1', '0.18')}, rgba(24, 25, 26, 0.6))`,
+        boxShadow: categoryHoverShadow[category],
         transition: { duration: 0.2 }
       }}
       whileTap={{ scale: 0.95 }}
@@ -278,11 +277,11 @@ const KeywordTag: React.FC<KeywordTagProps> = ({ keyword, size, category, index,
             <motion.div
               className="absolute inset-0 rounded-full"
               style={{
-                background: `radial-gradient(circle, ${categoryColors[category]} 0%, transparent 70%)`,
-                filter: 'blur(8px)'
+                background: 'rgba(255, 255, 255, 0.05)',
+                filter: 'blur(4px)'
               }}
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.8, scale: 1.2 }}
+              animate={{ opacity: 1, scale: 1.1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.3 }}
             />
@@ -451,12 +450,14 @@ export default function Keywords() {
           className="mb-20"
         >
           <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-4xl font-bold mb-6 text-gray-800">
-              My Approach to Digital Marketing Strategy
-            </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              I don&apos;t do fluff. I don&apos;t do vanity metrics. I build systems that get you more customers and make you more money.
-            </p>
+            <div className="max-w-4xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+              <h2 className="text-2xl md:text-4xl font-bold mb-6 text-gray-800">
+                My Approach to Digital Marketing Strategy
+              </h2>
+              <p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                I don&apos;t do fluff. I don&apos;t do vanity metrics. I build systems that get you more customers and make you more money.
+              </p>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -512,10 +513,12 @@ export default function Keywords() {
           className="mb-16"
         >
           <div className="text-center mb-12">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">
-              🏷️ Our Expertise Tags
-            </h3>
-            <p className="text-gray-600">Interactive keyword cloud showcasing our CRM capabilities</p>
+            <div className="max-w-4xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">
+                🏷️ Our Expertise Tags
+              </h3>
+              <p className="text-gray-600">Interactive keyword cloud showcasing our CRM capabilities</p>
+            </div>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8">

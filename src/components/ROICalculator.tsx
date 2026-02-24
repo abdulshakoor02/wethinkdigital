@@ -52,19 +52,21 @@ export default function ROICalculator() {
     <section id="calculator" className="py-24 relative overflow-hidden bg-[#18191a]">
       {/* Glassmorphism Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#18191a]/30 via-gray-50/20 to-[#18191a]/20" />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-6xl font-bold mb-6 text-gray-800">
-            📊 Calculate Your Potential ROI
-          </h2>
-          <p className="text-lg md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            See exactly how much revenue we can help you generate with data-driven improvements.
-          </p>
+          <div className="max-w-4xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-3xl md:text-6xl font-bold mb-6 text-gray-800">
+              📊 Calculate Your Potential ROI
+            </h2>
+            <p className="text-lg md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              See exactly how much revenue we can help you generate with data-driven improvements.
+            </p>
+          </div>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12 items-start">

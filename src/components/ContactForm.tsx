@@ -71,35 +71,24 @@ export default function ContactForm() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <div className="inline-block px-4 py-2 rounded-full text-sm font-medium text-gray-700 mb-6"
-            style={{
-              background: 'rgba(24, 25, 26, 0.12)',
-              backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(24, 25, 26, 0.2)',
-              boxShadow: '0 10px 20px rgba(209, 213, 219, 0.3)'
-            }}
-          >
-            Contact Us
+          <div className="max-w-5xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <div className="inline-block px-4 py-2 rounded-full text-sm font-medium mb-6 bg-[#18191a] text-gray-800 border border-gray-300">
+              Contact Us
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+              Let&apos;s Build Your Empire
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              You&apos;ve see the proof.You know what we can do.Now it&apos;s your turn.
+            </p>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
-            Let&apos;s Build Your Empire
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            You&apos;ve see the proof.You know what we can do.Now it&apos;s your turn.
-          </p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="rounded-3xl shadow-2xl p-8 md:p-12"
-          style={{
-            background: 'rgba(24, 25, 26, 0.9)',
-            backdropFilter: 'blur(20px) saturate(150%)',
-            border: '1px solid rgba(0, 0, 0, 0.1)',
-            boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
-          }}
+          className="rounded-3xl shadow-2xl p-8 md:p-12 bg-[#1e1e20] border border-gray-300"
         >
           {submitSuccess ? (
             <div className="text-center py-12">
@@ -111,13 +100,7 @@ export default function ContactForm() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setSubmitSuccess(false)}
-                className="px-6 py-3 font-semibold text-white rounded-full transition-all duration-300"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(24, 25, 26, 0.2)',
-                  boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
-                }}
+                className="px-6 py-3 font-semibold text-white rounded-full transition-all duration-300 bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-xl"
               >
                 Send Another Message
               </motion.button>
@@ -213,13 +196,7 @@ export default function ContactForm() {
                   disabled={isSubmitting}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="px-12 py-4 rounded-full font-semibold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-white"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(24, 25, 26, 0.2)',
-                    boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
-                  }}
+                  className="px-12 py-4 rounded-full font-semibold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-xl"
                 >
                   {isSubmitting ? 'Submiting...' : 'Submit'}
                 </motion.button>
@@ -235,63 +212,24 @@ export default function ContactForm() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mt-16 grid md:grid-cols-3 gap-8 text-center"
         >
-          <div className="rounded-2xl p-8 transition-all duration-300"
-            style={{
-              background: 'rgba(24, 25, 26, 0.8)',
-              backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
-            }}
-          >
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl"
-              style={{
-                background: 'rgba(24, 25, 26, 0.9)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(0, 0, 0, 0.1)'
-              }}
-            >
+          <div className="rounded-2xl p-8 transition-all duration-300 bg-[#1e1e20] border border-gray-300 shadow-lg hover:shadow-xl">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl bg-[#18191a] border border-gray-300">
               📧
             </div>
             <h3 className="text-xl font-bold mb-2 text-gray-800">Email Us</h3>
             <p className="text-gray-600">info@ebusinessplus.ae</p>
           </div>
 
-          <div className="rounded-2xl p-8 transition-all duration-300"
-            style={{
-              background: 'rgba(24, 25, 26, 0.8)',
-              backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
-            }}
-          >
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl"
-              style={{
-                background: 'rgba(24, 25, 26, 0.9)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(0, 0, 0, 0.1)'
-              }}
-            >
+          <div className="rounded-2xl p-8 transition-all duration-300 bg-[#1e1e20] border border-gray-300 shadow-lg hover:shadow-xl">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl bg-[#18191a] border border-gray-300">
               📱
             </div>
             <h3 className="text-xl font-bold mb-2 text-gray-800">Call Us</h3>
             <p className="text-gray-600">+971 (564) 713-394</p>
           </div>
 
-          <div className="rounded-2xl p-8 transition-all duration-300"
-            style={{
-              background: 'rgba(24, 25, 26, 0.8)',
-              backdropFilter: 'blur(15px) saturate(120%)',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
-            }}
-          >
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl"
-              style={{
-                background: 'rgba(24, 25, 26, 0.9)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(0, 0, 0, 0.1)'
-              }}
-            >
+          <div className="rounded-2xl p-8 transition-all duration-300 bg-[#1e1e20] border border-gray-300 shadow-lg hover:shadow-xl">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl bg-[#18191a] border border-gray-300">
               📍
             </div>
             <h3 className="text-xl font-bold mb-2 text-gray-800">Visit Us</h3>
