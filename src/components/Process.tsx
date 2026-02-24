@@ -50,18 +50,9 @@ export default function Process() {
   const ref = useRef(null);
 
   return (
-    <section id="process" className="py-24 relative overflow-hidden"
-      style={{
-        background: `
-          radial-gradient(circle at 30% 80%, rgba(209, 213, 219, 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 70% 20%, rgba(156, 163, 175, 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 50% 50%, rgba(209, 213, 219, 0.06) 0%, transparent 50%),
-          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
-        `
-      }}
-    >
-      {/* Glassmorphism Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#18191a]/30 via-gray-50/20 to-[#18191a]/20" />
+    <section id="process" className="py-24 relative overflow-hidden bg-[#18191a]">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#18191a] via-[#1e1e20] to-[#18191a]" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -69,17 +60,17 @@ export default function Process() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-100">
-            Our Proven Process
+          <h2 className="text-3xl md:text-6xl font-bold mb-6 text-gray-800">
+            🚀 Our Proven Process
           </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+          <p className="text-lg md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             From initial concept to market domination, our 5-step process ensures your success at every stage.
           </p>
         </motion.div>
 
         <div ref={ref} className="relative">
           {/* Timeline Line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-primary to-secondary hidden md:block" />
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 hidden md:block opacity-50" />
 
           {processSteps.map((step, index) => (
             <motion.div
@@ -93,29 +84,22 @@ export default function Process() {
               {/* Content */}
               <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
                 }`}>
-                <div className="rounded-xl p-8 hover:shadow-2xl transition-all duration-300"
-                  style={{
-                    background: 'rgba(24, 25, 26, 0.9)',
-                    backdropFilter: 'blur(20px) saturate(150%)',
-                    border: '1px solid rgba(0, 0, 0, 0.1)',
-                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
-                  }}
-                >
+                <div className="rounded-xl p-8 hover:shadow-2xl transition-all duration-300 bg-[#1e1e20] border border-gray-300">
                   <div className="flex items-center mb-4">
-                    <div className="text-4xl mr-4">{step.icon}</div>
+                    <div className="text-4xl mr-4 bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">{step.icon}</div>
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-100">{step.title}</h3>
-                      <p className="text-sm text-primary font-semibold">{step.duration}</p>
+                      <h3 className="text-2xl font-bold text-gray-800">{step.title}</h3>
+                      <p className="text-sm bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent font-semibold">{step.duration}</p>
                     </div>
                   </div>
 
-                  <p className="text-gray-400 mb-4">{step.description}</p>
+                  <p className="text-gray-600 mb-4">{step.description}</p>
 
                   <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-gray-100">Key Deliverables:</h4>
+                    <h4 className="text-sm font-semibold text-gray-800">Key Deliverables:</h4>
                     {step.deliverables.map((deliverable) => (
-                        <div key={deliverable} className="flex items-center text-sm text-gray-400">
-                        <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>
+                      <div key={deliverable} className="flex items-center text-sm text-gray-600">
+                        <span className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mr-2"></span>
                         {deliverable}
                       </div>
                     ))}
@@ -124,14 +108,14 @@ export default function Process() {
               </div>
 
               {/* Timeline Circle */}
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xl z-10 hidden md:flex"
+              <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-xl z-10 hidden md:flex shadow-lg"
               >
                 {step.id}
               </div>
 
               {/* Mobile Timeline */}
-              <div className="md:hidden absolute left-4 top-0 w-1 h-full bg-gradient-to-b from-primary to-secondary" />
-              <div className="md:hidden absolute left-0 w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-sm"
+              <div className="md:hidden absolute left-4 top-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 opacity-50" />
+              <div className="md:hidden absolute left-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md"
               >
                 {step.id}
               </div>
@@ -146,30 +130,26 @@ export default function Process() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="text-center mt-16"
         >
-          <h3 className="text-3xl font-bold mb-6 text-gray-100">Ready to Start Your Journey?</h3>
-          <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-            Let&apos;s discuss how we can apply our proven process to transform your business.
-          </p>
+          <div className="max-w-3xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-300">
+            <h3 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Ready to Start Your Journey?</h3>
+            <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
+              Let&apos;s discuss how we can apply our proven process to transform your business.
+            </p>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 text-lg font-semibold text-white rounded-full transition-all duration-300"
-            style={{
-              background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(24, 25, 26, 0.2)',
-              boxShadow: '0 10px 30px rgba(209, 213, 219, 0.4)'
-            }}
-            onClick={() => {
-              const contactElement = document.getElementById('contact');
-              if (contactElement) {
-                contactElement.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-          >
-            Book Your Discovery Call
-          </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 text-lg font-semibold text-white rounded-full transition-all duration-300 bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg"
+              onClick={() => {
+                const contactElement = document.getElementById('contact');
+                if (contactElement) {
+                  contactElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
+              Book Your Discovery Call
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     </section>

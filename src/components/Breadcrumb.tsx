@@ -68,7 +68,7 @@ export default function Breadcrumb({ pageTitle }: BreadcrumbProps) {
     <>
       <nav 
         aria-label="Breadcrumb" 
-        className="pt-20 pb-4 bg-background border-b border-gray-800/50"
+        className="pt-20 pb-4 bg-background border-b border-gray-200/50"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ol 
@@ -102,7 +102,7 @@ export default function Breadcrumb({ pageTitle }: BreadcrumbProps) {
                 {index === breadcrumbs.length - 1 ? (
                   // Current page - not clickable
                   <span 
-                    className="text-gray-400 font-medium"
+                    className="text-gray-600 font-medium"
                     itemProp="name"
                     aria-current="page"
                   >

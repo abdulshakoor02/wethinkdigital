@@ -29,11 +29,11 @@ const FloatingParticles: React.FC = () => {
         y: Math.random() * 100,
         size: Math.random() * (i < 6 ? 4 : i < 12 ? 25 : 120) + (i < 6 ? 2 : i < 12 ? 15 : 80),
         color: [
-          'rgba(209, 213, 219, 0.25)',
-          'rgba(156, 163, 175, 0.2)', 
-          'rgba(59, 130, 246, 0.2)',
           'rgba(209, 213, 219, 0.15)',
-          'rgba(14, 165, 233, 0.1)'
+          'rgba(156, 163, 175, 0.1)',
+          'rgba(59, 130, 246, 0.15)',
+          'rgba(209, 213, 219, 0.1)',
+          'rgba(14, 165, 233, 0.08)'
         ][Math.floor(Math.random() * 5)],
         speed: Math.random() * 0.3 + 0.1,
         opacity: Math.random() * 0.25 + 0.05,
@@ -53,8 +53,8 @@ const FloatingParticles: React.FC = () => {
           style={{
             width: particle.size,
             height: particle.size,
-            background: particle.type === 'dot' 
-              ? 'rgba(24, 25, 26, 0.2)'
+            background: particle.type === 'dot'
+              ? 'rgba(209, 213, 219, 0.08)'
               : `radial-gradient(circle, ${particle.color} 0%, transparent 70%)`,
             filter: particle.type !== 'dot' ? 'blur(1px)' : 'none',
             left: `${particle.x}%`,
@@ -156,14 +156,14 @@ interface CategorySidebarProps {
   className?: string;
 }
 
-const CategorySidebar: React.FC<CategorySidebarProps> = ({ 
-  categories, 
-  activeCategory, 
+const CategorySidebar: React.FC<CategorySidebarProps> = ({
+  categories,
+  activeCategory,
   onCategoryChange,
   className = ""
 }) => {
   return (
-    <motion.div 
+    <motion.div
       className={`space-y-4 ${className}`}
       initial={{ opacity: 0, x: -30 }}
       animate={{ opacity: 1, x: 0 }}
@@ -172,31 +172,19 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
       {categories.map((category, index) => {
         const isActive = activeCategory === category.id;
         const faqCount = faqData.filter(faq => faq.category === category.id).length;
-        
+
         return (
           <motion.button
             key={category.id}
             onClick={() => onCategoryChange(category.id)}
-            className={`w-full text-left p-6 rounded-2xl transition-all duration-300 relative overflow-hidden group ${
-              isActive ? 'text-white' : 'text-gray-200 hover:text-gray-50'
-            }`}
-            style={{
-              background: isActive 
-                ? 'rgba(209, 213, 219, 0.15)' 
-                : 'rgba(24, 25, 26, 0.06)',
-              backdropFilter: 'blur(20px) saturate(140%)',
-              border: isActive 
-                ? '2px solid rgba(209, 213, 219, 0.3)' 
-                : '1px solid rgba(24, 25, 26, 0.1)',
-              boxShadow: isActive 
-                ? '0 0 25px rgba(209, 213, 219, 0.4), 0 0 0 1px rgba(24, 25, 26, 0.1) inset'
-                : '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.04) inset'
-            }}
-            whileHover={!isActive ? {
-              background: 'rgba(24, 25, 26, 0.08)',
+            className={`w-full text-left p-6 rounded-2xl transition-all duration-300 border ${isActive
+              ? 'bg-[#1e1e20] text-gray-800 border-gray-300 shadow-lg'
+              : 'bg-[#1e1e20] text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-[#252528]'
+              }`}
+            whileHover={{
               scale: 1.02,
               transition: { duration: 0.2 }
-            } : {}}
+            }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -206,27 +194,19 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
                 <span className="text-2xl mr-3">{category.icon}</span>
                 <span className="font-semibold text-lg">{category.name}</span>
               </div>
-              <p className="text-sm opacity-90 mb-1 text-gray-400">{category.description}</p>
-              <span className="text-xs opacity-80 text-gray-400">{faqCount} questions</span>
+              <p className="text-sm mb-1 text-gray-600">{category.description}</p>
+              <span className="text-xs text-gray-500">{faqCount} questions</span>
             </div>
-            
+
             {/* Active indicator */}
             {isActive && (
               <motion.div
-                className="absolute right-4 top-1/2 w-1 h-8 rounded-full"
-                style={{ background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%)' }}
+                className="absolute right-4 top-1/2 w-1 h-8 rounded-full bg-gradient-to-b from-gray-300 to-gray-500"
                 initial={{ scale: 0, y: '-50%' }}
                 animate={{ scale: 1, y: '-50%' }}
                 transition={{ type: "spring", stiffness: 300 }}
               />
             )}
-            
-            {/* Hover glow effect */}
-            <div className={`absolute inset-0 rounded-2xl transition-opacity duration-300 ${
-              isActive ? 'opacity-20' : 'opacity-0 group-hover:opacity-10'
-            }`}
-                 style={{ background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.3) 0%, rgba(156, 163, 175, 0.2) 100%)' }}
-            />
           </motion.button>
         );
       })}
@@ -241,9 +221,9 @@ interface FAQAccordionProps {
   className?: string;
 }
 
-const FAQAccordion: React.FC<FAQAccordionProps> = ({ 
-  faqs, 
-  openItems, 
+const FAQAccordion: React.FC<FAQAccordionProps> = ({
+  faqs,
+  openItems,
   onToggle,
   className = ""
 }) => {
@@ -252,31 +232,19 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
       <AnimatePresence mode="popLayout">
         {faqs.map((item, index) => {
           const isOpen = openItems.has(item.id);
-          
+
           return (
             <motion.div
               key={item.id}
               layout
-              className="relative overflow-hidden rounded-2xl group cursor-pointer"
-              style={{
-                background: isOpen 
-                  ? 'rgba(24, 25, 26, 0.12)' 
-                  : 'rgba(24, 25, 26, 0.08)',
-                backdropFilter: isOpen 
-                  ? 'blur(18px) saturate(140%)' 
-                  : 'blur(15px) saturate(120%)',
-                border: isOpen 
-                  ? '1px solid rgba(24, 25, 26, 0.15)' 
-                  : '1px solid rgba(24, 25, 26, 0.1)',
-                boxShadow: isOpen
-                  ? '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.08) inset'
-                  : '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.04) inset'
-              }}
+              className={`relative overflow-hidden rounded-2xl group cursor-pointer border ${isOpen
+                ? 'bg-[#1e1e20] border-gray-300 shadow-lg'
+                : 'bg-[#1e1e20] border-gray-200 hover:border-gray-300'
+                }`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{
-                background: 'rgba(24, 25, 26, 0.1)',
                 scale: 1.01,
                 transition: { duration: 0.2 }
               }}
@@ -289,26 +257,21 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                 aria-controls={`faq-answer-${item.id}`}
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-100 pr-4 leading-relaxed">
+                  <h3 className="text-lg font-semibold text-gray-800 pr-4 leading-relaxed">
                     {item.question}
                   </h3>
                   <motion.div
                     animate={{ rotate: isOpen ? 45 : 0 }}
                     transition={{ duration: 0.3 }}
-                    className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{
-                      background: 'rgba(209, 213, 219, 0.2)',
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(24, 25, 26, 0.2)'
-                    }}
+                    className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-r from-gray-300 to-gray-500 border border-gray-400"
                   >
-                    <span className="text-gray-100 font-bold text-lg">
+                    <span className="text-white font-bold text-lg">
                       {isOpen ? '−' : '+'}
                     </span>
                   </motion.div>
                 </div>
               </motion.button>
-              
+
               {/* Answer Content */}
               <AnimatePresence>
                 {isOpen && (
@@ -326,15 +289,8 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.1 }}
                     >
-                      <div 
-                        className="p-4 rounded-xl"
-                        style={{
-                          background: 'rgba(24, 25, 26, 0.6)',
-                          backdropFilter: 'blur(8px)',
-                          border: '1px solid rgba(0, 0, 0, 0.05)'
-                        }}
-                      >
-                        <p className="text-gray-100 leading-relaxed">
+                      <div className="p-4 rounded-xl bg-[#18191a] border border-gray-300">
+                        <p className="text-gray-600 leading-relaxed">
                           {item.answer}
                         </p>
                       </div>
@@ -351,7 +307,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
 };
 
 export default function FAQ() {
-  const [activeCategory, setActiveCategory] = useState('seo');
+  const [activeCategory, setActiveCategory] = useState('crm');
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
@@ -374,28 +330,12 @@ export default function FAQ() {
   const filteredFAQs = faqData.filter(faq => faq.category === activeCategory);
 
   return (
-    <section 
-      className="relative min-h-screen py-24 overflow-hidden" 
+    <section
+      className="relative min-h-screen py-24 overflow-hidden bg-[#18191a]"
       ref={ref}
-      style={{
-        background: `
-          radial-gradient(circle at 30% 80%, rgba(120, 119, 198, 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 70% 20%, rgba(255, 119, 198, 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
-          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
-        `
-      }}
     >
       {/* Floating Particles Background */}
       <FloatingParticles />
-
-      {/* Noise Overlay */}
-      <div 
-        className="absolute inset-0 opacity-5 pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='7' r='1'/%3E%3Ccircle cx='47' cy='7' r='1'/%3E%3Ccircle cx='7' cy='27' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='27' r='1'/%3E%3Ccircle cx='7' cy='47' r='1'/%3E%3Ccircle cx='27' cy='47' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}
-      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Floating Header Card */}
@@ -405,19 +345,11 @@ export default function FAQ() {
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
-          <div 
-            className="relative max-w-4xl mx-auto p-12 rounded-3xl"
-            style={{
-              background: 'rgba(24, 25, 26, 0.9)',
-              backdropFilter: 'blur(25px) saturate(200%)',
-              border: '2px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 25px 45px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(24, 25, 26, 0.9) inset'
-            }}
-          >
-            <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gray-100">
+          <div className="max-w-4xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 text-gray-800">
               ❓ Frequently Asked Questions
             </h2>
-            <p className="text-xl md:text-2xl text-gray-400 leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
               Get answers about our digital marketing services and SEO solutions from industry experts
             </p>
           </div>
@@ -459,18 +391,10 @@ export default function FAQ() {
               <button
                 key={category.id}
                 onClick={() => handleCategoryChange(category.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                  activeCategory === category.id ? 'text-white' : 'text-gray-200'
-                }`}
-                style={{
-                  background: activeCategory === category.id 
-                    ? 'rgba(209, 213, 219, 0.3)' 
-                    : 'rgba(24, 25, 26, 0.08)',
-                  backdropFilter: 'blur(15px)',
-                  border: activeCategory === category.id 
-                    ? '1px solid rgba(209, 213, 219, 0.4)' 
-                    : '1px solid rgba(24, 25, 26, 0.1)'
-                }}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 border ${activeCategory === category.id
+                  ? 'bg-[#1e1e20] text-gray-800 border-gray-300'
+                  : 'bg-[#1e1e20] text-gray-600 border-gray-200'
+                  }`}
               >
                 <span className="mr-2">{category.icon}</span>
                 {category.name}
@@ -479,27 +403,19 @@ export default function FAQ() {
           </div>
         </div>
 
-        {/* Floating CTA Glass Card */}
+        {/* CTA Section */}
         <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.8 }}
         >
-          <div
-            className="max-w-2xl mx-auto p-8 rounded-3xl"
-            style={{
-              background: 'rgba(209, 213, 219, 0.15)',
-              backdropFilter: 'blur(30px) saturate(180%)',
-              border: '2px solid rgba(209, 213, 219, 0.25)',
-              boxShadow: '0 30px 60px rgba(209, 213, 219, 0.2), 0 0 0 1px rgba(24, 25, 26, 0.1) inset'
-            }}
-          >
-            <p className="text-gray-200 mb-6 text-lg">
+          <div className="max-w-2xl mx-auto p-6 md:p-8 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <p className="text-gray-600 mb-6 text-lg">
               Still have questions about our SEO services in Dubai?
             </p>
             <motion.button
-              className="text-2xl md:text-3xl font-bold text-gray-100 mb-4 w-full"
+              className="text-2xl md:text-3xl font-bold mb-4 w-full text-gray-800 hover:text-gray-700 transition-all"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
@@ -511,7 +427,7 @@ export default function FAQ() {
             >
               🚀 Get Your Free Consultation
             </motion.button>
-            <p className="text-gray-200 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed">
               Let's talk about how we can help you dominate your market with proven digital strategies.
             </p>
           </div>

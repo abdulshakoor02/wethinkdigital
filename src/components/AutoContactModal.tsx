@@ -92,21 +92,21 @@ export default function AutoContactModal() {
                         {/* Close Button */}
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="absolute top-4 right-4 p-2 rounded-full bg-[#27272a] hover:bg-gray-200 transition-colors z-10"
+                            className="absolute top-4 right-4 p-2 rounded-full bg-[#27272a] hover:bg-gray-600 transition-colors z-10"
                         >
-                            <FiX className="w-6 h-6 text-gray-400" />
+                            <FiX className="w-6 h-6 text-gray-300" />
                         </button>
 
                         <div className="p-8 md:p-10">
                             <div className="text-center mb-8">
-                                <h2 className="text-3xl font-bold text-gray-100 mb-2">Let's Discuss Your Project</h2>
+                                <h2 className="text-3xl font-bold text-gray-200 mb-2">Let's Discuss Your Project</h2>
                                 <p className="text-gray-400">Fill out the form below and we'll get back to you shortly.</p>
                             </div>
 
                             {submitSuccess ? (
                                 <div className="text-center py-12">
                                     <div className="text-6xl mb-4">🎉</div>
-                                    <h3 className="text-2xl font-bold mb-4 text-gray-100">Thank You!</h3>
+                                    <h3 className="text-2xl font-bold mb-4 text-gray-200">Thank You!</h3>
                                     <p className="text-gray-400">
                                         Your message has been sent successfully. We'll be in touch soon.
                                     </p>
@@ -118,7 +118,7 @@ export default function AutoContactModal() {
                                             <input
                                                 type="text"
                                                 {...register('name', { required: 'Name is required' })}
-                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-800 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-800 transition-all"
+                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-600 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-500 transition-all"
                                                 placeholder="Full Name"
                                             />
                                             {errors.name && <span className="text-red-400 text-xs mt-1 block">{errors.name.message}</span>}
@@ -128,7 +128,7 @@ export default function AutoContactModal() {
                                             <input
                                                 type="email"
                                                 {...register('email', { required: 'Email is required' })}
-                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-800 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-800 transition-all"
+                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-600 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-500 transition-all"
                                                 placeholder="Email Address"
                                             />
                                             {errors.email && <span className="text-red-400 text-xs mt-1 block">{errors.email.message}</span>}
@@ -138,7 +138,7 @@ export default function AutoContactModal() {
                                             <input
                                                 type="text"
                                                 {...register('company', { required: 'Company Name is required' })}
-                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-800 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-800 transition-all"
+                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-600 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-500 transition-all"
                                                 placeholder="Company Name"
                                             />
                                             {errors.company && <span className="text-red-400 text-xs mt-1 block">{errors.company.message}</span>}
@@ -148,7 +148,7 @@ export default function AutoContactModal() {
                                             <input
                                                 type="text"
                                                 {...register('phone', { required: 'Phone is required' })}
-                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-800 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-800 transition-all"
+                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-600 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-500 transition-all"
                                                 placeholder="Phone Number"
                                             />
                                             {errors.phone && <span className="text-red-400 text-xs mt-1 block">{errors.phone.message}</span>}
@@ -157,7 +157,7 @@ export default function AutoContactModal() {
                                         <div>
                                             <select
                                                 {...register('projectType', { required: 'Project type is required' })}
-                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-800 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-800 transition-all"
+                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-600 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-500 transition-all"
                                                 defaultValue=""
                                             >
                                                 <option value="">Select Project Type</option>
@@ -174,7 +174,7 @@ export default function AutoContactModal() {
                                         <div>
                                             <select
                                                 {...register('budget', { required: 'Budget is required' })}
-                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-800 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-800 transition-all"
+                                                className="w-full px-4 py-3 bg-[#18191a] border border-gray-600 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-500 transition-all"
                                                 defaultValue=""
                                             >
                                                 <option value="">Select Budget Range</option>
@@ -191,7 +191,7 @@ export default function AutoContactModal() {
                                         <textarea
                                             {...register('message', { required: 'Project Details are required' })}
                                             rows={4}
-                                            className="w-full px-4 py-3 bg-[#18191a] border border-gray-800 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-800 transition-all resize-none"
+                                            className="w-full px-4 py-3 bg-[#18191a] border border-gray-600 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-500 transition-all resize-none"
                                             placeholder="Tell us about your project..."
                                         />
                                         {errors.message && <span className="text-red-400 text-xs mt-1 block">{errors.message.message}</span>}

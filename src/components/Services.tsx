@@ -198,12 +198,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, isMobile = false }) 
       </div>
 
       {/* Title */}
-      <h3 className="text-xl md:text-2xl font-bold mb-4 text-gray-100 leading-tight">
+      <h3 className="text-xl md:text-2xl font-bold mb-4 text-gray-800 leading-tight">
         {service.title}
       </h3>
 
       {/* Description */}
-      <p className="text-gray-400 mb-6 text-sm md:text-base leading-relaxed">
+      <p className="text-gray-600 mb-6 text-sm md:text-base leading-relaxed">
         {service.description}
       </p>
 
@@ -214,10 +214,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, isMobile = false }) 
 
       {/* Key Features */}
       <div className="mb-6">
-        <h4 className="text-gray-100 font-semibold mb-3">✨ What You Get:</h4>
+        <h4 className="text-gray-800 font-semibold mb-3">✨ What You Get:</h4>
         <ul className="space-y-2">
           {service.features.slice(0, 4).map((feature, i) => (
-            <li key={feature} className="flex items-center text-gray-400 text-sm">
+            <li key={feature} className="flex items-center text-gray-600 text-sm">
               <FaCheck className="text-xs mr-3 text-green-500" />
               {feature}
             </li>
@@ -230,7 +230,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, isMobile = false }) 
         <p className={`font-bold bg-gradient-to-r ${service.color} bg-clip-text text-transparent`}>
           📊 {service.stats.roi}
         </p>
-        <p className="text-gray-400 text-xs mt-1">
+        <p className="text-gray-600 text-xs mt-1">
           {service.stats.projects} • ⭐ {service.stats.rating}/5 ({service.stats.reviews} reviews)
         </p>
       </div>
@@ -238,7 +238,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, isMobile = false }) 
       {/* Package Selection (Desktop only) */}
       {!isMobile && (
         <div className="mb-6">
-          <h4 className="text-gray-100 font-semibold mb-3">💼 Choose Your Package:</h4>
+          <h4 className="text-gray-800 font-semibold mb-3">💼 Choose Your Package:</h4>
           <div className="grid grid-cols-3 gap-2">
             {service.packages.map((pkg) => (
               <button
@@ -247,7 +247,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, isMobile = false }) 
                 className={`p-2 rounded-lg text-xs font-semibold transition-all duration-300 ${
                   selectedPackage === pkg.name
                     ? `bg-gradient-to-r ${service.color} text-white`
-                    : 'border border-gray-300 text-gray-400 hover:bg-[#18191a]'
+                    : 'border border-gray-300 text-gray-600 hover:bg-[#18191a]'
                 } ${pkg.popular ? 'ring-2 ring-white/30' : ''}`}
               >
                 <div>{pkg.name}</div>
@@ -260,13 +260,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, isMobile = false }) 
 
       {/* Testimonial */}
       <div className="mb-6 p-3 bg-[#18191a] rounded-lg">
-        <p className="text-gray-400 text-xs italic mb-1">&ldquo;{service.testimonial.text}&rdquo;</p>
+        <p className="text-gray-600 text-xs italic mb-1">&ldquo;{service.testimonial.text}&rdquo;</p>
         <p className="text-gray-500 text-xs">- {service.testimonial.author}</p>
       </div>
 
       {/* Perfect For */}
       <div className="mb-6">
-        <p className="text-gray-400 text-xs">
+        <p className="text-gray-600 text-xs">
           🎯 Perfect for: {service.perfectFor.join(', ')}
         </p>
       </div>
@@ -276,7 +276,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, isMobile = false }) 
         <button className={`flex-1 py-3 rounded-xl bg-gradient-to-r ${service.color} text-white font-semibold text-sm hover:shadow-lg transition-all duration-300 flex items-center justify-center`}>
           <FaPhone className="mr-2" /> Quick Call
         </button>
-        <button className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-400 font-semibold text-sm hover:bg-[#18191a] transition-all duration-300 flex items-center justify-center">
+        <button className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-semibold text-sm hover:bg-[#18191a] transition-all duration-300 flex items-center justify-center">
           <FaEnvelope className="mr-2" /> Proposal
         </button>
       </div>
@@ -305,11 +305,11 @@ export default function Services() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-20">
-          <div className="max-w-5xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-800">
-            <h2 className="text-3xl md:text-6xl font-bold mb-6 md:mb-8 text-gray-100">
+          <div className="max-w-5xl mx-auto p-8 md:p-12 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-3xl md:text-6xl font-bold mb-6 md:mb-8 text-gray-800">
               🚀 Transform Your Business with Powerful CRM Solutions
             </h2>
-            <p className="text-lg md:text-2xl text-gray-400 leading-relaxed">
+            <p className="text-lg md:text-2xl text-gray-600 leading-relaxed">
               We help businesses streamline customer relationships, automate sales workflows, and boost productivity with our integrated CRM platform tailored to your needs.
             </p>
           </div>
@@ -326,11 +326,11 @@ export default function Services() {
 
         {/* CTA Section */}
         <div className="text-center mt-16 md:mt-20">
-          <div className="max-w-2xl mx-auto p-6 md:p-8 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-800">
-            <button className="text-2xl md:text-3xl font-bold text-gray-100 mb-4 md:mb-6 w-full hover:text-gray-200 transition-colors">
+          <div className="max-w-2xl mx-auto p-6 md:p-8 bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-200">
+            <button className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6 w-full hover:text-gray-700 transition-colors">
               📊 Get Your Free CRM Consultation
             </button>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed">
               Ready to streamline your customer relationships? Let&apos;s discuss how our CRM solutions can transform your business efficiency.
             </p>
           </div>

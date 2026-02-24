@@ -150,7 +150,7 @@ const mockPosts: BlogPost[] = [
     image: '/blog/seo-services-dubai.jpg',
     content: `
       <h2>Most SEO Services in Dubai Are a Waste of Money</h2>
-      <p>If you've ever purchased <a href="/#services" class="text-gray-400 hover:underline">SEO services in Dubai</a>, you know the drill:</p>
+      <p>If you've ever purchased <a href="/#services" class="text-gray-600 hover:underline">SEO services in Dubai</a>, you know the drill:</p>
       <ul>
         <li>Monthly reports filled with meaningless metrics</li>
         <li>Promises of #1 rankings for keywords no one searches for</li>
@@ -234,7 +234,7 @@ const mockPosts: BlogPost[] = [
       
       <h2>Your Next Step</h2>
       <p>Dubai's SEO landscape is crowded with agencies offering similar services. The difference is in execution and focus. If you're looking for SEO services that actually drive business results, you need a partner that thinks like a business owner, not just an SEO technician.</p>
-      <p>Ready to grow? <a href="/#contact" class="text-gray-400 hover:underline">Get a free SEO audit</a> for your business today.</p>
+      <p>Ready to grow? <a href="/#contact" class="text-gray-600 hover:underline">Get a free SEO audit</a> for your business today.</p>
     `,
     date: '2025-08-18',
     author: 'WeThinkDigital Team',
@@ -914,8 +914,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     return (
       <div className="min-h-screen bg-[#1e1e20] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-50 mb-4">Post Not Found</h1>
-          <p className="text-gray-400 mb-8">The requested blog post could not be found.</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Post Not Found</h1>
+          <p className="text-gray-600 mb-8">The requested blog post could not be found.</p>
           <Link
             href="/blog"
             className="inline-block px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors shadow-md"
@@ -965,11 +965,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <div className="max-w-3xl mx-auto pt-24 pb-12 px-4">
           <BlogPostComponent post={post} />
 
-          <div className="mt-12 pt-8 border-t border-gray-800">
+          <div className="mt-12 pt-8 border-t border-gray-200">
             <div className="flex justify-between">
               <Link
                 href="/blog"
-                className="px-6 py-3 bg-[#27272a] hover:bg-gray-200 text-gray-50 rounded-lg transition-colors shadow-sm"
+                className="px-6 py-3 bg-[#27272a] hover:bg-gray-200 text-gray-900 rounded-lg transition-colors shadow-sm"
               >
                 ← Back to Blog
               </Link>

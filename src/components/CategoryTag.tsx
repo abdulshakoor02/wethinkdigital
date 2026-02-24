@@ -22,7 +22,7 @@ const categoryConfig: Record<string, BlogCategory> = {
   },
   'Business': {
     name: 'Business',
-    color: 'text-gray-100',
+    color: 'text-gray-800',
     bgColor: 'bg-gray-600/80'
   },
   'Market Trends': {

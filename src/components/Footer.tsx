@@ -43,8 +43,8 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-br from-[#18191a] via-[#27272a] to-[#18191a]">
-      
+    <footer className="relative overflow-hidden bg-[#18191a]">
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Company Info Card - Takes up more space */}
@@ -53,22 +53,15 @@ export default function Footer() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="bg-[#1e1e20] rounded-2xl p-8 h-full border border-gray-800 shadow-sm"
+              className="bg-[#1e1e20] rounded-2xl p-8 h-full border border-gray-300 shadow-lg"
             >
-              <h3 className="text-3xl font-bold mb-4"
-                style={{
-                  background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
-              >
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">
                 ebusiness+
               </h3>
-              <p className="text-gray-200 mb-6 text-lg leading-relaxed">
+              <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                 Empowering businesses with powerful CRM solutions for streamlined customer relationships and growth.
               </p>
-              
+
               {/* Social Links */}
               <div className="flex space-x-4">
                 {Object.entries(socialIcons).map(([social, icon]) => (
@@ -77,13 +70,7 @@ export default function Footer() {
                     href={`#${social}`}
                     whileHover={{ scale: 1.1, y: -2 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all duration-300"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.8) 0%, rgba(156, 163, 175, 0.6) 100%)',
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(24, 25, 26, 0.2)',
-                      boxShadow: '0 10px 20px rgba(209, 213, 219, 0.4)'
-                    }}
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg"
                   >
                     <span className="sr-only">{social}</span>
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -103,15 +90,15 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               transition={{ delay: 0.1 }}
-              className="bg-[#1e1e20] rounded-2xl p-6 border border-gray-800 shadow-sm hover:shadow-md transition-all duration-300"
+              className="bg-[#1e1e20] rounded-2xl p-6 border border-gray-300 shadow-lg hover:shadow-md transition-all duration-300"
             >
-              <h4 className="text-xl font-semibold text-gray-50 mb-6 text-center">Services</h4>
+              <h4 className="text-lg font-semibold text-gray-800 mb-6 text-center">Services</h4>
               <ul className="space-y-3">
                 {footerLinks.services.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-gray-200 hover:text-gray-400 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                      className="text-gray-600 hover:text-gray-800 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
                     >
                       {link.name}
                     </Link>
@@ -126,15 +113,15 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               transition={{ delay: 0.2 }}
-              className="bg-[#1e1e20] rounded-2xl p-6 border border-gray-800 shadow-sm hover:shadow-md transition-all duration-300"
+              className="bg-[#1e1e20] rounded-2xl p-6 border border-gray-300 shadow-lg hover:shadow-md transition-all duration-300"
             >
-              <h4 className="text-xl font-semibold text-gray-50 mb-6 text-center">Company</h4>
+              <h4 className="text-lg font-semibold text-gray-800 mb-6 text-center">Company</h4>
               <ul className="space-y-3">
                 {footerLinks.company.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 hover:text-gray-400 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                      className="text-gray-600 hover:text-gray-800 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
                     >
                       {link.name}
                     </Link>
@@ -149,15 +136,15 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               transition={{ delay: 0.3 }}
-              className="bg-[#1e1e20] rounded-2xl p-6 border border-gray-800 shadow-sm hover:shadow-md transition-all duration-300"
+              className="bg-[#1e1e20] rounded-2xl p-6 border border-gray-300 shadow-lg hover:shadow-md transition-all duration-300"
             >
-              <h4 className="text-xl font-semibold text-gray-50 mb-6 text-center">Resources</h4>
+              <h4 className="text-lg font-semibold text-gray-800 mb-6 text-center">Resources</h4>
               <ul className="space-y-3">
                 {footerLinks.resources.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 hover:text-gray-400 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
+                      className="text-gray-600 hover:text-gray-800 transition-colors duration-300 text-sm font-medium block py-1 hover:translate-x-1 transform transition-transform"
                     >
                       {link.name}
                     </Link>
@@ -173,31 +160,31 @@ export default function Footer() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-12 bg-[#1e1e20] rounded-2xl p-6 border border-gray-800 shadow-sm"
+          className="mt-12 bg-[#1e1e20] rounded-2xl p-6 border border-gray-300 shadow-lg"
         >
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-200 mb-4 md:mb-0 font-medium">
+            <p className="text-gray-600 mb-4 md:mb-0 font-medium">
               © {currentYear} ebusiness+. All rights reserved.
             </p>
-            
+
             <div className="flex space-x-8">
               <Link
                 href="#privacy"
-                className="text-gray-500 hover:text-gray-400 text-sm font-medium transition-colors duration-300"
+                className="text-gray-600 hover:text-gray-800 text-sm font-medium transition-colors duration-300"
               >
                 Privacy Policy
               </Link>
-              
+
               <Link
                 href="#terms"
-                className="text-gray-500 hover:text-gray-400 text-sm font-medium transition-colors duration-300"
+                className="text-gray-600 hover:text-gray-800 text-sm font-medium transition-colors duration-300"
               >
                 Terms of Service
               </Link>
-              
+
               <Link
                 href="#sitemap"
-                className="text-gray-400 hover:text-gray-400 text-sm font-medium transition-colors duration-300"
+                className="text-gray-600 hover:text-gray-800 text-sm font-medium transition-colors duration-300"
               >
                 Sitemap
               </Link>

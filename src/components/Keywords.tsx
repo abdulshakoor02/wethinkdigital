@@ -30,11 +30,11 @@ const FloatingParticles: React.FC = () => {
         y: Math.random() * 100,
         size: Math.random() * (i < 8 ? 4 : i < 15 ? 30 : 150) + (i < 8 ? 2 : i < 15 ? 20 : 100),
         color: [
-          'rgba(209, 213, 219, 0.3)',
-          'rgba(156, 163, 175, 0.2)', 
+          'rgba(59, 130, 246, 0.4)',
+          'rgba(14, 165, 233, 0.35)',
+          'rgba(6, 182, 212, 0.3)',
           'rgba(59, 130, 246, 0.25)',
-          'rgba(209, 213, 219, 0.2)',
-          'rgba(14, 165, 233, 0.15)'
+          'rgba(34, 211, 238, 0.3)'
         ][Math.floor(Math.random() * 5)],
         speed: Math.random() * 0.5 + 0.2,
         opacity: Math.random() * 0.3 + 0.1,
@@ -66,7 +66,7 @@ const FloatingParticles: React.FC = () => {
             width: particle.size,
             height: particle.size,
             background: particle.type === 'dot'
-              ? 'rgba(24, 25, 26, 0.3)'
+              ? 'rgba(59, 130, 246, 0.5)'
               : `radial-gradient(circle, ${particle.color} 0%, transparent 70%)`,
             filter: particle.type !== 'dot' ? 'blur(1px)' : 'none',
             left: `${particle.x}%`,
@@ -99,12 +99,12 @@ interface GlassCardProps {
   onClick?: () => void;
 }
 
-const GlassCard: React.FC<GlassCardProps> = ({ 
-  children, 
-  className = "", 
-  level = 2, 
+const GlassCard: React.FC<GlassCardProps> = ({
+  children,
+  className = "",
+  level = 2,
   hover = true,
-  onClick 
+  onClick
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
@@ -113,37 +113,37 @@ const GlassCard: React.FC<GlassCardProps> = ({
   const rotateY = useTransform(mouseX, [-300, 300], [-5, 5]);
 
   const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
-  
+
   const glassStyles = {
     1: {
       backdropFilter: isMobileDevice ? 'blur(10px) saturate(150%)' : 'blur(25px) saturate(200%)',
-      background: isMobileDevice ? 'rgba(24, 25, 26, 0.85)' : 'rgba(24, 25, 26, 0.15)',
-      border: '2px solid rgba(24, 25, 26, 0.2)',
-      boxShadow: '0 25px 45px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.1) inset'
+      background: 'rgba(30, 30, 32, 0.95)',
+      border: '2px solid rgba(209, 213, 219, 0.3)',
+      boxShadow: '0 25px 45px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(209, 213, 219, 0.1) inset'
     },
     2: {
       backdropFilter: isMobileDevice ? 'blur(8px) saturate(120%)' : 'blur(20px) saturate(150%)',
-      background: isMobileDevice ? 'rgba(24, 25, 26, 0.8)' : 'rgba(24, 25, 26, 0.12)',
-      border: '1px solid rgba(24, 25, 26, 0.15)',
-      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.08) inset'
+      background: 'rgba(30, 30, 32, 0.95)',
+      border: '1px solid rgba(209, 213, 219, 0.25)',
+      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(209, 213, 219, 0.08) inset'
     },
     3: {
       backdropFilter: isMobileDevice ? 'blur(8px) saturate(100%)' : 'blur(15px) saturate(120%)',
-      background: isMobileDevice ? 'rgba(24, 25, 26, 0.75)' : 'rgba(24, 25, 26, 0.08)',
-      border: '1px solid rgba(24, 25, 26, 0.1)',
-      boxShadow: '0 15px 35px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(24, 25, 26, 0.06) inset'
+      background: 'rgba(30, 30, 32, 0.95)',
+      border: '1px solid rgba(209, 213, 219, 0.2)',
+      boxShadow: '0 15px 35px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(209, 213, 219, 0.06) inset'
     },
     4: {
       backdropFilter: isMobileDevice ? 'blur(6px) saturate(100%)' : 'blur(12px) saturate(100%)',
-      background: isMobileDevice ? 'rgba(24, 25, 26, 0.7)' : 'rgba(24, 25, 26, 0.06)',
-      border: '0.5px solid rgba(24, 25, 26, 0.08)',
-      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(24, 25, 26, 0.04) inset'
+      background: 'rgba(30, 30, 32, 0.95)',
+      border: '0.5px solid rgba(209, 213, 219, 0.15)',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(209, 213, 219, 0.04) inset'
     },
     5: {
       backdropFilter: isMobileDevice ? 'blur(10px) saturate(150%)' : 'blur(30px) saturate(180%)',
-      background: isMobileDevice ? 'rgba(209, 213, 219, 0.25)' : 'rgba(209, 213, 219, 0.2)',
-      border: '2px solid rgba(209, 213, 219, 0.3)',
-      boxShadow: '0 30px 60px rgba(209, 213, 219, 0.3), 0 0 0 1px rgba(24, 25, 26, 0.1) inset'
+      background: 'rgba(30, 30, 32, 0.95)',
+      border: '2px solid rgba(209, 213, 219, 0.35)',
+      boxShadow: '0 30px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(209, 213, 219, 0.1) inset'
     }
   };
 
@@ -220,29 +220,29 @@ const KeywordTag: React.FC<KeywordTagProps> = ({ keyword, size, category, index,
   };
 
   const categoryColors = {
-    primary: 'rgba(209, 213, 219, 0.15)',
-    secondary: 'rgba(59, 130, 246, 0.12)',
-    lsi: 'rgba(156, 163, 175, 0.1)'
+    primary: 'rgba(59, 130, 246, 0.25)',
+    secondary: 'rgba(14, 165, 233, 0.2)',
+    lsi: 'rgba(156, 163, 175, 0.15)'
   };
 
   return (
     <motion.div
       ref={tagRef}
-      className={`relative rounded-full border border-gray-300/30 text-gray-200 text-center cursor-pointer select-none ${sizeStyles[size]}`}
+      className={`relative rounded-full border border-gray-300/50 text-gray-100 text-center cursor-pointer select-none ${sizeStyles[size]}`}
       style={{
-        background: `linear-gradient(135deg, ${categoryColors[category]}, rgba(24, 25, 26, 0.8))`,
+        background: `linear-gradient(135deg, ${categoryColors[category]}, rgba(30, 30, 32, 0.9))`,
         backdropFilter: 'blur(8px) saturate(100%)',
         WebkitBackdropFilter: 'blur(8px) saturate(100%)',
         WebkitTransform: 'translateZ(0)'
       }}
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
-      animate={{ 
-        opacity: isVisible ? 1 : 0, 
-        scale: isVisible ? 1 : 0.8, 
+      animate={{
+        opacity: isVisible ? 1 : 0,
+        scale: isVisible ? 1 : 0.8,
         y: isVisible ? 0 : 20,
       }}
-      transition={{ 
-        duration: 0.6, 
+      transition={{
+        duration: 0.6,
         delay: index * 0.1,
         ease: "easeOut"
       }}
@@ -271,7 +271,7 @@ const KeywordTag: React.FC<KeywordTagProps> = ({ keyword, size, category, index,
         className="w-full h-full flex items-center justify-center"
       >
         <span className="relative z-10">{keyword}</span>
-        
+
         {/* Glow Effect */}
         <AnimatePresence>
           {isHovered && (
@@ -322,7 +322,7 @@ export default function Keywords() {
   const getKeywordProps = (keyword: string, index: number) => {
     const isPrimary = primaryKeywords.includes(keyword);
     const originalIndex = isPrimary ? primaryKeywords.indexOf(keyword) : lsiKeywords.indexOf(keyword);
-    
+
     if (isPrimary && originalIndex < 3) {
       return { size: 'large' as const, category: 'primary' as const };
     } else if (isPrimary || originalIndex < 5) {
@@ -333,24 +333,16 @@ export default function Keywords() {
   };
 
   return (
-    <section 
-      id="keywords" 
+    <section
+      id="keywords"
       ref={sectionRef}
-      className="relative min-h-screen py-24 overflow-hidden"
-      style={{
-        background: `
-          radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
-          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
-        `
-      }}
+      className="relative min-h-screen py-24 overflow-hidden bg-[#18191a]"
     >
       {/* Floating Particles Background */}
       <FloatingParticles />
 
       {/* Noise Overlay */}
-      <div 
+      <div
         className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='7' r='1'/%3E%3Ccircle cx='47' cy='7' r='1'/%3E%3Ccircle cx='7' cy='27' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='27' r='1'/%3E%3Ccircle cx='7' cy='47' r='1'/%3E%3Ccircle cx='27' cy='47' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
@@ -365,9 +357,9 @@ export default function Keywords() {
           transition={{ duration: 1, ease: "easeOut" }}
           className="text-center mb-20"
         >
-          <GlassCard level={1} className="max-w-4xl mx-auto">
-            <motion.h2 
-              className="text-4xl md:text-6xl font-bold mb-8 text-gray-100"
+          <div className="max-w-4xl mx-auto bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-300 p-8 md:p-12">
+            <motion.h2
+              className="text-3xl md:text-6xl font-bold mb-8 text-gray-800"
               animate={{
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
               }}
@@ -375,12 +367,12 @@ export default function Keywords() {
             >
               💫 Ready to Stop Guessing and Start Growing?
             </motion.h2>
-            <p className="text-xl md:text-2xl text-gray-400 leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
               Transform your digital presence with our proven strategies
               <br className="hidden md:block" />
               that deliver real results, not just pretty metrics
             </p>
-          </GlassCard>
+          </div>
         </motion.div>
 
         {/* Q&A and Truth Glass Cards Grid */}
@@ -391,9 +383,10 @@ export default function Keywords() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <GlassCard level={2}>
-              <h3 className="text-3xl font-bold mb-8 text-gray-100 flex items-center">
-                💡 Your Questions, Answered
+            <div className="bg-[#1e1e20] rounded-xl border border-gray-300 shadow-lg p-8 h-full">
+              <h3 className="text-2xl md:text-3xl font-bold mb-8 text-gray-800 flex items-center">
+                <span className="mr-2">💡</span>
+                Your Questions, Answered
               </h3>
               <div className="space-y-6">
                 {[
@@ -411,13 +404,13 @@ export default function Keywords() {
                   >
                     <div className="flex items-start gap-3 mb-2">
                       <span className="text-2xl">{item.icon}</span>
-                      <h4 className="text-lg font-semibold text-gray-100">{item.q}</h4>
+                      <h4 className="text-lg font-semibold text-gray-800">{item.q}</h4>
                     </div>
-                    <p className="text-gray-400 ml-11">{item.a}</p>
+                    <p className="text-gray-600 ml-11">{item.a}</p>
                   </motion.div>
                 ))}
               </div>
-            </GlassCard>
+            </div>
           </motion.div>
 
           {/* Truth Glass Card */}
@@ -426,30 +419,27 @@ export default function Keywords() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <GlassCard level={2} className="h-full">
-              <h3 className="text-3xl font-bold mb-8 text-gray-100 flex items-center">
-                🔥 The Raw Truth About Digital Marketing
+            <div className="bg-[#1e1e20] rounded-xl border border-gray-300 shadow-lg p-8 h-full">
+              <h3 className="text-2xl md:text-3xl font-bold mb-8 text-gray-800 flex items-center">
+                <span className="mr-2">🔥</span>
+                The Raw Truth About Digital Marketing
               </h3>
               <div className="space-y-6">
-                <p className="text-xl text-gray-400 leading-relaxed">
+                <p className="text-xl text-gray-600 leading-relaxed">
                   Most of what you've been told about online marketing is wrong.
                 </p>
-                <p className="text-lg text-gray-400 leading-relaxed">
+                <p className="text-lg text-gray-600 leading-relaxed">
                   It's not about posting pretty pictures or getting a million followers who never buy anything.
                 </p>
-                <motion.div 
-                  className="mt-8 p-6 rounded-2xl"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.2) 0%, rgba(156, 163, 175, 0.15) 100%)',
-                    backdropFilter: 'blur(10px)'
-                  }}
+                <motion.div
+                  className="mt-8 p-6 rounded-2xl bg-[#18191a] border border-gray-300"
                 >
-                  <p className="text-2xl font-bold text-gray-100 text-center">
-                    It's about one thing: <span className="text-gray-400 font-extrabold">ROI</span>
+                  <p className="text-xl md:text-2xl font-bold text-gray-800 text-center">
+                    It&apos;s about one thing: <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent font-extrabold">ROI</span>
                   </p>
                 </motion.div>
               </div>
-            </GlassCard>
+            </div>
           </motion.div>
         </div>
 
@@ -461,11 +451,11 @@ export default function Keywords() {
           className="mb-20"
         >
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-100">
+            <h2 className="text-2xl md:text-4xl font-bold mb-6 text-gray-800">
               My Approach to Digital Marketing Strategy
             </h2>
-            <p className="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed">
-              I don't do fluff. I don't do vanity metrics. I build systems that get you more customers and make you more money.
+            <p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              I don&apos;t do fluff. I don&apos;t do vanity metrics. I build systems that get you more customers and make you more money.
             </p>
           </div>
 
@@ -473,19 +463,19 @@ export default function Keywords() {
             {[
               {
                 icon: "🗺️",
-                title: "1. Map Customer Journey", 
+                title: "1. Map Customer Journey",
                 desc: "Figure out exactly how your customers think, from first contact to raving fan",
                 points: ["Pain points identification", "Touchpoint mapping", "Behavior analysis"]
               },
               {
-                icon: "🏗️", 
+                icon: "🏗️",
                 title: "2. Build Digital Footprint",
-                desc: "Create a seamless system that turns strangers into customers", 
+                desc: "Create a seamless system that turns strangers into customers",
                 points: ["Website optimization", "SEO implementation", "Social media strategy"]
               },
               {
                 icon: "📈",
-                title: "3. Optimize for Conversion", 
+                title: "3. Optimize for Conversion",
                 desc: "Obsess over the details that turn clicks into cash",
                 points: ["CRO strategies", "Funnel analysis", "Marketing automation"]
               }
@@ -496,19 +486,19 @@ export default function Keywords() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.2 + 0.8 }}
               >
-                <GlassCard level={3}>
-                  <div className="text-6xl mb-6 text-center">{item.icon}</div>
-                  <h3 className="text-2xl font-bold mb-4 text-gray-100 text-center">{item.title}</h3>
-                  <p className="text-gray-400 mb-6 text-center leading-relaxed">{item.desc}</p>
+                <div className="bg-[#1e1e20] rounded-xl border border-gray-300 shadow-lg p-8 h-full">
+                  <div className="text-5xl md:text-6xl mb-6 text-center">{item.icon}</div>
+                  <h3 className="text-xl md:text-2xl font-bold mb-4 text-gray-800 text-center">{item.title}</h3>
+                  <p className="text-gray-600 mb-6 text-center leading-relaxed">{item.desc}</p>
                   <ul className="space-y-3">
                     {item.points.map((point, idx) => (
-                      <li key={idx} className="flex items-center text-gray-400">
-                        <span className="w-2 h-2 bg-gray-400 rounded-full mr-3 flex-shrink-0"></span>
-                        {point}
+                      <li key={idx} className="flex items-center text-gray-600">
+                        <span className="w-2 h-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mr-3 flex-shrink-0"></span>
+                        <span>{point}</span>
                       </li>
                     ))}
                   </ul>
-                </GlassCard>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -522,8 +512,10 @@ export default function Keywords() {
           className="mb-16"
         >
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold mb-4 text-gray-100">🏷️ Our Expertise Tags</h3>
-            <p className="text-gray-400">Interactive keyword cloud showcasing our CRM capabilities</p>
+            <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">
+              🏷️ Our Expertise Tags
+            </h3>
+            <p className="text-gray-600">Interactive keyword cloud showcasing our CRM capabilities</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -545,20 +537,14 @@ export default function Keywords() {
             <div className="text-center">
               <motion.button
                 onClick={() => setShowAll(true)}
-                className="relative px-8 py-4 rounded-full text-gray-200 font-semibold overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.3) 0%, rgba(156, 163, 175, 0.2) 100%)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(24, 25, 26, 0.15)'
-                }}
+                className="px-8 py-4 rounded-full text-white font-semibold overflow-hidden bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg transition-all duration-300"
                 whileHover={{
                   scale: 1.05,
-                  boxShadow: '0 20px 40px rgba(209, 213, 219, 0.3)',
-                  background: 'linear-gradient(135deg, rgba(209, 213, 219, 0.4) 0%, rgba(156, 163, 175, 0.3) 100%)'
+                  boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3)'
                 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span className="relative z-10">Show More Keywords</span>
+                Show More Keywords
               </motion.button>
             </div>
           )}
@@ -571,9 +557,9 @@ export default function Keywords() {
           transition={{ duration: 0.8, delay: 1 }}
           className="text-center"
         >
-          <GlassCard level={5} className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto bg-[#1e1e20] rounded-2xl shadow-lg border border-gray-300 p-8">
             <motion.button
-              className="text-2xl md:text-3xl font-bold text-gray-100 mb-6 w-full"
+              className="text-xl md:text-3xl font-bold text-gray-800 mb-6 w-full"
               onClick={() => {
                 const contactElement = document.getElementById('contact');
                 if (contactElement) {
@@ -585,11 +571,11 @@ export default function Keywords() {
             >
               🚀 Book a Free Strategy Call
             </motion.button>
-            <p className="text-gray-400 leading-relaxed">
-              Let's talk about how we can 10x your business. No fluff, no hard sell. 
+            <p className="text-gray-600 leading-relaxed">
+              Let's talk about how we can 10x your business. No fluff, no hard sell.
               Just a real conversation about your goals.
             </p>
-          </GlassCard>
+          </div>
         </motion.div>
       </div>
     </section>

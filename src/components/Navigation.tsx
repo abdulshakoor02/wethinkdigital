@@ -55,7 +55,7 @@ export default function Navigation() {
 
   return (
     <motion.nav
-      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${isScrolled ? 'border-b border-gray-800' : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${isScrolled ? 'border-b border-gray-700' : 'bg-transparent'
         }`}
       style={isScrolled ? {
         background: 'rgba(24, 25, 26, 0.95)',
@@ -121,14 +121,14 @@ export default function Navigation() {
                         findAndScroll();
                       }
                     }}
-                    className="text-gray-400 hover:text-gray-50 transition-colors"
+                    className="text-gray-300 hover:text-white transition-colors"
                   >
                     {item.name}
                   </a>
                 ) : (
                   <Link
                     href={item.href}
-                    className="text-gray-400 hover:text-gray-50 transition-colors"
+                    className="text-gray-300 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -165,7 +165,7 @@ export default function Navigation() {
                 e.preventDefault();
                 setIsMobileMenuOpen(!isMobileMenuOpen);
               }}
-              className="text-gray-200 p-2"
+              className="text-gray-300 p-2"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -182,7 +182,7 @@ export default function Navigation() {
         {/* Mobile Menu */}
         <div
           className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
-            } overflow-hidden border-t border-gray-800`}
+            } overflow-hidden border-t border-gray-700`}
           style={{
             background: 'rgba(24, 25, 26, 0.95)',
             backdropFilter: 'blur(20px) saturate(150%)',
@@ -226,7 +226,7 @@ export default function Navigation() {
                         findAndScroll();
                       }
                     }}
-                    className="block py-2 text-gray-400 hover:text-gray-50 transition-colors"
+                    className="block py-2 text-gray-300 hover:text-white transition-colors"
                   >
                     {item.name}
                   </a>
@@ -237,7 +237,7 @@ export default function Navigation() {
                       e.preventDefault();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="block py-2 text-gray-400 hover:text-gray-50 transition-colors"
+                    className="block py-2 text-gray-300 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>

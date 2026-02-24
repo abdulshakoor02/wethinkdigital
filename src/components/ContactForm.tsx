@@ -71,7 +71,7 @@ export default function ContactForm() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <div className="inline-block px-4 py-2 rounded-full text-sm font-medium text-gray-200 mb-6"
+          <div className="inline-block px-4 py-2 rounded-full text-sm font-medium text-gray-700 mb-6"
             style={{
               background: 'rgba(24, 25, 26, 0.12)',
               backdropFilter: 'blur(15px) saturate(120%)',
@@ -81,10 +81,10 @@ export default function ContactForm() {
           >
             Contact Us
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-100">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
             Let&apos;s Build Your Empire
           </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             You&apos;ve see the proof.You know what we can do.Now it&apos;s your turn.
           </p>
         </motion.div>
@@ -104,8 +104,8 @@ export default function ContactForm() {
           {submitSuccess ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🎉</div>
-              <h3 className="text-3xl font-bold mb-4 text-gray-100">Thank You!</h3>
-              <p className="text-xl text-gray-400 mb-6">
+              <h3 className="text-3xl font-bold mb-4 text-gray-800">Thank You!</h3>
+              <p className="text-xl text-gray-600 mb-6">
                 Your message has been sent successfully. We&apos;ll get back to you within 24 hours.
               </p>
               <motion.button
@@ -129,7 +129,7 @@ export default function ContactForm() {
                   <input
                     type="text"
                     {...register('name', { required: 'Name is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     placeholder="Full Name"
                   />
                   {errors.name && <span className="text-red-300 text-sm mt-2 block">{errors.name.message}</span>}
@@ -139,7 +139,7 @@ export default function ContactForm() {
                   <input
                     type="text"
                     {...register('email', { required: 'email is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     placeholder="email address"
                   />
                   {errors.email && <span className="text-red-300 text-sm mt-2 block">{errors.email.message}</span>}
@@ -149,7 +149,7 @@ export default function ContactForm() {
                   <input
                     type="text"
                     {...register('company', { required: 'Company Name is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     placeholder="Company Name"
                   />
                   {errors.company && <span className="text-red-300 text-sm mt-2 block">{errors.company.message}</span>}
@@ -159,7 +159,7 @@ export default function ContactForm() {
                   <input
                     type="text"
                     {...register('phone', { required: 'Phone is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     placeholder="phone e.g +971 (58) 1233-567"
                   />
                   {errors.phone && <span className="text-red-300 text-sm mt-2 block">{errors.phone.message}</span>}
@@ -168,7 +168,7 @@ export default function ContactForm() {
                 <div>
                   <select
                     {...register('projectType', { required: 'Project type is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                     defaultValue=""
                   >
                     <option value="">Select Project Type</option>
@@ -185,7 +185,7 @@ export default function ContactForm() {
                 <div>
                   <select
                     {...register('budget', { required: 'Budget is required' })}
-                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
+                    className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300"
                   >
                     <option value="">Select Budget Range</option>
                     <option value="100-1k">AED100 - AED1000</option>
@@ -201,7 +201,7 @@ export default function ContactForm() {
                 <textarea
                   {...register('message', { required: 'Project Details are required' })}
                   rows={4}
-                  className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300 resize-none"
+                  className="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:border-gray-600 text-lg transition-all duration-300 resize-none"
                   placeholder="Project Details"
                 />
                 {errors.message && <span className="text-red-300 text-sm mt-2 block">{errors.message.message}</span>}
@@ -252,8 +252,8 @@ export default function ContactForm() {
             >
               📧
             </div>
-            <h3 className="text-xl font-bold mb-2 text-gray-100">Email Us</h3>
-            <p className="text-gray-400">info@ebusinessplus.ae</p>
+            <h3 className="text-xl font-bold mb-2 text-gray-800">Email Us</h3>
+            <p className="text-gray-600">info@ebusinessplus.ae</p>
           </div>
 
           <div className="rounded-2xl p-8 transition-all duration-300"
@@ -273,8 +273,8 @@ export default function ContactForm() {
             >
               📱
             </div>
-            <h3 className="text-xl font-bold mb-2 text-gray-100">Call Us</h3>
-            <p className="text-gray-400">+971 (564) 713-394</p>
+            <h3 className="text-xl font-bold mb-2 text-gray-800">Call Us</h3>
+            <p className="text-gray-600">+971 (564) 713-394</p>
           </div>
 
           <div className="rounded-2xl p-8 transition-all duration-300"
@@ -294,8 +294,8 @@ export default function ContactForm() {
             >
               📍
             </div>
-            <h3 className="text-xl font-bold mb-2 text-gray-100">Visit Us</h3>
-            <p className="text-gray-400">Dubai, UAE</p>
+            <h3 className="text-xl font-bold mb-2 text-gray-800">Visit Us</h3>
+            <p className="text-gray-600">Dubai, UAE</p>
           </div>
         </motion.div>
       </div>

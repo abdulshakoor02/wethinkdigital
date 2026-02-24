@@ -65,10 +65,10 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="gradient-text">CRM Solutions</span>
               <br />
-              <span className="text-gray-100">for Modern Business</span>
+              <span className="text-gray-800">for Modern Business</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Streamline customer relationships, automate sales workflows, and boost productivity with our powerful CRM platform
             </p>
             

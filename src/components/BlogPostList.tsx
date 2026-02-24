@@ -12,14 +12,14 @@ export default function BlogPostList({ posts }: BlogPostListProps) {
       {posts.map((post) => (
         <article
           key={post.id}
-          className="bg-[#1e1e20] rounded-xl p-6 border border-gray-800 shadow-sm hover:shadow-md transition-all duration-300"
+          className="bg-[#1e1e20] rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300"
         >
           <Link href={`/blog/${post.slug}`} className="block group">
-            <h2 className="text-2xl font-bold text-gray-50 mb-2 group-hover:text-gray-400 transition-colors">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-600 transition-colors">
               {post.title}
             </h2>
             {post.excerpt && (
-              <p className="text-gray-400 mb-4">{post.excerpt}</p>
+              <p className="text-gray-600 mb-4">{post.excerpt}</p>
             )}
             <div className="flex items-center text-sm text-gray-500">
               <span>{new Date(post.date).toISOString().split('T')[0]}</span>

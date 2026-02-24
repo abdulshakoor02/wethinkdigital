@@ -82,21 +82,13 @@ export default function LatestNews() {
 
   return (
     <section
-      className="py-24 relative overflow-hidden"
-      style={{
-        background: `
-          radial-gradient(circle at 20% 80%, rgba(209, 213, 219, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(156, 163, 175, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(209, 213, 219, 0.25) 0%, transparent 50%),
-          linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 100%)
-        `
-      }}
+      className="py-24 relative overflow-hidden bg-[#18191a]"
       ref={ref}
     >
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(209, 213, 219, 0.15) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0)`,
           backgroundSize: '20px 20px'
         }}></div>
       </div>
@@ -110,14 +102,14 @@ export default function LatestNews() {
           className="flex justify-between items-start mb-16"
         >
           <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
               Latest news
             </h2>
-            <p className="text-lg text-gray-400">
+            <p className="text-lg text-gray-600">
               Stay informed! Explore our latest updates on tax laws, economic insights, and industry trends.
             </p>
           </div>
-          
+
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -126,13 +118,7 @@ export default function LatestNews() {
           >
             <Link
               href="/blog"
-              className="inline-flex items-center px-6 py-3 text-gray-100 font-medium rounded-full transition-all duration-300"
-              style={{
-                background: 'rgba(24, 25, 26, 0.12)',
-                backdropFilter: 'blur(15px) saturate(120%)',
-                border: '1px solid rgba(24, 25, 26, 0.2)',
-                boxShadow: '0 10px 20px rgba(209, 213, 219, 0.3)'
-              }}
+              className="inline-flex items-center px-6 py-3 font-medium rounded-full transition-all duration-300 bg-[#1e1e20] text-gray-800 border border-gray-300 hover:bg-[#18191a] hover:shadow-lg"
             >
               View all blogs
             </Link>
@@ -150,14 +136,7 @@ export default function LatestNews() {
               className="lg:col-span-1 lg:row-span-2 group cursor-pointer"
             >
               <Link href={`/blog/${featuredPost.slug}`} className="block h-full">
-                <div className="relative h-full rounded-2xl overflow-hidden transition-all duration-300"
-                  style={{
-                    background: 'rgba(24, 25, 26, 0.08)',
-                    backdropFilter: 'blur(15px) saturate(120%)',
-                    border: '1px solid rgba(24, 25, 26, 0.1)',
-                    boxShadow: '0 15px 35px rgba(209, 213, 219, 0.1), 0 0 0 1px rgba(24, 25, 26, 0.06) inset'
-                  }}
-                >
+                <div className="relative h-full bg-[#1e1e20] rounded-2xl overflow-hidden transition-all duration-300 border border-gray-300 hover:shadow-xl hover:border-gray-400">
                   <div className="relative h-64 lg:h-80 overflow-hidden">
                     <Image
                       src={featuredPost.image || ''}
@@ -167,31 +146,31 @@ export default function LatestNews() {
                       sizes="(max-width: 1024px) 100vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
-                    
+
                     {featuredPost.category && (
                       <div className="absolute top-4 left-4">
                         <CategoryTag category={featuredPost.category} />
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="p-6 lg:p-8">
-                    <h3 className="text-xl lg:text-2xl font-bold text-gray-100 mb-4 transition-colors">
+                    <h3 className="text-xl lg:text-2xl font-bold text-gray-800 mb-4 transition-colors">
                       {featuredPost.title}
                     </h3>
-                    
-                    <p className="text-gray-400 mb-6 line-clamp-3">
+
+                    <p className="text-gray-600 mb-6 line-clamp-3">
                       {featuredPost.excerpt}
                     </p>
-                    
+
                     <div className="flex items-center text-sm text-gray-500">
                       <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                       </svg>
-                      {new Date(featuredPost.date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
+                      {new Date(featuredPost.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
                       })}
                     </div>
                   </div>
@@ -228,27 +207,27 @@ export default function LatestNews() {
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
-                      
+
                       {post.category && (
                         <div className="absolute top-3 left-3">
                           <CategoryTag category={post.category} size="sm" />
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="p-6">
-                      <h3 className="text-lg font-bold text-gray-100 mb-3 transition-colors line-clamp-2">
+                      <h3 className="text-lg font-bold text-gray-800 mb-3 transition-colors line-clamp-2">
                         {post.title}
                       </h3>
-                      
+
                       <div className="flex items-center text-sm text-gray-500">
                         <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                         </svg>
-                        {new Date(post.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
+                        {new Date(post.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
                         })}
                       </div>
                     </div>
@@ -268,7 +247,7 @@ export default function LatestNews() {
         >
           <Link
             href="/blog"
-            className="inline-flex items-center px-6 py-3 text-gray-100 font-medium rounded-full transition-all duration-300"
+            className="inline-flex items-center px-6 py-3 text-gray-800 font-medium rounded-full transition-all duration-300"
             style={{
               background: 'rgba(24, 25, 26, 0.12)',
               backdropFilter: 'blur(15px) saturate(120%)',
