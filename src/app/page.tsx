@@ -1,6 +1,8 @@
 import VideoHero from '@/components/VideoHero';
 import LazySection from '@/components/LazySection';
 import dynamic from 'next/dynamic';
+import Script from 'next/script';
+import { faqData } from '@/data/faq';
 
 export const dynamicParams = false;
 export const revalidate = 3600;
@@ -48,6 +50,26 @@ const Footer = dynamic(() => import('@/components/Footer'), {
 export default function Home() {
   return (
     <main className="bg-background">
+      {/* Server-rendered FAQ schema (indexable by Google without JS execution) */}
+      <Script
+        id="json-ld-faq-server"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqData.map((item) => ({
+              '@type': 'Question',
+              name: item.question,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: item.answer,
+              },
+            })),
+          }),
+        }}
+      />
       <VideoHero />
 
       <LazySection rootMargin="250px" fallback={<div className="h-96 border-y border-line bg-background-muted" />}>
