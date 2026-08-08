@@ -1,32 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-
-interface BlogPost {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  readTime: string;
-}
+import { blogPosts } from '@/data/posts';
 
 interface RelatedPostsProps {
   currentPostId: string;
   currentPostKeywords?: string[];
 }
-
-const allPosts: BlogPost[] = [
-  { id: '1', slug: 'digital-marketing-trends-2025', title: 'Digital marketing trends to watch', excerpt: 'A clear view of the shifts changing digital growth.', date: '2025-08-15', readTime: '5 min read' },
-  { id: '2', slug: 'seo-best-practices', title: 'SEO practices for modern websites', excerpt: 'The technical and editorial decisions that help search work compound.', date: '2025-08-01', readTime: '6 min read' },
-  { id: '3', slug: 'web-development-frameworks', title: 'Choosing a web development framework', excerpt: 'A practical way to weigh team, product, and maintenance needs.', date: '2025-07-20', readTime: '7 min read' },
-  { id: '4', slug: 'best-seo-company-in-dubai', title: 'What a good SEO partner should measure in Dubai', excerpt: 'A practical look at the difference between ranking reports and commercial progress.', date: '2025-08-20', readTime: '8 min read' },
-  { id: '5', slug: 'best-seo-services-in-dubai', title: 'The SEO services that actually move a business forward', excerpt: 'Five ways to connect search work to the revenue decisions behind it.', date: '2025-08-18', readTime: '9 min read' },
-  { id: '6', slug: 'crm-and-lead-management', title: 'Where good leads disappear after they arrive', excerpt: 'The handoffs between marketing, sales, and operations that quietly cost growth.', date: '2025-08-15', readTime: '10 min read' },
-  { id: '7', slug: 'website-design-development-services-in-dubai', title: 'Why most business websites fail to convert', excerpt: 'What separates a useful commercial path from a digital brochure.', date: '2025-08-12', readTime: '12 min read' },
-  { id: '8', slug: 'top-10-digital-marketing-company-in-dubai', title: 'Why agency rankings do not make the decision', excerpt: 'A better way to compare partners when the stakes are commercial.', date: '2025-08-10', readTime: '11 min read' },
-  { id: '9', slug: 'top-5-digital-marketing-company-in-dubai', title: 'How to find the right growth partner', excerpt: 'The questions that reveal whether an agency understands your business.', date: '2025-08-08', readTime: '10 min read' },
-];
 
 const postKeywords: Record<string, string[]> = {
   '1': ['digital marketing', 'trends'],
@@ -42,7 +22,7 @@ const postKeywords: Record<string, string[]> = {
 
 export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }: RelatedPostsProps) {
   const currentKeywords = postKeywords[currentPostId] || currentPostKeywords;
-  const relatedPosts = allPosts
+  const relatedPosts = blogPosts
     .filter((post) => post.id !== currentPostId)
     .map((post) => ({
       ...post,

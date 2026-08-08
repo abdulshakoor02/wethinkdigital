@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -57,59 +56,20 @@ function HeroContent() {
 }
 
 export default function VideoHero({ className = '' }: VideoHeroProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isClient, setIsClient] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleCanPlay = () => {
-      setIsLoaded(true);
-      video.play().catch(() => undefined);
-    };
-
-    video.addEventListener('canplay', handleCanPlay);
-    return () => video.removeEventListener('canplay', handleCanPlay);
-  }, []);
-
-  if (!isClient) {
-    return (
-      <section id="top" className={`relative min-h-[680px] w-full overflow-hidden bg-background ${className}`}>
-        <HeroContent />
-      </section>
-    );
-  }
-
   return (
-    <section id="top" className={`relative min-h-[680px] w-full overflow-hidden bg-background ${className}`}>
+    <section
+      id="top"
+      className={`relative min-h-[680px] w-full overflow-hidden bg-background ${className}`}
+    >
+      {/* Static background (replaces the removed hero video — lighter + faster LCP) */}
       <div className="absolute inset-0 overflow-hidden">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          className="absolute inset-0 h-full w-full object-cover opacity-55"
-          onLoadedData={() => setIsLoaded(true)}
-        >
-          <source src="/hero2.mp4" type="video/mp4" />
-        </video>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgb(107_70_193_/_0.25),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgb(16_185_129_/_0.15),transparent_55%)]" />
         <div className="absolute inset-0 bg-[rgb(12_18_17_/_0.7)]" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(12_18_17_/_0.94)_0%,rgb(12_18_17_/_0.72)_48%,rgb(12_18_17_/_0.54)_100%)]" />
       </div>
 
       <HeroContent />
-
-      {!isLoaded && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background">
-          <div className="h-8 w-8 animate-spin border-2 border-primary border-t-transparent" role="status" aria-label="Loading hero video" />
-        </div>
-      )}
     </section>
   );
 }

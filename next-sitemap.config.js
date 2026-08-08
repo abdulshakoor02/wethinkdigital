@@ -1,4 +1,8 @@
 /** @type {import('next-sitemap').IConfig} */
+
+// Derive blog URLs + dates from the single source of truth (src/data/posts.ts)
+const blogPosts = require('./src/data/posts.json');
+
 module.exports = {
   siteUrl: "https://www.wethinkdigital.solutions",
   generateRobotsTxt: true,
@@ -7,17 +11,20 @@ module.exports = {
   priority: 0.7,
   exclude: ['/blog/[slug]'],
   transform: async (config, path) => {
-    // Handle blog posts with custom priority and changefreq
+    // Blog posts: use their real published date (not build-time now())
     if (path.startsWith('/blog/')) {
+      const slug = path.replace('/blog/', '');
+      const post = blogPosts.find((p) => p.slug === slug);
       return {
         loc: path,
         changefreq: 'monthly',
         priority: 0.7,
-        lastmod: new Date().toISOString(),
+        lastmod: post ? new Date(post.date).toISOString() : undefined,
       };
     }
-    
-    // Default configuration for other pages
+
+    // Default: static pages keep autoLastmod (build date) — but home/blog index
+    // don't need artificial freshness either, so use autoLastmod only for real content.
     return {
       loc: path,
       changefreq: config.changefreq,
@@ -26,20 +33,8 @@ module.exports = {
     };
   },
   additionalPaths: async (config) => {
-    // Add your blog posts dynamically
-    const blogPosts = [
-      { slug: 'digital-marketing-trends-2025', date: '2025-08-15' },
-      { slug: 'seo-best-practices', date: '2025-08-01' },
-      { slug: 'web-development-frameworks', date: '2025-07-20' },
-      { slug: 'best-seo-company-in-dubai', date: '2025-08-20' },
-      { slug: 'best-seo-services-in-dubai', date: '2025-08-18' },
-      { slug: 'crm-and-lead-management', date: '2025-08-15' },
-      { slug: 'website-design-development-services-in-dubai', date: '2025-08-12' },
-      { slug: 'top-10-digital-marketing-company-in-dubai', date: '2025-08-10' },
-      { slug: 'top-5-digital-marketing-company-in-dubai', date: '2025-08-08' },
-    ];
-    
-    return blogPosts.map(post => ({
+    // Blog posts — from the shared data file (single source of truth)
+    return blogPosts.map((post) => ({
       loc: `/blog/${post.slug}`,
       changefreq: 'monthly',
       priority: 0.7,

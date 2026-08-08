@@ -4,46 +4,10 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { blogPosts } from '@/data/posts';
 
-interface BlogPost {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  author: string;
-  readTime: string;
-}
-
-const featuredPosts: BlogPost[] = [
-  {
-    id: '4',
-    slug: 'best-seo-company-in-dubai',
-    title: 'What a good SEO partner should measure in Dubai',
-    excerpt: 'A practical look at the difference between ranking reports and commercial progress.',
-    date: '2025-08-20',
-    author: 'WeThinkDigital Team',
-    readTime: '8 min read',
-  },
-  {
-    id: '5',
-    slug: 'best-seo-services-in-dubai',
-    title: 'The SEO services that actually move a business forward',
-    excerpt: 'Five ways to connect search work to the revenue decisions behind it.',
-    date: '2025-08-18',
-    author: 'WeThinkDigital Team',
-    readTime: '9 min read',
-  },
-  {
-    id: '6',
-    slug: 'crm-and-lead-management',
-    title: 'Where good leads disappear after they arrive',
-    excerpt: 'The handoffs between marketing, sales, and operations that quietly cost growth.',
-    date: '2025-08-15',
-    author: 'WeThinkDigital Team',
-    readTime: '10 min read',
-  },
-];
+// Pick the 3 most recent posts for the homepage feature
+const featuredPosts = blogPosts.slice(0, 3);
 
 export default function RecentBlogPosts() {
   const ref = useRef(null);

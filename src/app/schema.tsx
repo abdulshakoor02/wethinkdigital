@@ -86,13 +86,6 @@ export const localBusinessSchema = {
     "https://www.linkedin.com/company/wethinkdigital",
     "https://www.instagram.com/wethinkdigital"
   ],
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.9",
-    "reviewCount": "127",
-    "bestRating": "5",
-    "worstRating": "1"
-  }
 };
 
 // Organization Schema for homepage
