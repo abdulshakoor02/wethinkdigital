@@ -33,11 +33,13 @@ export const metadata: Metadata = {
     url: "https://www.wethinkdigital.solutions",
     siteName: "WeThinkDigital",
     locale: "en_US",
+    images: [{ url: "https://www.wethinkdigital.solutions/og-image.png", width: 1200, height: 630, alt: "WeThinkDigital - SEO and Digital Marketing in Dubai" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Best SEO Services in Dubai | Top Digital Marketing Company",
     description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue.",
+    images: ["https://www.wethinkdigital.solutions/og-image.png"],
   },
   alternates: {
     canonical: "https://www.wethinkdigital.solutions",
