@@ -2,6 +2,7 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
+import Script from 'next/script';
 
 interface FAQItem {
   question: string;
@@ -56,6 +57,26 @@ export default function FAQ() {
 
   return (
     <section id="faq" className="bg-background py-24 sm:py-32" ref={ref}>
+      {/* FAQPage schema for rich results */}
+      <Script
+        id="json-ld-faq"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqData.map((item) => ({
+              '@type': 'Question',
+              name: item.question,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: item.answer,
+              },
+            })),
+          }),
+        }}
+      />
       <div className="mx-auto max-w-4xl px-6 sm:px-10 lg:px-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <p className="mb-5 font-mono text-xs uppercase tracking-[0.24em] text-primary">Before we start</p>

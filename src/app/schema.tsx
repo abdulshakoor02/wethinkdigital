@@ -83,7 +83,6 @@ export const localBusinessSchema = {
   "sameAs": [
     "https://www.facebook.com/wethinkdigital",
     "https://www.twitter.com/wethinkdigital",
-    "https://www.linkedin.com/company/wethinkdigital",
     "https://www.instagram.com/wethinkdigital"
   ],
 };
@@ -119,7 +118,7 @@ export const organizationSchema = {
   "sameAs": [
     "https://www.facebook.com/wethinkdigital",
     "https://www.twitter.com/wethinkdigital",
-    "https://www.linkedin.com/company/wethinkdigital"
+    "https://www.instagram.com/wethinkdigital"
   ]
 };
 
