@@ -10,12 +10,7 @@ interface VideoHeroProps {
 function HeroContent() {
   return (
     <div className="relative z-10 grid min-h-[680px] w-full items-end gap-12 px-6 pb-16 pt-32 sm:px-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.7fr)] lg:items-center lg:px-16 lg:pb-20">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="max-w-3xl"
-      >
+      <div className="max-w-3xl">
         <p className="mb-5 font-mono text-xs uppercase tracking-[0.24em] text-accent">
           Growth systems for Dubai businesses
         </p>
@@ -33,7 +28,7 @@ function HeroContent() {
             See the proof
           </Link>
         </div>
-      </motion.div>
+      </div>
 
       <motion.aside
         initial={{ opacity: 0, x: 24 }}

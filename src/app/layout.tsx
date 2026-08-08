@@ -69,8 +69,10 @@ export default function RootLayout({
           `
         }} />
         
-        {/* Optimize critical CSS delivery */}
-        <link rel="preload" href="/wethinkdigital.ico" as="image" type="image/x-icon" />
+        {/* Favicon: lightweight SVG + PNG (replaces 197KB JPEG preload) */}
+        <link rel="icon" type="image/svg+xml" href="/wethinkdigital.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/wethinkdigital-32.png" />
+        <link rel="apple-touch-icon" sizes="64x64" href="/wethinkdigital-64.png" />
         
         <Script
           id="json-ld-organization"
@@ -128,8 +130,6 @@ export default function RootLayout({
             />
           </>
         )}
-        
-        <link rel="icon" href="/wethinkdigital.ico" />
         
         {/* Mobile-optimized font preloading */}
         <link
