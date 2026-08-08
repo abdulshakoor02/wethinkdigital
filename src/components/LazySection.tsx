@@ -27,8 +27,8 @@ const LazySection = memo(function LazySection({
   return (
     <div ref={elementRef} className={className}>
       {hasIntersected ? children : (fallback || (
-        <div className="h-96 bg-gray-900/10 animate-pulse rounded-lg flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="flex h-96 items-center justify-center border-y border-line bg-background-muted" aria-label="Loading section">
+          <div className="h-6 w-6 animate-spin border-2 border-primary border-t-transparent" />
         </div>
       ))}
     </div>

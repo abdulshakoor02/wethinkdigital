@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 interface BlogPost {
   id: string;
@@ -17,218 +16,60 @@ interface RelatedPostsProps {
   currentPostKeywords?: string[];
 }
 
-// All blog posts data
 const allPosts: BlogPost[] = [
-  {
-    id: '1',
-    slug: 'digital-marketing-trends-2025',
-    title: 'Digital Marketing Trends to Watch in 2025',
-    excerpt: 'Explore the latest digital marketing trends that will shape the industry in 2025 and beyond.',
-    date: '2025-08-15',
-    readTime: '5 min read',
-  },
-  {
-    id: '2',
-    slug: 'seo-best-practices',
-    title: 'SEO Best Practices for Modern Websites',
-    excerpt: 'Learn the essential SEO techniques that will help your website rank higher in search results.',
-    date: '2025-08-01',
-    readTime: '6 min read',
-  },
-  {
-    id: '3',
-    slug: 'web-development-frameworks',
-    title: 'Choosing the Right Web Development Framework',
-    excerpt: 'A comprehensive guide to selecting the best web development framework for your next project.',
-    date: '2025-07-20',
-    readTime: '7 min read',
-  },
-  {
-    id: '4',
-    slug: 'best-seo-company-in-dubai',
-    title: 'Best SEO Company in Dubai: Why WeThinkDigital is the #1 Choice for Businesses',
-    excerpt: 'Discover why WeThinkDigital stands out as the best SEO company in Dubai for driving real business results and revenue growth.',
-    date: '2025-08-20',
-    readTime: '8 min read',
-  },
-  {
-    id: '5',
-    slug: 'best-seo-services-in-dubai',
-    title: 'Best SEO Services in Dubai: The 5 Services That Actually Drive Revenue',
-    excerpt: 'Not all SEO services are created equal. Here are the 5 SEO services in Dubai that actually drive business results and revenue growth.',
-    date: '2025-08-18',
-    readTime: '9 min read',
-  },
-  {
-    id: '6',
-    slug: 'crm-and-lead-management',
-    title: 'CRM and Lead Management: The $2.3M Secret Your Dubai Business is Missing',
-    excerpt: 'Discover how proper CRM and lead management can transform your Dubai business from struggling to scaling effortlessly.',
-    date: '2025-08-15',
-    readTime: '10 min read',
-  },
-  {
-    id: '7',
-    slug: 'website-design-development-services-in-dubai',
-    title: 'Website Design & Development Services in Dubai: Why Most Businesses Fail (And How to Succeed)',
-    excerpt: 'Most website design services in Dubai miss the mark. Here\'s what separates winning websites from digital billboards.',
-    date: '2025-08-12',
-    readTime: '12 min read',
-  },
-  {
-    id: '8',
-    slug: 'top-10-digital-marketing-company-in-dubai',
-    title: 'Top 10 Digital Marketing Company in Dubai: Why Rankings Don\'t Matter (And What Does)',
-    excerpt: 'Forget about "top 10" lists. Here\'s how to actually choose the best digital marketing company in Dubai for your business.',
-    date: '2025-08-10',
-    readTime: '11 min read',
-  },
-  {
-    id: '9',
-    slug: 'top-5-digital-marketing-company-in-dubai',
-    title: 'Top 5 Digital Marketing Company in Dubai: The Truth About Finding Your Perfect Partner',
-    excerpt: 'Forget about arbitrary rankings. Here\'s how to identify the top digital marketing companies in Dubai that actually drive results.',
-    date: '2025-08-08',
-    readTime: '10 min read',
-  },
+  { id: '1', slug: 'digital-marketing-trends-2025', title: 'Digital marketing trends to watch', excerpt: 'A clear view of the shifts changing digital growth.', date: '2025-08-15', readTime: '5 min read' },
+  { id: '2', slug: 'seo-best-practices', title: 'SEO practices for modern websites', excerpt: 'The technical and editorial decisions that help search work compound.', date: '2025-08-01', readTime: '6 min read' },
+  { id: '3', slug: 'web-development-frameworks', title: 'Choosing a web development framework', excerpt: 'A practical way to weigh team, product, and maintenance needs.', date: '2025-07-20', readTime: '7 min read' },
+  { id: '4', slug: 'best-seo-company-in-dubai', title: 'What a good SEO partner should measure in Dubai', excerpt: 'A practical look at the difference between ranking reports and commercial progress.', date: '2025-08-20', readTime: '8 min read' },
+  { id: '5', slug: 'best-seo-services-in-dubai', title: 'The SEO services that actually move a business forward', excerpt: 'Five ways to connect search work to the revenue decisions behind it.', date: '2025-08-18', readTime: '9 min read' },
+  { id: '6', slug: 'crm-and-lead-management', title: 'Where good leads disappear after they arrive', excerpt: 'The handoffs between marketing, sales, and operations that quietly cost growth.', date: '2025-08-15', readTime: '10 min read' },
+  { id: '7', slug: 'website-design-development-services-in-dubai', title: 'Why most business websites fail to convert', excerpt: 'What separates a useful commercial path from a digital brochure.', date: '2025-08-12', readTime: '12 min read' },
+  { id: '8', slug: 'top-10-digital-marketing-company-in-dubai', title: 'Why agency rankings do not make the decision', excerpt: 'A better way to compare partners when the stakes are commercial.', date: '2025-08-10', readTime: '11 min read' },
+  { id: '9', slug: 'top-5-digital-marketing-company-in-dubai', title: 'How to find the right growth partner', excerpt: 'The questions that reveal whether an agency understands your business.', date: '2025-08-08', readTime: '10 min read' },
 ];
 
-// Define keyword relationships for better matching
 const postKeywords: Record<string, string[]> = {
-  '1': ['digital marketing', 'trends', 'marketing'],
-  '2': ['seo', 'best practices', 'optimization'],
-  '3': ['web development', 'frameworks', 'development'],
-  '4': ['seo company dubai', 'best seo', 'dubai', 'seo services'],
-  '5': ['seo services dubai', 'dubai seo', 'seo', 'revenue'],
-  '6': ['crm', 'lead management', 'dubai business'],
-  '7': ['website design dubai', 'development services', 'dubai'],
-  '8': ['digital marketing company dubai', 'top companies', 'dubai'],
-  '9': ['digital marketing dubai', 'top companies', 'dubai'],
+  '1': ['digital marketing', 'trends'],
+  '2': ['seo', 'optimization'],
+  '3': ['web development', 'frameworks'],
+  '4': ['seo', 'dubai', 'revenue'],
+  '5': ['seo', 'dubai', 'revenue'],
+  '6': ['crm', 'leads', 'dubai'],
+  '7': ['website', 'development', 'dubai'],
+  '8': ['digital marketing', 'dubai'],
+  '9': ['digital marketing', 'dubai'],
 };
 
 export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }: RelatedPostsProps) {
-  // Filter out current post
-  const otherPosts = allPosts.filter(post => post.id !== currentPostId);
-  
-  // Score posts based on keyword matching
-  const scoredPosts = otherPosts.map(post => {
-    const postKeywordList = postKeywords[post.id] || [];
-    const currentKeywordList = postKeywords[currentPostId] || currentPostKeywords;
-    
-    // Calculate similarity score
-    let score = 0;
-    
-    // Check for keyword matches
-    currentKeywordList.forEach(keyword => {
-      postKeywordList.forEach(postKeyword => {
-        if (keyword.toLowerCase().includes(postKeyword.toLowerCase()) || 
-            postKeyword.toLowerCase().includes(keyword.toLowerCase())) {
-          score += 1;
-        }
-      });
-    });
-    
-    // Boost score for Dubai-related posts when current post is Dubai-related
-    const isDubaiPost = currentKeywordList.some(k => k.toLowerCase().includes('dubai'));
-    const isRelatedDubaiPost = postKeywordList.some(k => k.toLowerCase().includes('dubai'));
-    if (isDubaiPost && isRelatedDubaiPost) {
-      score += 2;
-    }
-    
-    // Boost score for SEO-related posts when current post is SEO-related
-    const isSeoPost = currentKeywordList.some(k => k.toLowerCase().includes('seo'));
-    const isRelatedSeoPost = postKeywordList.some(k => k.toLowerCase().includes('seo'));
-    if (isSeoPost && isRelatedSeoPost) {
-      score += 2;
-    }
-    
-    return { ...post, score };
-  });
-  
-  // Sort by score and recency, then take top 3
-  const relatedPosts = scoredPosts
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    })
+  const currentKeywords = postKeywords[currentPostId] || currentPostKeywords;
+  const relatedPosts = allPosts
+    .filter((post) => post.id !== currentPostId)
+    .map((post) => ({
+      ...post,
+      score: (postKeywords[post.id] || []).reduce((score, keyword) => score + (currentKeywords.some((current) => current.includes(keyword) || keyword.includes(current)) ? 1 : 0), 0),
+    }))
+    .sort((a, b) => b.score - a.score || new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 3);
 
-  // If no related posts found, show most recent posts
-  if (relatedPosts.length === 0 || relatedPosts.every(post => post.score === 0)) {
-    return null;
-  }
-
   return (
-    <section className="py-16 bg-slate-900/30 border-t border-gray-700/50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-12"
-        >
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Related Articles
-          </h2>
-          <p className="text-gray-400">
-            Continue learning about SEO services in Dubai and digital marketing strategies
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {relatedPosts.map((post, index) => (
-            <motion.article
-              key={post.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/50 transition-colors border border-gray-700/30 hover:border-primary/30 group"
-            >
-              <Link href={`/blog/${post.slug}`} className="block">
-                <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                  {post.title}
-                </h3>
-                
-                <p className="text-gray-400 text-sm mb-4 line-clamp-3">
-                  {post.excerpt}
-                </p>
-                
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{new Date(post.date).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })}</span>
-                  <span>{post.readTime}</span>
+    <section className="border-t border-line bg-background-muted py-16">
+      <div className="mx-auto max-w-4xl px-6 sm:px-10 lg:px-16">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Keep reading</p>
+        <h2 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-foreground">Related field notes</h2>
+        <div className="mt-8 divide-y divide-line border-y border-line">
+          {relatedPosts.map((post) => (
+            <article key={post.id} className="py-6">
+              <Link href={`/blog/${post.slug}`} className="group block">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+                  <h3 className="text-xl font-semibold tracking-[-0.02em] text-foreground group-hover:text-primary">{post.title}</h3>
+                  <span className="shrink-0 text-sm text-muted">{post.readTime}</span>
                 </div>
-                
-                <div className="flex items-center text-primary text-sm font-medium mt-4 group-hover:text-primary/80 transition-colors">
-                  <span>Read Article</span>
-                  <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
+                <p className="mt-3 leading-7 text-muted">{post.excerpt}</p>
               </Link>
-            </motion.article>
+            </article>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center mt-12"
-        >
-          <Link
-            href="/blog"
-            className="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
-          >
-            View All Articles
-            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </motion.div>
+        <Link href="/blog" className="btn-secondary mt-8">Read all field notes</Link>
       </div>
     </section>
   );

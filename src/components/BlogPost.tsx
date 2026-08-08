@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import type { BlogPost } from '@/types/blog';
 
@@ -8,34 +7,23 @@ interface BlogPostProps {
 
 export default function BlogPost({ post }: BlogPostProps) {
   return (
-    <article className="bg-gray-800/50 rounded-xl p-6 md:p-8 border border-gray-700/50">
-      <Link 
-        href="/blog" 
-        className="inline-flex items-center text-primary hover:text-primary/80 mb-6 transition-colors"
-      >
-        ← Back to Blog
+    <article className="border-y border-line py-8 md:py-12">
+      <Link href="/blog" className="inline-flex items-center text-sm text-primary hover:text-accent">
+        ← Back to journal
       </Link>
-      
-      <header className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{post.title}</h1>
-        
-        <div className="flex flex-wrap items-center text-sm text-gray-400 gap-4">
+
+      <header className="mt-10 border-b border-line pb-8">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Field note</p>
+        <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-tight tracking-[-0.05em] text-foreground md:text-6xl">{post.title}</h1>
+        <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-muted">
           <span>By {post.author}</span>
-          <span>•</span>
+          <span aria-hidden="true">·</span>
           <time dateTime={post.date}>{new Date(post.date).toISOString().split('T')[0]}</time>
-          {post.readTime && (
-            <>
-              <span>•</span>
-              <span>{post.readTime}</span>
-            </>
-          )}
+          {post.readTime && <><span aria-hidden="true">·</span><span>{post.readTime}</span></>}
         </div>
       </header>
-      
-      <div 
-        className="prose prose-lg prose-invert max-w-none text-gray-300"
-        dangerouslySetInnerHTML={{ __html: post.content }}
-      />
+
+      <div className="prose prose-lg mt-10 max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
     </article>
   );
 }

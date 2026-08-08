@@ -1,5 +1,4 @@
 import React from 'react';
-import Navigation from '@/components/Navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 
 export default function BlogLayout({
@@ -9,7 +8,6 @@ export default function BlogLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
       <Breadcrumb />
       <div className="pt-0">
         {children}

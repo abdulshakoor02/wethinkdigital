@@ -1,10 +1,59 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 interface VideoHeroProps {
   className?: string;
+}
+
+function HeroContent() {
+  return (
+    <div className="relative z-10 grid min-h-[680px] w-full items-end gap-12 px-6 pb-16 pt-32 sm:px-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.7fr)] lg:items-center lg:px-16 lg:pb-20">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-3xl"
+      >
+        <p className="mb-5 font-mono text-xs uppercase tracking-[0.24em] text-accent">
+          Growth systems for Dubai businesses
+        </p>
+        <h1 className="max-w-3xl text-5xl font-bold leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-8xl">
+          Turn search demand into qualified revenue.
+        </h1>
+        <p className="mt-7 max-w-2xl text-lg leading-8 text-muted sm:text-xl">
+          We build the acquisition system behind your next stage: SEO, conversion-focused websites, and automation your team can measure.
+        </p>
+        <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <Link href="#contact" className="btn-primary">
+            Plan a growth audit
+          </Link>
+          <Link href="#case-studies" className="btn-secondary">
+            See the proof
+          </Link>
+        </div>
+      </motion.div>
+
+      <motion.aside
+        initial={{ opacity: 0, x: 24 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        className="surface max-w-md justify-self-end p-6 sm:p-8"
+      >
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">One recent result</p>
+        <p className="mt-6 text-5xl font-bold tracking-[-0.05em] text-primary sm:text-6xl">300%</p>
+        <p className="mt-2 text-lg font-semibold text-foreground">revenue increase in 90 days</p>
+        <p className="mt-5 border-t border-line pt-5 text-sm leading-6 text-muted">
+          Dubai fashion retailer. Rebuilt the acquisition path, cut paid waste, and moved conversion from 4.5% to 12.8%.
+        </p>
+        <Link href="#case-studies" className="mt-6 inline-flex text-sm font-semibold text-primary hover:text-accent">
+          Read the case study <span aria-hidden="true" className="ml-2">↗</span>
+        </Link>
+      </motion.aside>
+    </div>
+  );
 }
 
 export default function VideoHero({ className = '' }: VideoHeroProps) {
@@ -13,136 +62,54 @@ export default function VideoHero({ className = '' }: VideoHeroProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Mark as client-side to avoid hydration issues
     setIsClient(true);
-    
-    // Set up video event listeners
-    if (videoRef.current) {
-      const handleCanPlay = () => {
-        setIsLoaded(true);
-        // Autoplay the video when it's ready
-        videoRef.current?.play().catch(error => {
-          console.log('Autoplay prevented:', error);
-        });
-      };
 
-      videoRef.current.addEventListener('canplay', handleCanPlay);
-      
-      return () => {
-        videoRef.current?.removeEventListener('canplay', handleCanPlay);
-      };
-    }
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleCanPlay = () => {
+      setIsLoaded(true);
+      video.play().catch(() => undefined);
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+    return () => video.removeEventListener('canplay', handleCanPlay);
   }, []);
 
-  // Don't render video on server to prevent hydration mismatch
   if (!isClient) {
     return (
-      <div className={`relative w-full h-screen ${className}`}>
-        {/* Loading placeholder */}
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        </div>
-        
-        {/* Hero Content Overlay */}
-        <div className="relative z-10 flex items-center justify-center w-full h-full">
-          <div className="text-center px-4 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="gradient-text">Build Tomorrow's</span>
-              <br />
-              <span className="text-white">Digital Experiences Today</span>
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Full-stack development + growth marketing that scales from MVP to millions
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary px-8 py-4 text-lg">
-                Start Your Project
-              </button>
-              
-              <button className="btn-secondary px-8 py-4 text-lg">
-                View Our Work
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <section id="top" className={`relative min-h-[680px] w-full overflow-hidden bg-background ${className}`}>
+        <HeroContent />
+      </section>
     );
   }
 
   return (
-    <div className={`relative w-full h-screen ${className}`}>
-      {/* Video Background */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
+    <section id="top" className={`relative min-h-[680px] w-full overflow-hidden bg-background ${className}`}>
+      <div className="absolute inset-0 overflow-hidden">
         <video
           ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
-          preload="auto"
-          className="absolute inset-0 w-full h-full object-cover"
+          preload="metadata"
+          className="absolute inset-0 h-full w-full object-cover opacity-55"
           onLoadedData={() => setIsLoaded(true)}
         >
           <source src="/hero2.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
         </video>
-        
-        {/* Video overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/40"></div>
-      </div>
-      
-      {/* Hero Content Overlay */}
-      <div className="relative z-10 flex items-center justify-center w-full h-full">
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="text-center px-4 max-w-4xl mx-auto"
-        >
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            <span className="gradient-text">Build Tomorrow's</span>
-            <br />
-            <span className="text-white">Digital Experiences Today</span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            <span className="gradient-text">Full-stack development + growth marketing that scales from MVP to millions</span>
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                const contactElement = document.getElementById('contact');
-                if (contactElement) {
-                  contactElement.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className="btn-primary px-8 py-4 text-lg"
-            >
-              Start Your Project
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn-secondary px-8 py-4 text-lg"
-            >
-              View Our Work
-            </motion.button>
-          </div>
-        </motion.div>
+        <div className="absolute inset-0 bg-[rgb(12_18_17_/_0.7)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(12_18_17_/_0.94)_0%,rgb(12_18_17_/_0.72)_48%,rgb(12_18_17_/_0.54)_100%)]" />
       </div>
 
-      {/* Loading State */}
+      <HeroContent />
+
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-20">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background">
+          <div className="h-8 w-8 animate-spin border-2 border-primary border-t-transparent" role="status" aria-label="Loading hero video" />
         </div>
       )}
-    </div>
+    </section>
   );
 }

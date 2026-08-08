@@ -1,152 +1,89 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useRef } from 'react';
 
 const processSteps = [
   {
-    id: 1,
-    title: 'Discovery & Strategy',
-    description: 'Deep dive into your business goals, market position, and growth opportunities.',
-    duration: '1-2 weeks',
-    deliverables: ['Business Analysis', 'Competitive Research', 'Growth Strategy'],
-    icon: '🔍'
+    id: '01',
+    title: 'Discovery and strategy',
+    description: 'We get specific about the commercial target, current friction, and the evidence that will move the decision.',
+    duration: '1–2 weeks',
+    deliverables: ['Business analysis', 'Competitive research', 'Growth strategy'],
   },
   {
-    id: 2,
-    title: 'Design & Architecture',
-    description: 'Create stunning designs and robust technical architecture for your solution.',
-    duration: '2-3 weeks',
-    deliverables: ['UI/UX Design', 'Technical Architecture', 'Project Roadmap'],
-    icon: '🎨'
+    id: '02',
+    title: 'Design and architecture',
+    description: 'We shape the experience and technical foundation around the way your customers actually decide.',
+    duration: '2–3 weeks',
+    deliverables: ['Interface direction', 'Technical architecture', 'Project roadmap'],
   },
   {
-    id: 3,
-    title: 'Development & Testing',
-    description: 'Agile development with continuous testing and quality assurance.',
-    duration: '4-8 weeks',
-    deliverables: ['Development Sprints', 'Testing Reports', 'Feature Releases'],
-    icon: '⚡'
+    id: '03',
+    title: 'Build and test',
+    description: 'We ship in focused increments, measuring the path as it becomes real instead of waiting for a big reveal.',
+    duration: '4–8 weeks',
+    deliverables: ['Development sprints', 'Testing reports', 'Feature releases'],
   },
   {
-    id: 4,
-    title: 'Launch & Optimization',
-    description: 'Deploy, monitor, and continuously optimize for maximum performance.',
+    id: '04',
+    title: 'Launch and learn',
+    description: 'We monitor the live experience, remove friction, and keep the next improvement visible to the team.',
     duration: 'Ongoing',
-    deliverables: ['Performance Monitoring', 'A/B Testing', 'Growth Optimization'],
-    icon: '🚀'
+    deliverables: ['Performance monitoring', 'Experiment plan', 'Growth optimisation'],
   },
-  {
-    id: 5,
-    title: 'Scale & Dominate',
-    description: 'Scale your success and dominate your market with advanced strategies.',
-    duration: 'Ongoing',
-    deliverables: ['Scaling Strategy', 'Market Domination', 'Long-term Growth'],
-    icon: '👑'
-  }
 ];
 
 export default function Process() {
-  const ref = useRef(null);
-
   return (
-    <section id="process" className="py-24 bg-slate-900/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="process" className="border-y border-line bg-background py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6 }}
+          className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Our Proven Process</span>
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            From initial concept to market domination, our 5-step process ensures your success at every stage.
-          </p>
+          <div>
+            <p className="mb-5 font-mono text-xs uppercase tracking-[0.24em] text-primary">How we work</p>
+            <h2 className="text-4xl font-bold leading-tight tracking-[-0.05em] text-foreground sm:text-6xl">A visible path from brief to business result.</h2>
+          </div>
+          <p className="max-w-2xl self-end text-lg leading-8 text-muted">No black box, no ceremonial handoff. Every phase leaves behind a decision, an artifact, and a measurable next move.</p>
         </motion.div>
 
-        <div ref={ref} className="relative">
-          {/* Timeline Line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-primary to-secondary hidden md:block" />
-
+        <div className="mt-16 divide-y divide-line border-y border-line">
           {processSteps.map((step, index) => (
-            <motion.div
+            <motion.article
               key={step.id}
-              initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              className={`relative flex items-center mb-16 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                }`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: index * 0.06 }}
+              className="grid gap-6 py-8 md:grid-cols-[72px_1fr_220px] md:items-start"
             >
-              {/* Content */}
-              <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
-                }`}>
-                <div className="glass rounded-xl p-8 hover:shadow-2xl transition-all duration-300">
-                  <div className="flex items-center mb-4">
-                    <div className="text-4xl mr-4">{step.icon}</div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-white">{step.title}</h3>
-                      <p className="text-sm text-primary font-semibold">{step.duration}</p>
-                    </div>
-                  </div>
-
-                  <p className="text-gray-300 mb-4">{step.description}</p>
-
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-white">Key Deliverables:</h4>
-                    {step.deliverables.map((deliverable) => (
-                      <div key={deliverable} className="flex items-center text-sm text-gray-300">
-                        <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>
-                        {deliverable}
-                      </div>
-                    ))}
-                  </div>
+              <p className="font-mono text-sm text-primary">{step.id}</p>
+              <div>
+                <h3 className="text-2xl font-semibold tracking-[-0.03em] text-foreground">{step.title}</h3>
+                <p className="mt-3 max-w-2xl leading-7 text-muted">{step.description}</p>
+                <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-secondary">
+                  {step.deliverables.map((deliverable) => <span key={deliverable}>{deliverable}</span>)}
                 </div>
               </div>
-
-              {/* Timeline Circle */}
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xl z-10 hidden md:flex"
-              >
-                {step.id}
-              </div>
-
-              {/* Mobile Timeline */}
-              <div className="md:hidden absolute left-4 top-0 w-1 h-full bg-gradient-to-b from-primary to-secondary" />
-              <div className="md:hidden absolute left-0 w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-sm"
-              >
-                {step.id}
-              </div>
-            </motion.div>
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted md:pt-1">{step.duration}</p>
+            </motion.article>
           ))}
         </div>
 
-        {/* Process CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-center mt-16"
-        >
-          <h3 className="text-3xl font-bold mb-6 text-white">Ready to Start Your Journey?</h3>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Let&apos;s discuss how we can apply our proven process to transform your business.
-          </p>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn-primary px-8 py-4 text-lg"
-            onClick={() => {
-              const contactElement = document.getElementById('contact');
-              if (contactElement) {
-                contactElement.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
+        <div className="mt-14 flex flex-col gap-6 border-b border-line pb-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-xl text-lg leading-7 text-muted">Bring us the growth problem you keep circling. We&apos;ll help you turn it into a tractable plan.</p>
+          <button
+            type="button"
+            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+            className="btn-primary self-start"
           >
-            Book Your Discovery Call
-          </motion.button>
-        </motion.div>
+            Plan a growth audit
+          </button>
+        </div>
       </div>
     </section>
   );

@@ -1,104 +1,98 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { FaRocket, FaChartLine, FaChartBar, FaStore, FaMobileAlt, FaWordpress } from 'react-icons/fa';
 
 const services = [
   {
-    title: 'Custom Web Development Dubai',
-    description: "I don&apos;t just build websites. I build revenue-generating machines. As the best digital marketing company in Dubai, I deliver custom web development that converts.",
-    features: ['Responsive Web Design Dubai', 'Custom Software Development Dubai', 'Enterprise Software Solutions Dubai', 'CRM Software Development Dubai'],
-    icon: <FaRocket className="text-6xl" />,
-    color: 'from-purple-500 to-blue-500'
+    number: '01',
+    title: 'Revenue-ready websites',
+    description: 'Conversion-focused websites that make your offer easy to understand, trust, and act on.',
+    features: ['Technical foundation', 'Conversion journeys', 'Measurement setup'],
   },
   {
-    title: 'Digital Marketing Services Dubai UAE',
-    description: "You&apos;re losing money every day you&apos;re not at the top of Google. My digital marketing services in Dubai UAE will get you there. I&apos;m the social media marketing agency Dubai trusts.",
-    features: ['SEO Services Dubai Small Business', 'PPC Advertising Company Dubai', 'Content Marketing Services UAE', 'Email Marketing Agency Dubai'],
-    icon: <FaChartLine className="text-6xl" />,
-    color: 'from-blue-500 to-cyan-500'
+    number: '02',
+    title: 'Search visibility',
+    description: 'SEO that connects high-intent searches in Dubai with the pages and proof that close the gap.',
+    features: ['Commercial keyword strategy', 'Local search systems', 'Content with a job'],
   },
   {
-    title: 'Ecommerce Website Development UAE',
-    description: "Your ecommerce store should be making you money while you sleep. My ecommerce website development in the UAE is designed to do just that. More traffic, more sales, more profit.",
-    features: ['Shopify Development', 'Magento Development', 'Payment Gateway Integration', 'UX for E-commerce'],
-    icon: <FaStore className="text-6xl" />,
-    color: 'from-green-500 to-lime-500'
+    number: '03',
+    title: 'E-commerce growth',
+    description: 'A clearer path from product discovery to checkout for stores that need more from every visit.',
+    features: ['Storefront performance', 'Checkout improvements', 'Retention loops'],
   },
   {
-    title: 'Mobile App Development Dubai',
-    description: "I build mobile apps that people actually use. As leading mobile app developers in the UAE, I create experiences that drive engagement and revenue.",
-    features: ['iOS Development', 'Android Development', 'Cross-Platform Apps', 'App Store Optimization'],
-    icon: <FaMobileAlt className="text-6xl" />,
-    color: 'from-red-500 to-orange-500'
+    number: '04',
+    title: 'Automation and CRM',
+    description: 'Connected systems that stop qualified leads disappearing between marketing and sales.',
+    features: ['Lead routing', 'CRM integrations', 'Actionable reporting'],
   },
-  {
-    title: 'WordPress Development Company Dubai',
-    description: "I build WordPress sites that are fast, secure, and SEO-friendly. As a top WordPress development company in Dubai, I&apos;ll make sure your website is a lead-generating asset, not a liability.",
-    features: ['Custom Themes & Plugins', 'Performance Optimization', 'Security Hardening', 'WooCommerce Integration'],
-    icon: <FaWordpress className="text-6xl" />,
-    color: 'from-yellow-500 to-amber-500'
-  },
-  {
-    title: 'Business Automation Software UAE',
-    description: "I help businesses in the UAE automate their processes and save money. My business automation software is custom-built to solve your specific problems and scale your operations.",
-    features: ['Process Analysis', 'Custom Software Development', 'API Integration', 'Ongoing Support'],
-    icon: <FaChartBar className="text-6xl" />,
-    color: 'from-cyan-500 to-teal-500'
-  }
 ];
 
 export default function Services() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <section id="services" className="py-24 bg-background" ref={ref}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="services" className="border-y border-line bg-background py-24 sm:py-32" ref={ref}>
+      <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">I Offer a Lot More Than Just Services</span>
+          <p className="mb-5 font-mono text-xs uppercase tracking-[0.24em] text-primary">What we build</p>
+          <h2 className="text-4xl font-bold leading-tight tracking-[-0.05em] text-foreground sm:text-6xl">
+            One acquisition system, not a pile of disconnected services.
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            I provide a clear path to dominating your market. I&apos;m not just a service provider; I&apos;m your partner in growth. I&apos;m the best digital marketing company in Dubai, and I have the results to prove it.
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
+            We focus the work around the commercial moment: the right person finds you, understands the value, and takes the next step.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <motion.div
-              key={service.title}
-              initial={{ opacity: 0, y: 50 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              whileHover={{ scale: 1.05 }}
-              className="glass rounded-xl p-8 hover:shadow-2xl transition-all duration-300"
-            >
-              <div className={`mb-4 bg-gradient-to-r ${service.color} bg-clip-text`}>
-                {service.icon}
-              </div>
-              
-              <h3 className="text-2xl font-bold mb-4 text-white">{service.title}</h3>
-              
-              <p className="text-gray-300 mb-6">{service.description}</p>
-              
-              <ul className="space-y-2">
-                {service.features.map((feature) => (
-                  <li key={feature} className="flex items-center text-gray-300">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
+        <div className="mt-16 grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="surface self-start p-7 sm:p-9"
+          >
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Lead offer</p>
+            <h3 className="mt-7 text-3xl font-bold tracking-[-0.04em] text-foreground">Revenue-ready websites</h3>
+            <p className="mt-5 text-base leading-7 text-muted">
+              Your website should make the next decision easier. We turn scattered pages into a focused path from search intent to qualified enquiry.
+            </p>
+            <ul className="mt-8 divide-y divide-line border-y border-line">
+              {['Technical foundation', 'Conversion journeys', 'Measurement setup'].map((feature) => (
+                <li key={feature} className="py-4 text-sm text-foreground">
+                  <span className="mr-3 text-primary" aria-hidden="true">↳</span>{feature}
+                </li>
+              ))}
+            </ul>
+          </motion.article>
+
+          <div className="divide-y divide-line border-y border-line">
+            {services.slice(1).map((service, index) => (
+              <motion.article
+                key={service.number}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.2 + index * 0.08 }}
+                className="grid gap-5 py-7 sm:grid-cols-[72px_1fr]"
+              >
+                <p className="font-mono text-sm text-primary">{service.number}</p>
+                <div>
+                  <h3 className="text-2xl font-semibold tracking-[-0.03em] text-foreground">{service.title}</h3>
+                  <p className="mt-3 max-w-2xl leading-7 text-muted">{service.description}</p>
+                  <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-secondary">
+                    {service.features.map((feature) => <span key={feature}>{feature}</span>)}
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

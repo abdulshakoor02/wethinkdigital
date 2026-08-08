@@ -3,21 +3,22 @@
 import { FaWhatsapp } from 'react-icons/fa';
 
 export default function WhatsAppButton() {
-  const phoneNumber = '+971564713394'; // Replace with your WhatsApp number
-  const message = 'Hello, I would like to know more about your services.'; // Optional: pre-filled message
+  const phoneNumber = '+971564713394';
+  const message = 'Hello, I would like to know more about your services.';
 
   const openWhatsApp = () => {
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <button
+      type="button"
       onClick={openWhatsApp}
-      className="fixed bottom-8 right-8 z-50 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all duration-300 transform hover:scale-110"
+      className="fixed bottom-6 right-6 z-50 inline-flex min-h-14 min-w-14 items-center justify-center rounded-full bg-[#25D366] px-4 text-white shadow-lg transition-colors hover:bg-[#1ebe5d]"
       aria-label="Chat on WhatsApp"
     >
-      <FaWhatsapp className="text-4xl" />
+      <FaWhatsapp className="text-3xl" aria-hidden="true" />
     </button>
   );
 }

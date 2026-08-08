@@ -4,34 +4,25 @@ import { motion } from 'framer-motion';
 
 export default function DubaiDomination() {
   return (
-    <section id="team" className="py-24 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
+    <section id="approach" className="border-y border-line bg-background py-20 sm:py-28">
+      <div className="mx-auto grid max-w-7xl gap-8 px-6 sm:px-10 lg:grid-cols-[0.8fr_1.2fr] lg:px-16">
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="font-mono text-xs uppercase tracking-[0.24em] text-primary"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">I&apos;m Not Just in the Business of Digital Marketing. I&apos;m in the Business of Dubai Domination.</span>
-          </h2>
-                    <p className="text-xl text-gray-300 max-w-4xl mx-auto">
-            I don&apos;t play small. I don&apos;t aim for incremental improvements. I go for the jugular. While other agencies are fighting for scraps, I&apos;m rewriting the rules of the game in the UAE.
-          </p>
-        </motion.div>
+          Local context, commercial standards
+        </motion.p>
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-center mt-16"
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn-primary px-8 py-4 text-lg"
-          >
-            Let&apos;s Talk About How I Can Make You More Money
-          </motion.button>
+          <h2 className="max-w-4xl text-4xl font-bold leading-tight tracking-[-0.05em] text-foreground sm:text-6xl">Dubai is competitive. Your growth system should be sharper than your competitors&apos; claims.</h2>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">We pair local market fluency with the discipline to show the work: what changed, why it changed, and what moved afterwards.</p>
         </motion.div>
       </div>
     </section>

@@ -60,12 +60,12 @@ export default function RootLayout({
         {/* Critical CSS inlined for faster rendering */}
         <style dangerouslySetInnerHTML={{
           __html: `
-            :root{--background:#0f172a;--foreground:#f8fafc;--primary:#6b46c1;--secondary:#3b82f6;--accent:#10b981;--muted:#64748b}
-            body{background:var(--background);color:var(--foreground);margin:0;overflow-x:hidden}
-            .gradient-text{background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-            .btn-primary{background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;color:white;padding:12px 24px;border-radius:8px;font-weight:600;transition:all 0.3s ease;cursor:pointer}
-            .btn-secondary{background:transparent;border:2px solid var(--primary);color:var(--primary);padding:12px 24px;border-radius:8px;font-weight:600;transition:all 0.3s ease;cursor:pointer}
-            nav{position:fixed;top:0;left:0;right:0;z-index:50}
+            :root{--background:oklch(0.17 0.02 165);--foreground:oklch(0.94 0.025 90);--primary:oklch(0.7 0.13 48);--secondary:oklch(0.68 0.07 165);--accent:oklch(0.82 0.13 83);--muted:oklch(0.73 0.03 165);--line:oklch(0.38 0.03 165)}
+             body{background:var(--background);color:var(--foreground);margin:0;overflow-x:hidden}
+             .gradient-text{color:var(--primary)}
+             .btn-primary{background:var(--primary);border:none;color:var(--background);padding:12px 24px;border-radius:3px;font-weight:650;cursor:pointer}
+             .btn-secondary{background:transparent;border:1px solid var(--line);color:var(--foreground);padding:12px 24px;border-radius:3px;font-weight:650;cursor:pointer}
+             nav{position:fixed;top:0;left:0;right:0;z-index:50}
           `
         }} />
         

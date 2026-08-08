@@ -1,192 +1,98 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 const primaryKeywords = [
-  'Digital Marketing',
-  'Digital Marketing Agency',
-  'Business Growth',
-  'Website Design & Development',
-  'Search Engine Optimization (SEO)',
-  'Social Media Marketing',
-  'Lead Generation',
-  'HubSpot',
-  'Digital Marketing Strategy',
-  'Online Marketing',
+  'Digital marketing',
+  'Business growth',
+  'Website design and development',
+  'Search engine optimization',
+  'Social media marketing',
+  'Lead generation',
+  'CRM integration',
+  'Conversion rate optimization',
+  'Marketing automation',
+  'Performance marketing',
 ];
 
-const lsiKeywords = [
-  'Digital marketing services',
-  'Marketing strategy creation',
-  'Customer journey mapping',
-  'Brand awareness campaigns',
-  'Content creation and distribution',
-  'Search engine marketing',
-  'Inbound marketing strategies',
-  'CRM integration services',
-  'Customer relationship management',
-  'Digital footprint optimization',
-  'Online reputation management',
-  'Marketing automation',
-  'Sales funnel optimization',
-  'Conversion rate optimization',
-  'Customer acquisition strategies',
-  'Brand advocacy development',
-  'Multi-channel marketing',
-  'Performance marketing',
-  'Growth hacking techniques',
-  'Digital transformation services',
+const approach = [
+  {
+    number: '01',
+    title: 'Map the commercial journey',
+    description: 'We identify the questions, friction, and handoffs between first search and signed deal.',
+  },
+  {
+    number: '02',
+    title: 'Build the high-intent path',
+    description: 'We connect the page, message, proof, and offer so every important visit has a clear next step.',
+  },
+  {
+    number: '03',
+    title: 'Measure what compounds',
+    description: 'We keep the work close to revenue, learning from qualified enquiries rather than vanity metrics.',
+  },
 ];
 
 export default function Keywords() {
   const [showAll, setShowAll] = useState(false);
-  const keywords = [...primaryKeywords, ...lsiKeywords];
-  const visibleKeywords = showAll ? keywords : keywords.slice(0, 10);
+  const visibleKeywords = showAll ? primaryKeywords : primaryKeywords.slice(0, 6);
+
   return (
-    <section id="keywords" className="py-24 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Ready to Stop Guessing and Start Growing?</span>
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            You&apos;re here because you know you need to be doing more with your digital marketing.
-            <br />
-            You&apos;re probably asking yourself:
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-          <div>
-            <h3 className="text-3xl font-bold mb-4 text-white">Your Questions, Answered.</h3>
-            <ul className="space-y-4 text-lg text-gray-300">
-              <li><strong>How do I get more leads?</strong> I&apos;ll build you a lead generation machine.</li>
-              <li><strong>Is my website actually working?</strong> I&apos;ll turn it into your best salesperson.</li>
-              <li><strong>Should I be on social media?</strong> I&apos;ll make it a profitable channel, not a time-suck.</li>
-              <li><strong>What&apos;s this SEO thing all about?</strong> It&apos;s about getting found by people who want to buy from you. I&apos;ll get you to the top.</li>
-            </ul>
-          </div>
-          <div className="glass rounded-xl p-8">
-            <h3 className="text-2xl font-bold mb-4 text-white">The Raw Truth About Digital Marketing</h3>
-            <p className="text-gray-300 mb-4">
-              Look, most of what you&apos;ve been told about online marketing is wrong.
-            </p>
-            <p className="text-gray-300">
-              It&apos;s not about posting pretty pictures or getting a million followers who never buy anything.
-            </p>
-            <p className="text-gray-300 font-bold mt-4">
-              It&apos;s about one thing: ROI.
-            </p>
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">My Approach to Digital Marketing Strategy</span>
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            I don&apos;t do fluff. I don&apos;t do vanity metrics. I build systems that get you more customers and make you more money. It&apos;s that simple.
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          <div className="glass rounded-xl p-8">
-            <h3 className="text-2xl font-bold mb-4 text-white">1. We Map the Customer Journey</h3>
-            <p className="text-gray-300">
-              I figure out exactly how your customers think, from the first time they hear about you to the moment they become a raving fan.
-            </p>
-            <ul className="mt-4 space-y-2 text-gray-300">
-              <li>- We identify their pain points.</li>
-              <li>- We figure out where they hang out online.</li>
-              <li>- We build a plan to reach them at every step.</li>
-            </ul>
-          </div>
-          <div className="glass rounded-xl p-8">
-            <h3 className="text-2xl font-bold mb-4 text-white">2. We Build Your Digital Footprint</h3>
-            <p className="text-gray-300">
-              Your website, your social media, your ads - they all need to work together. I&apos;ll build you a seamless system that turns strangers into customers.
-            </p>
-            <ul className="mt-4 space-y-2 text-gray-300">
-              <li>- **Website Design & Development** that&apos;s built to convert.</li>
-              <li>- **Search Engine Optimization (SEO)** so you show up when it matters.</li>
-              <li>- **Social Media Marketing** that actually builds a community.</li>
-            </ul>
-          </div>
-          <div className="glass rounded-xl p-8">
-            <h3 className="text-2xl font-bold mb-4 text-white">3. We Optimize for Conversion</h3>
-            <p className="text-gray-300">
-              Getting traffic is easy. Getting that traffic to buy from you is what I do best. We&apos;ll obsess over the details that turn clicks into cash.
-            </p>
-            <ul className="mt-4 space-y-2 text-gray-300">
-              <li>- **Conversion Rate Optimization (CRO)** to maximize every visitor.</li>
-              <li>- **Sales Funnel Optimization** to guide them to the sale.</li>
-              <li>- **Marketing Automation** to nurture leads and close deals.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-          {visibleKeywords.map((keyword, index) => (
-            <motion.div
-              key={keyword}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="glass rounded-lg p-4 text-center"
-            >
-              <p className="text-white">{keyword}</p>
-            </motion.div>
-          ))}
-        </div>
-
-        {!showAll && (
-          <div className="text-center mb-16">
-            <motion.button
-              onClick={() => setShowAll(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn-secondary px-8 py-4 text-lg"
-            >
-              Show More
-            </motion.button>
-          </div>
-        )}
-
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-center"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn-primary px-8 py-4 text-lg"
-            onClick={() => {
-              const contactElement = document.getElementById('contact');
-              if (contactElement) {
-                contactElement.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
+    <section id="strategy" className="bg-background-muted py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
+        <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
           >
-            Book a Free Strategy Call
-          </motion.button>
-          <p className="text-gray-400 mt-4">
-            Let&apos;s talk about how I can 10x your business. No fluff, no hard sell. Just a real conversation about your goals.
-          </p>
-        </motion.div>
+            <p className="mb-5 font-mono text-xs uppercase tracking-[0.24em] text-primary">How the work moves</p>
+            <h2 className="text-4xl font-bold leading-tight tracking-[-0.05em] text-foreground sm:text-6xl">
+              Clarity first. Momentum second.
+            </h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-muted">
+              The best digital work is not louder. It removes the uncertainty between a customer&apos;s intent and your team&apos;s response.
+            </p>
+          </motion.div>
+
+          <div className="divide-y divide-line border-y border-line">
+            {approach.map((item, index) => (
+              <motion.article
+                key={item.number}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                className="grid gap-5 py-7 sm:grid-cols-[72px_1fr]"
+              >
+                <p className="font-mono text-sm text-primary">{item.number}</p>
+                <div>
+                  <h3 className="text-2xl font-semibold tracking-[-0.03em] text-foreground">{item.title}</h3>
+                  <p className="mt-3 max-w-2xl leading-7 text-muted">{item.description}</p>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-20 border-t border-line pt-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">Specialisms</p>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-muted">The channels and systems we bring together when the commercial problem calls for them.</p>
+            </div>
+            {!showAll && (
+              <button type="button" onClick={() => setShowAll(true)} className="btn-secondary shrink-0 self-start px-5 py-2 text-sm">
+                Show all specialisms
+              </button>
+            )}
+          </div>
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-base text-foreground">
+            {visibleKeywords.map((keyword) => <span key={keyword}>{keyword}</span>)}
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -1,205 +1,153 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import Image from 'next/image';
+import { useState } from 'react';
 
 const caseStudies = [
   {
     id: 1,
-    title: 'I Took This Dubai E-commerce Store from Zero to Hero',
-    client: 'A Dubai-based fashion retailer',
-    description: 'They were bleeding money on ads that didn&apos;t convert. I implemented my proven ecommerce website development UAE strategy and 3x-ed their revenue in 90 days.',
-    image: 'https://plus.unsplash.com/premium_photo-1726729310968-f322e3742418?w=600&h=400&fit=crop',
+    title: 'A Dubai fashion retailer stopped paying for wasted clicks.',
+    client: 'Dubai fashion retailer',
+    timeframe: '90-day engagement',
+    description: 'We rebuilt the acquisition path around commercial intent, clearer product proof, and a checkout experience that did less work against the customer.',
+    image: 'https://plus.unsplash.com/premium_photo-1726729310968-f322e3742418?w=1200&h=800&fit=crop',
     results: [
-      { metric: 'Revenue Increase', value: '300%' },
-      { metric: 'Conversion Rate', value: '4.5% → 12.8%' },
-      { metric: 'PPC Ad Spend', value: '-50%' },
-      { metric: 'Customer Retention', value: '+78%' }
+      { metric: 'Revenue', value: '+300%' },
+      { metric: 'Conversion rate', value: '4.5% → 12.8%' },
+      { metric: 'Paid media waste', value: '-50%' },
+      { metric: 'Customer retention', value: '+78%' },
     ],
     technologies: ['Next.js', 'Stripe', 'AWS', 'Google Analytics'],
-    testimonial: {
-      text: "I stopped wasting money and started making it. My business was transformed from a struggling startup to a market leader thanks to the best digital marketing company in Dubai.",
-      author: 'Fatima Al-Mansoori',
-      position: 'CEO, Dubai Fashion House'
-    }
+    testimonial: 'I stopped wasting money and started making it. The work changed how the whole business grew.',
+    author: 'Fatima Al-Mansoori, CEO, Dubai Fashion House',
   },
   {
     id: 2,
-    title: 'How I Built a Dominant SaaS Platform in Abu Dhabi',
-    client: 'A high-growth SaaS company in Abu Dhabi',
-    description: 'They had a great idea but no clue how to build it. I provided custom software development in Dubai that took them from a local startup to a regional powerhouse.',
-    image: 'https://images.unsplash.com/photo-1651760464181-49092525ca3b?w=600&h=400&fit=crop',
+    title: 'A SaaS platform turned a strong idea into regional demand.',
+    client: 'Abu Dhabi SaaS company',
+    timeframe: 'Product launch and scale',
+    description: 'We built the product foundation and acquisition system together, giving a high-growth team the speed and visibility to move beyond its local market.',
+    image: 'https://images.unsplash.com/photo-1651760464181-49092525ca3b?w=1200&h=800&fit=crop',
     results: [
-      { metric: 'User Growth', value: '0 → 50,000+' },
+      { metric: 'Users', value: '0 → 50,000+' },
       { metric: 'Uptime', value: '99.9%' },
-      { metric: 'Response Time', value: '<100ms' },
-      { metric: 'Monthly Revenue', value: '$250K+' }
+      { metric: 'Response time', value: '<100ms' },
+      { metric: 'Monthly revenue', value: '$250K+' },
     ],
     technologies: ['React', 'Node.js', 'PostgreSQL', 'Redis'],
-    testimonial: {
-      text: "I didn&apos;t just get a product; I got a partner. Their enterprise software solutions in Dubai are second to none.",
-      author: 'Ahmed Al-Futtaim',
-      position: 'CTO, MENA Cloud Solutions'
-    }
+    testimonial: 'I did not just get a product. I got a partner who understood the business behind it.',
+    author: 'Ahmed Al-Futtaim, CTO, MENA Cloud Solutions',
   },
   {
     id: 3,
-    title: 'I Saved This Local UAE Business with Digital',
-    client: 'A popular fitness center in Abu Dhabi',
-    description: 'The pandemic almost killed their business. I used my mobile app development Dubai expertise to pivot them to a digital model and 5x their revenue.',
-    image: 'https://plus.unsplash.com/premium_photo-1712999654713-59018f76fe6d?w=600&h=400&fit=crop',
+    title: 'A fitness business rebuilt demand after the pandemic.',
+    client: 'Abu Dhabi fitness centre',
+    timeframe: 'Digital pivot and growth',
+    description: 'We moved bookings and customer relationships into a digital model that gave the team a more resilient way to grow.',
+    image: 'https://plus.unsplash.com/premium_photo-1712999654713-59018f76fe6d?w=1200&h=800&fit=crop',
     results: [
-      { metric: 'Revenue Growth', value: '500%' },
-      { metric: 'Online Bookings', value: '0 → 2,000+/month' },
-      { metric: 'Social Media Growth', value: '+200%' },
-      { metric: 'Customer LTV', value: '+300%' }
+      { metric: 'Revenue', value: '+500%' },
+      { metric: 'Online bookings', value: '0 → 2,000+/month' },
+      { metric: 'Social growth', value: '+200%' },
+      { metric: 'Customer LTV', value: '+300%' },
     ],
     technologies: ['React Native', 'Firebase', 'Stripe', 'Instagram API'],
-    testimonial: {
-      text: "I was about to close my doors. Then I found the top mobile app developers in the UAE. They didn&apos;t just save my business; they made it thrive.",
-      author: 'Youssef Al-Haddad',
-      position: 'Owner, Abu Dhabi Fitness'
-    }
+    testimonial: 'They did not just save the business. They gave it a stronger way to operate.',
+    author: 'Youssef Al-Haddad, Owner, Abu Dhabi Fitness',
   },
 ];
 
 export default function CaseStudies() {
   const [selectedCase, setSelectedCase] = useState(0);
+  const selectedStudy = caseStudies[selectedCase];
 
   return (
-    <section id="case-studies" className="py-24 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="case-studies" className="bg-background-muted py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6 }}
+          className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">Don&apos;t Just Take My Word for It. Here&apos;s the Proof.</span>
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            I get results. It&apos;s that simple. Here&apos;s a look at how I&apos;ve helped businesses just like yours dominate the market in Dubai and the UAE.
-          </p>
+          <div>
+            <p className="mb-5 font-mono text-xs uppercase tracking-[0.24em] text-primary">Proof, with context</p>
+            <h2 className="text-4xl font-bold leading-tight tracking-[-0.05em] text-foreground sm:text-6xl">The work is measured in business movement.</h2>
+          </div>
+          <p className="max-w-2xl self-end text-lg leading-8 text-muted">Outcomes are only useful when you can see the client, the intervention, and the period behind the number.</p>
         </motion.div>
 
-        {/* Case Study Navigation */}
-        <div className="flex justify-center mb-12">
-          <div className="flex space-x-4">
-            {caseStudies.map((study, index) => (
-              <button
-                key={study.id}
-                onClick={() => setSelectedCase(index)}
-                className={`px-4 py-2 rounded-lg transition-all ${selectedCase === index
-                    ? 'bg-primary text-white'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                {study.client}
-              </button>
-            ))}
-          </div>
+        <div className="mt-16 flex flex-col gap-2 border-b border-line sm:flex-row" role="tablist" aria-label="Case studies">
+          {caseStudies.map((study, index) => (
+            <button
+              key={study.id}
+              id={`case-tab-${study.id}`}
+              type="button"
+              onClick={() => setSelectedCase(index)}
+              aria-selected={selectedCase === index}
+              aria-controls="case-study-panel"
+              role="tab"
+              tabIndex={selectedCase === index ? 0 : -1}
+              className={`min-h-12 border-t-2 px-4 py-3 text-left text-sm transition-colors sm:flex-1 ${selectedCase === index ? 'border-primary text-foreground' : 'border-transparent text-muted hover:text-foreground'}`}
+            >
+              {study.client}
+            </button>
+          ))}
         </div>
 
-        {/* Case Study Content */}
         <motion.div
-          key={selectedCase}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="glass rounded-xl p-8 md:p-12"
+          key={selectedStudy.id}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          id="case-study-panel"
+          role="tabpanel"
+          aria-labelledby={`case-tab-${selectedStudy.id}`}
+          tabIndex={0}
+          className="grid gap-10 border-b border-line py-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16"
         >
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Image and Results */}
-            <div>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="relative overflow-hidden rounded-lg mb-6"
-              >
-                <Image 
-                  src={caseStudies[selectedCase].image} 
-                  alt={`${caseStudies[selectedCase].client} project`} 
-                  width={600}
-                  height={400}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-              </motion.div>
+          <div>
+            <div className="relative aspect-[4/3] overflow-hidden border border-line">
+              <Image src={selectedStudy.image} alt={`${selectedStudy.client} project`} fill sizes="(max-width: 1024px) 100vw, 45vw" className="object-cover" />
+            </div>
+            <div className="mt-5 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-muted">
+              <span>{selectedStudy.client}</span>
+              <span>{selectedStudy.timeframe}</span>
+            </div>
+          </div>
 
-              {/* Results */}
-              <div className="grid grid-cols-2 gap-4">
-                {caseStudies[selectedCase].results.map((result, index) => (
-                  <motion.div
-                    key={result.metric}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="text-center"
-                  >
-                    <div className="text-2xl font-bold text-green-400">
-                      {result.value}
-                    </div>
-                    <div className="text-sm text-gray-400">{result.metric}</div>
-                  </motion.div>
-                ))}
-              </div>
+          <div>
+            <h3 className="max-w-2xl text-3xl font-bold leading-tight tracking-[-0.04em] text-foreground sm:text-4xl">{selectedStudy.title}</h3>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">{selectedStudy.description}</p>
+
+            <div className="mt-8 grid grid-cols-2 border-y border-line">
+              {selectedStudy.results.map((result) => (
+                <div key={result.metric} className="border-b border-line py-5 pr-4 odd:border-r even:pl-4 [&:nth-last-child(-n+2)]:border-b-0">
+                  <p className="text-2xl font-bold tracking-[-0.04em] text-primary">{result.value}</p>
+                  <p className="mt-1 text-sm text-muted">{result.metric}</p>
+                </div>
+              ))}
             </div>
 
-            {/* Content */}
-            <div>
-              <h3 className="text-3xl font-bold mb-4 text-white">
-                {caseStudies[selectedCase].title}
-              </h3>
-              
-              <p className="text-gray-300 mb-6 text-lg">
-                {caseStudies[selectedCase].description}
-              </p>
-
-              {/* Technologies */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold mb-3 text-white">Technologies Used</h4>
-                <div className="flex flex-wrap gap-2">
-                  {caseStudies[selectedCase].technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Testimonial */}
-              <div className="glass rounded-lg p-6">
-                <blockquote className="text-gray-300 italic mb-4">
-&quot;{caseStudies[selectedCase].testimonial.text}&quot;
-                </blockquote>
-                <div className="text-white">
-                  <div className="font-semibold">{caseStudies[selectedCase].testimonial.author}</div>
-                  <div className="text-sm text-gray-400">{caseStudies[selectedCase].testimonial.position}</div>
-                </div>
-              </div>
+            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-secondary">
+              {selectedStudy.technologies.map((technology) => <span key={technology}>{technology}</span>)}
             </div>
+
+            <blockquote className="mt-8 border-l-2 border-primary pl-5 text-lg leading-7 text-foreground">
+              “{selectedStudy.testimonial}”
+              <footer className="mt-3 text-sm text-muted">{selectedStudy.author}</footer>
+            </blockquote>
           </div>
         </motion.div>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-center mt-16"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn-primary px-8 py-4 text-lg"
-          >
-            Start Your Success Story
-          </motion.button>
-        </motion.div>
+        <div className="mt-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-xl text-muted">Have a similar commercial problem? Bring the baseline, and we&apos;ll help map the next measurable move.</p>
+          <button type="button" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })} className="btn-primary self-start">
+            Discuss a similar target
+          </button>
+        </div>
       </div>
     </section>
   );

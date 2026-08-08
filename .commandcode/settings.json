@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(npm:*)",
+      "Shell(agent-browser:*)",
+      "Shell(npx tsc --noEmit)",
+      "Shell(for:*)",
+      "Shell(do:*)",
+      "Shell(done:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
