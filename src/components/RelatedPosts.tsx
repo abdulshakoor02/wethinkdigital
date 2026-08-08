@@ -18,6 +18,7 @@ const postKeywords: Record<string, string[]> = {
   '7': ['website', 'development', 'dubai'],
   '8': ['digital marketing', 'dubai'],
   '9': ['digital marketing', 'dubai'],
+  '10': ['crm', 'free crm', 'small business', 'dubai'],
 };
 
 export default function RelatedPosts({ currentPostId, currentPostKeywords = [] }: RelatedPostsProps) {

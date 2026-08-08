@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import BlogPostComponent from '@/components/BlogPost';
 import RelatedPosts from '@/components/RelatedPosts';
 import Navigation from '@/components/Navigation';
@@ -76,8 +77,43 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     );
   }
 
+  const cleanDescription = post.content.replace(/<[^>]*>/g, '').substring(0, 160);
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Article schema for rich results */}
+      <Script
+        id="json-ld-article"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: post.title,
+            description: cleanDescription,
+            datePublished: new Date(post.date).toISOString(),
+            dateModified: new Date(post.date).toISOString(),
+            author: {
+              '@type': 'Organization',
+              name: post.author,
+              url: 'https://www.wethinkdigital.solutions',
+            },
+            publisher: {
+              '@type': 'Organization',
+              name: 'WeThinkDigital',
+              url: 'https://www.wethinkdigital.solutions',
+              logo: {
+                '@type': 'ImageObject',
+                url: 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+              },
+            },
+            mainEntityOfPage: `https://www.wethinkdigital.solutions/blog/${post.slug}`,
+            image: 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+            url: `https://www.wethinkdigital.solutions/blog/${post.slug}`,
+          }),
+        }}
+      />
       <div className="max-w-3xl mx-auto py-12">
         <Navigation />
         <BlogPostComponent post={post} />
