@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       locale: 'en_US',
       images: [
         {
-          url: 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+          url: 'https://www.wethinkdigital.solutions/wethinkdigital.svg',
           width: 1200,
           height: 630,
           alt: post.title,
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: 'summary_large_image',
       title: post.title,
       description: cleanDescription,
-      images: ['https://www.wethinkdigital.solutions/wethinkdigital.ico'],
+      images: ['https://www.wethinkdigital.solutions/wethinkdigital.svg'],
     },
     alternates: {
       canonical: `https://www.wethinkdigital.solutions/blog/${resolvedParams.slug}`,
@@ -105,11 +105,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               url: 'https://www.wethinkdigital.solutions',
               logo: {
                 '@type': 'ImageObject',
-                url: 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+                url: 'https://www.wethinkdigital.solutions/wethinkdigital.svg',
               },
             },
             mainEntityOfPage: `https://www.wethinkdigital.solutions/blog/${post.slug}`,
-            image: 'https://www.wethinkdigital.solutions/wethinkdigital.ico',
+            image: 'https://www.wethinkdigital.solutions/wethinkdigital.svg',
             url: `https://www.wethinkdigital.solutions/blog/${post.slug}`,
           }),
         }}
