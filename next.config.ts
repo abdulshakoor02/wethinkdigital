@@ -2,103 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  
+
   // Experimental optimizations
   experimental: {
     optimizePackageImports: ['three', '@react-three/fiber', '@react-three/drei', 'framer-motion', 'gsap'],
   },
 
-  // Turbopack configuration (stable in Next.js 15)
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
-
-  // Bundle analyzer and optimization
-  webpack: (config, { isServer, dev }) => {
-    // Optimize for production builds
-    if (!dev && !isServer) {
-      // Tree shake unused Three.js modules - use standard import path
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        three: 'three',
-      };
-
-      // Mobile-specific optimizations
-      config.optimization = {
-        ...config.optimization,
-        // Smaller chunk sizes for mobile
-        splitChunks: {
-          ...config.optimization.splitChunks,
-          chunks: 'all',
-          minSize: 20000, // Smaller min size for mobile
-          maxSize: 200000, // Smaller max size for mobile
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Critical vendor chunk (small, immediately needed)
-            criticalVendor: {
-              name: 'critical-vendor',
-              chunks: 'all',
-              test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
-              priority: 40,
-              enforce: true,
-            },
-            // Three.js specific chunk (lazy loaded on mobile)
-            three: {
-              name: 'three',
-              chunks: 'all',
-              test: /[\\/]node_modules[\\/](three|@react-three)[\\/]/,
-              priority: 30,
-            },
-            // Animation libraries chunk (lazy loaded)
-            animations: {
-              name: 'animations',
-              chunks: 'all',
-              test: /[\\/]node_modules[\\/](framer-motion|gsap)[\\/]/,
-              priority: 25,
-            },
-            // Other vendor libraries
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /[\\/]node_modules[\\/]/,
-              priority: 20,
-              maxSize: 150000, // Smaller chunks for mobile
-            },
-            // Common chunk for shared code
-            common: {
-              name: 'common',
-              chunks: 'all',
-              minChunks: 2,
-              priority: 10,
-              reuseExistingChunk: true,
-              maxSize: 100000, // Smaller common chunks
-            },
-          },
-        },
-      };
-
-      // Add mobile-specific performance hints
-      config.performance = {
-        ...config.performance,
-        maxAssetSize: 200000, // 200KB for mobile
-        maxEntrypointSize: 300000, // 300KB for mobile
-        hints: 'warning',
-      };
-    }
-
-    return config;
-  },
-
-  // Modern browser targeting
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
+  // Turbopack configuration (stable in Next.js 16)
+  turbopack: {},
 
   // Compression and caching
   compress: true,
@@ -126,10 +37,6 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 31536000, // 1 year
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-  },
-  
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 
   // Headers for caching

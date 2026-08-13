@@ -19,15 +19,18 @@ export function useIntersectionObserver({
     const element = elementRef.current;
     if (!element) return;
 
-    // Skip intersection observer on slow devices or reduced motion preference
+    // Skip intersection observer on slow devices or reduced motion preference.
+    // Defer state updates out of the effect body to avoid cascading renders.
     if (
       typeof window !== 'undefined' && 
       (window.navigator.hardwareConcurrency <= 2 || 
        window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     ) {
-      setIsIntersecting(true);
-      setHasIntersected(true);
-      return;
+      const rafId = requestAnimationFrame(() => {
+        setIsIntersecting(true);
+        setHasIntersected(true);
+      });
+      return () => cancelAnimationFrame(rafId);
     }
 
     const observer = new IntersectionObserver(

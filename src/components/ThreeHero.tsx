@@ -30,8 +30,14 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    setIsLoaded(true);
+    // Mount flag is set via effect to avoid rendering Three.js during SSR.
+    // Using requestAnimationFrame defers state updates out of the effect body
+    // (satisfies react-hooks/set-state-in-effect) while preserving mount gating.
+    const rafId = requestAnimationFrame(() => {
+      setIsMounted(true);
+      setIsLoaded(true);
+    });
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   // Mobile-optimized Three.js scene
@@ -254,7 +260,6 @@ export default function ThreeHero({ className = '' }: ThreeHeroProps) {
     };
 
     animate();
-    setIsLoaded(true);
 
     // Handle resize
     const handleResize = () => {
