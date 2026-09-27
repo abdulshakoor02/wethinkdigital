@@ -7,18 +7,28 @@ export const localBusinessSchema = {
   "@id": "https://www.wethinkdigital.solutions#organization",
   "name": "WeThinkDigital",
   "alternateName": "WeThinkDigital Solutions",
-  "description": "Best SEO services in Dubai and top digital marketing company offering proven strategies for business growth. Leading SEO service provider in Dubai, UAE.",
+  "description": "WeThinkDigital is an SEO and digital marketing agency in Business Bay, Dubai, working with UAE businesses on technical SEO, local search, conversion-focused content, web development and CRM/lead management.",
   "image": "https://www.wethinkdigital.solutions/wethinkdigital.svg",
   "logo": "https://www.wethinkdigital.solutions/wethinkdigital.svg",
   "url": "https://www.wethinkdigital.solutions",
   "telephone": "+971 58 929 3060",
   "email": "hello@wethinkdigital.solutions",
+  "knowsAbout": [
+    "Search engine optimisation (SEO)",
+    "Technical SEO",
+    "Local SEO and Google Business Profile optimisation",
+    "Commercial keyword research and search intent",
+    "Conversion-focused content",
+    "B2B lead generation from organic search",
+    "Generative engine optimisation (visibility in AI answers)",
+    "Web development",
+    "CRM and lead management"
+  ],
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Business Bay",
     "addressLocality": "Dubai",
     "addressRegion": "Dubai",
-    "postalCode": "00000",
     "addressCountry": "AE"
   },
   "geo": {
@@ -95,13 +105,14 @@ export const organizationSchema = {
   "name": "WeThinkDigital",
   "url": "https://www.wethinkdigital.solutions",
   "logo": "https://www.wethinkdigital.solutions/wethinkdigital.svg",
-  "description": "Best digital marketing company in Dubai offering top-tier SEO services, web development, and digital marketing solutions for businesses in UAE.",
+  "description": "WeThinkDigital is a Dubai-based SEO and digital marketing agency working with UAE businesses on search-driven growth: SEO, web development, CRM and lead management.",
   "foundingDate": "2020",
-  "founders": [
-    {
-      "@type": "Person",
-      "name": "WeThinkDigital Founder"
-    }
+  "knowsAbout": [
+    "Search engine optimisation (SEO)",
+    "Local SEO in Dubai and the UAE",
+    "B2B lead generation from organic search",
+    "Web development",
+    "CRM and lead management"
   ],
   "contactPoint": {
     "@type": "ContactPoint",
@@ -127,7 +138,7 @@ export const professionalServiceSchema = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
   "name": "WeThinkDigital - SEO Services Dubai",
-  "description": "Professional SEO services in Dubai providing comprehensive digital marketing solutions including search engine optimization, web development, and online marketing strategies.",
+  "description": "SEO services in Dubai for UAE businesses: technical SEO, commercial keyword strategy, local search systems, conversion-focused content, and measurement reported against enquiries and revenue.",
   "provider": {
     "@id": "https://www.wethinkdigital.solutions#organization"
   },

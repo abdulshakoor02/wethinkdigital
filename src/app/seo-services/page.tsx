@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Script from 'next/script';
+import JsonLd from '@/components/JsonLd';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ContactForm from '@/components/ContactForm';
@@ -80,41 +80,42 @@ const seoServices = [
 export default function SEOServicesPage() {
   return (
     <main className="bg-background">
-      {/* SEO Service schema */}
-      <Script
+      {/* SEO Service schema — raw ld+json for non-JS crawlers */}
+      <JsonLd
         id="json-ld-service-seo"
-        type="application/ld+json"
-        strategy="beforeInteractive"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Service',
-            serviceType: 'SEO Services Dubai',
-            provider: {
-              '@type': 'ProfessionalService',
-              name: 'WeThinkDigital',
-              url: 'https://www.wethinkdigital.solutions',
-            },
-            areaServed: { '@type': 'City', name: 'Dubai', addressCountry: 'AE' },
-            url: 'https://www.wethinkdigital.solutions/seo-services',
-          }),
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          serviceType: 'SEO Services Dubai',
+          name: 'SEO services in Dubai',
+          description:
+            'SEO services in Dubai for UAE businesses: technical SEO, commercial keyword strategy, local search systems (Google Business Profile, citations, reviews), and conversion-focused content, measured against qualified enquiries and revenue.',
+          provider: {
+            '@type': 'ProfessionalService',
+            '@id': 'https://www.wethinkdigital.solutions#organization',
+            name: 'WeThinkDigital',
+            url: 'https://www.wethinkdigital.solutions',
+          },
+          areaServed: [
+            { '@type': 'City', name: 'Dubai', addressCountry: 'AE' },
+            { '@type': 'Country', name: 'United Arab Emirates' },
+          ],
+          availableLanguage: ['English', 'Arabic'],
+          url: 'https://www.wethinkdigital.solutions/seo-services',
+          mainEntityOfPage: 'https://www.wethinkdigital.solutions/seo-services',
         }}
       />
       {/* FAQ schema */}
-      <Script
+      <JsonLd
         id="json-ld-faq-seo"
-        type="application/ld+json"
-        strategy="beforeInteractive"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: seoFaqs.map((f) => ({
-              '@type': 'Question',
-              name: f.question,
-              acceptedAnswer: { '@type': 'Answer', text: f.answer },
-            })),
-          }),
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: seoFaqs.map((f) => ({
+            '@type': 'Question',
+            name: f.question,
+            acceptedAnswer: { '@type': 'Answer', text: f.answer },
+          })),
         }}
       />
 
@@ -139,6 +140,55 @@ export default function SEOServicesPage() {
               See what&apos;s included
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* At a glance — the extractable entity paragraph AI answers quote from */}
+      <section className="border-t border-line bg-background-muted py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
+          <h2 className="font-mono text-xs uppercase tracking-[0.24em] text-primary">At a glance</h2>
+          <dl className="mt-8 grid gap-x-12 gap-y-6 sm:grid-cols-2">
+            <div>
+              <dt className="text-sm font-semibold uppercase tracking-[0.12em] text-muted">What we do</dt>
+              <dd className="mt-2 leading-7 text-foreground">
+                SEO services in Dubai for UAE businesses: technical SEO, commercial keyword strategy,
+                local search systems (Google Business Profile, citations, reviews) and conversion-focused content.
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold uppercase tracking-[0.12em] text-muted">Who it is for</dt>
+              <dd className="mt-2 leading-7 text-foreground">
+                B2B services, professional firms and e-commerce businesses in Dubai and the wider UAE that
+                need qualified enquiries from search — not vanity rankings.
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold uppercase tracking-[0.12em] text-muted">Where we are</dt>
+              <dd className="mt-2 leading-7 text-foreground">
+                Based in Business Bay, Dubai. Serving Dubai and the wider UAE in English and Arabic.
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold uppercase tracking-[0.12em] text-muted">How an engagement starts</dt>
+              <dd className="mt-2 leading-7 text-foreground">
+                With a free growth audit that maps the highest-value search gaps, the technical issues
+                costing you traffic, and the pages that should be converting.
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold uppercase tracking-[0.12em] text-muted">How we measure it</dt>
+              <dd className="mt-2 leading-7 text-foreground">
+                Qualified enquiries, conversion rate and revenue from organic search. Rankings and traffic
+                are inputs, not the finish line.
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold uppercase tracking-[0.12em] text-muted">Contact</dt>
+              <dd className="mt-2 leading-7 text-foreground">
+                hello@wethinkdigital.solutions · +971 58 929 3060
+              </dd>
+            </div>
+          </dl>
         </div>
       </section>
 

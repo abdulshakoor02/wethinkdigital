@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import JsonLd from "@/components/JsonLd";
 import { localBusinessSchema, organizationSchema, professionalServiceSchema } from "./schema";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Navigation from "@/components/Navigation";
@@ -76,39 +77,17 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/wethinkdigital-32.png" />
         <link rel="apple-touch-icon" sizes="64x64" href="/wethinkdigital-64.png" />
         
-        <Script
-          id="json-ld-organization"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        
-        <Script
-          id="json-ld-localbusiness"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-        />
-        
-        <Script
-          id="json-ld-service"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceSchema) }}
-        />
-        
-        <Script
+        <JsonLd id="json-ld-organization" data={organizationSchema} />
+        <JsonLd id="json-ld-localbusiness" data={localBusinessSchema} />
+        <JsonLd id="json-ld-service" data={professionalServiceSchema} />
+        <JsonLd
           id="json-ld-blog"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Blog",
-              "name": "WeThinkDigital Blog",
-              "url": "https://www.wethinkdigital.solutions/blog",
-              "description": "Latest insights, tips, and news from WeThinkDigital about digital marketing, web development, and SEO strategies."
-            })
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            "name": "WeThinkDigital Blog",
+            "url": "https://www.wethinkdigital.solutions/blog",
+            "description": "Latest insights, tips, and news from WeThinkDigital about digital marketing, web development, and SEO strategies."
           }}
         />
         

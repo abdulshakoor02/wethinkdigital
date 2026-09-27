@@ -6,6 +6,26 @@ const blogPosts = require('./src/data/posts.json');
 module.exports = {
   siteUrl: "https://www.wethinkdigital.solutions",
   generateRobotsTxt: true,
+  robotsTxtOptions: {
+    // AI answer engines only cite what they are allowed to crawl. `*` already
+    // allows everything, but naming the assistants explicitly removes any
+    // ambiguity (and survives a future blanket-deny rule by accident).
+    policies: [
+      { userAgent: '*', allow: '/' },
+      { userAgent: 'GPTBot', allow: '/' },
+      { userAgent: 'OAI-SearchBot', allow: '/' },
+      { userAgent: 'ChatGPT-User', allow: '/' },
+      { userAgent: 'ClaudeBot', allow: '/' },
+      { userAgent: 'Claude-User', allow: '/' },
+      { userAgent: 'Claude-SearchBot', allow: '/' },
+      { userAgent: 'PerplexityBot', allow: '/' },
+      { userAgent: 'Perplexity-User', allow: '/' },
+      { userAgent: 'Google-Extended', allow: '/' },
+      { userAgent: 'Applebot-Extended', allow: '/' },
+      { userAgent: 'Bingbot', allow: '/' },
+      { userAgent: 'CCBot', allow: '/' },
+    ],
+  },
   sitemapSize: 5000,
   changefreq: "daily",
   priority: 0.7,
