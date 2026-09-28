@@ -1,51 +1,59 @@
-import type { Metadata } from "next";
-import Script from "next/script";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import JsonLd from "@/components/JsonLd";
-import { localBusinessSchema, organizationSchema, professionalServiceSchema } from "./schema";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import Navigation from "@/components/Navigation";
+import type { Metadata } from 'next';
+import Script from 'next/script';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import JsonLd from '@/components/JsonLd';
+import { organizationSchema, websiteSchema, professionalServiceSchema } from './schema';
+import WhatsAppButton from '@/components/WhatsAppButton';
+import Navigation from '@/components/Navigation';
+import { siteConfig } from '@/lib/site';
+import { buildMetadata } from '@/lib/seo';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
   display: 'swap',
   preload: true,
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
   display: 'swap',
   preload: false, // Only preload critical fonts
 });
 
 export const metadata: Metadata = {
-  title: "Best SEO Services in Dubai | Top Digital Marketing Company - WeThinkDigital",
-  description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue. Get #1 rankings with Dubai's leading SEO service provider.",
-  keywords: "seo services in dubai, best digital marketing company in dubai, top digital marketing companies in dubai, seo service in dubai, best seo company dubai, digital marketing services dubai uae, social media marketing agency dubai, ppc advertising company dubai, content marketing services uae, email marketing agency dubai, website design companies dubai uae, custom web development dubai, ecommerce website development uae, responsive web design dubai, mobile app development dubai, wordpress development company dubai",
-  authors: [{ name: "WeThinkDigital Team" }],
-  creator: "WeThinkDigital",
-  openGraph: {
-    title: "Best SEO Services in Dubai | Top Digital Marketing Company - WeThinkDigital",
-    description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue. Get #1 rankings with Dubai's leading SEO service provider.",
-    type: "website",
-    url: "https://www.wethinkdigital.solutions",
-    siteName: "WeThinkDigital",
-    locale: "en_US",
-    images: [{ url: "https://www.wethinkdigital.solutions/og-image.png", width: 1200, height: 630, alt: "WeThinkDigital - SEO and Digital Marketing in Dubai" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Best SEO Services in Dubai | Top Digital Marketing Company",
-    description: "WeThinkDigital is the best digital marketing company in Dubai offering proven SEO services that drive revenue.",
-    images: ["https://www.wethinkdigital.solutions/og-image.png"],
-  },
-  alternates: {
-    canonical: "https://www.wethinkdigital.solutions",
-  },
+  metadataBase: new URL(siteConfig.url),
+  ...buildMetadata({
+    title: 'WeThinkDigital — AI Automation, AI Agents & Custom Software Development',
+    description: siteConfig.description,
+    path: '/',
+    absoluteTitle: true,
+    keywords: [
+      'ai automation',
+      'ai agents',
+      'custom software development',
+      'web development',
+      'llm application development',
+      'agentic workflows',
+      'software engineering company',
+      'ai integration services',
+    ],
+  }),
+  authors: [{ name: `${siteConfig.name} Team` }],
+  creator: siteConfig.name,
 };
+
+/**
+ * Inlined first-paint styles. Mirrors the dark canvas tokens in globals.css so
+ * the page never flashes white before the stylesheet resolves.
+ */
+const criticalCss = `
+:root{--background:oklch(0.15 0.02 260);--foreground:oklch(0.97 0.005 260);--primary:oklch(0.68 0.19 255);--line:oklch(0.33 0.028 263)}
+html{background:var(--background)}
+body{background:var(--background);color:var(--foreground);margin:0;overflow-x:hidden}
+`;
 
 export default function RootLayout({
   children,
@@ -59,38 +67,18 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
-        {/* Critical CSS inlined for faster rendering */}
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            :root{--background:oklch(0.17 0.02 165);--foreground:oklch(0.94 0.025 90);--primary:oklch(0.7 0.13 48);--secondary:oklch(0.68 0.07 165);--accent:oklch(0.82 0.13 83);--muted:oklch(0.73 0.03 165);--line:oklch(0.38 0.03 165)}
-             body{background:var(--background);color:var(--foreground);margin:0;overflow-x:hidden}
-             .gradient-text{color:var(--primary)}
-             .btn-primary{background:var(--primary);border:none;color:var(--background);padding:12px 24px;border-radius:3px;font-weight:650;cursor:pointer}
-             .btn-secondary{background:transparent;border:1px solid var(--line);color:var(--foreground);padding:12px 24px;border-radius:3px;font-weight:650;cursor:pointer}
-             nav{position:fixed;top:0;left:0;right:0;z-index:50}
-          `
-        }} />
-        
-        {/* Favicon: lightweight SVG + PNG (replaces 197KB JPEG preload) */}
+
+        <style dangerouslySetInnerHTML={{ __html: criticalCss }} />
+
+        {/* Favicon: lightweight SVG + PNG */}
         <link rel="icon" type="image/svg+xml" href="/wethinkdigital.svg" />
         <link rel="icon" type="image/png" sizes="32x32" href="/wethinkdigital-32.png" />
         <link rel="apple-touch-icon" sizes="64x64" href="/wethinkdigital-64.png" />
-        
+
         <JsonLd id="json-ld-organization" data={organizationSchema} />
-        <JsonLd id="json-ld-localbusiness" data={localBusinessSchema} />
+        <JsonLd id="json-ld-website" data={websiteSchema} />
         <JsonLd id="json-ld-service" data={professionalServiceSchema} />
-        <JsonLd
-          id="json-ld-blog"
-          data={{
-            "@context": "https://schema.org",
-            "@type": "Blog",
-            "name": "WeThinkDigital Blog",
-            "url": "https://www.wethinkdigital.solutions/blog",
-            "description": "Latest insights, tips, and news from WeThinkDigital about digital marketing, web development, and SEO strategies."
-          }}
-        />
-        
+
         {process.env.NODE_ENV === 'production' && (
           <>
             <Script
@@ -111,32 +99,14 @@ export default function RootLayout({
             />
           </>
         )}
-        
-        {/* Mobile-optimized font preloading */}
-        <link
-          rel="preload"
-          href="/_next/static/media/GeistVF.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-          media="(min-width: 768px)"
-        />
-        
-        {/* Critical font subset for mobile */}
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            @media (max-width: 767px) {
-              .gradient-text, h1, h2, h3 {
-                font-display: swap;
-                text-rendering: optimizeSpeed;
-              }
-            }
-          `
-        }} />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-md focus:bg-primary focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-background focus:shadow-lg"
+        >
+          Skip to content
+        </a>
         <Navigation />
         {children}
         <WhatsAppButton />

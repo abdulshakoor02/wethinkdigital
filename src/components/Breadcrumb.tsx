@@ -1,72 +1,50 @@
-'use client';
-
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
-interface BreadcrumbItem {
+export interface Crumb {
   name: string;
-  href: string;
+  href?: string;
 }
 
 interface BreadcrumbProps {
-  pageTitle?: string;
+  items: Crumb[];
+  className?: string;
 }
 
-export default function Breadcrumb({ pageTitle }: BreadcrumbProps) {
-  const pathname = usePathname();
-
-  if (pathname === '/') return null;
-
-  const pathSegments = pathname.split('/').filter(Boolean);
-  const breadcrumbs: BreadcrumbItem[] = [{ name: 'Home', href: '/' }];
-  let currentPath = '';
-
-  pathSegments.forEach((segment, index) => {
-    currentPath += `/${segment}`;
-    let name = segment;
-    if (segment === 'blog') {
-      name = 'Journal';
-    } else if (index === pathSegments.length - 1 && pageTitle) {
-      name = pageTitle;
-    } else {
-      name = segment.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    }
-    breadcrumbs.push({ name, href: currentPath });
-  });
-
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: breadcrumbs.map((item, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: item.name,
-      item: `https://www.wethinkdigital.solutions${item.href}`,
-    })),
-  };
-
+/**
+ * Visual breadcrumb trail. Server component: the page passes the trail in
+ * explicitly and emits the matching `BreadcrumbList` JSON-LD itself, so the
+ * markup and the structured data cannot drift apart.
+ */
+export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
   return (
-    <>
-      <nav aria-label="Breadcrumb" className="border-b border-line bg-background pt-20">
-        <div className="mx-auto max-w-7xl px-6 py-4 sm:px-10 lg:px-16">
-          <ol className="flex items-center gap-2 text-sm" itemScope itemType="https://schema.org/BreadcrumbList">
-            {breadcrumbs.map((item, index) => (
-              <li key={item.href} className="flex items-center" itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-                {index > 0 && <span className="px-1 text-muted" aria-hidden="true">/</span>}
-                {index === breadcrumbs.length - 1 ? (
-                  <span className="font-medium text-foreground" itemProp="name" aria-current="page">{item.name}</span>
-                ) : (
-                  <Link href={item.href} className="text-muted hover:text-primary" itemProp="item">
-                    <span itemProp="name">{item.name}</span>
-                  </Link>
-                )}
-                <meta itemProp="position" content={String(index + 1)} />
-              </li>
-            ))}
-          </ol>
-        </div>
-      </nav>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-    </>
+    <nav aria-label="Breadcrumb" className={className}>
+      <ol className="flex flex-wrap items-center gap-2 text-sm text-muted">
+        {items.map((item, index) => {
+          const isLast = index === items.length - 1;
+
+          return (
+            <li key={item.name} className="flex items-center gap-2">
+              {item.href && !isLast ? (
+                <Link href={item.href} className="transition-colors hover:text-primary">
+                  {item.name}
+                </Link>
+              ) : (
+                <span
+                  className={isLast ? 'text-foreground' : undefined}
+                  aria-current={isLast ? 'page' : undefined}
+                >
+                  {item.name}
+                </span>
+              )}
+              {!isLast ? (
+                <span aria-hidden="true" className="text-line-strong">
+                  /
+                </span>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }

@@ -1,55 +1,29 @@
-import VideoHero from '@/components/VideoHero';
-import LazySection from '@/components/LazySection';
 import dynamic from 'next/dynamic';
+import Hero from '@/components/Hero';
+import LazySection from '@/components/LazySection';
 import JsonLd from '@/components/JsonLd';
+import ServicesOverview from '@/components/home/ServicesOverview';
+import ProductsShowcase from '@/components/home/ProductsShowcase';
+import Capabilities from '@/components/home/Capabilities';
+import Process from '@/components/home/Process';
+import TechStack from '@/components/home/TechStack';
+import FAQ from '@/components/home/FAQ';
+import RecentPosts from '@/components/home/RecentPosts';
+import Footer from '@/components/Footer';
 import { faqData } from '@/data/faq';
 
-export const dynamicParams = false;
 export const revalidate = 3600;
 
-const CaseStudies = dynamic(() => import('@/components/CaseStudies'), {
-  loading: () => <div className="h-96 border-y border-line bg-background-muted" />,
-});
-
-const Services = dynamic(() => import('@/components/Services'), {
-  loading: () => <div className="h-96 border-y border-line bg-background-muted" />,
-});
-
-const Keywords = dynamic(() => import('@/components/Keywords'), {
-  loading: () => <div className="h-64 border-y border-line bg-background-muted" />,
-});
-
-const DubaiDomination = dynamic(() => import('@/components/DubaiDomination'), {
-  loading: () => <div className="h-80 border-y border-line bg-background-muted" />,
-});
-
-const ROICalculator = dynamic(() => import('@/components/ROICalculator'), {
-  loading: () => <div className="h-96 border-y border-line bg-background-muted" />,
-});
-
-const Process = dynamic(() => import('@/components/Process'), {
-  loading: () => <div className="h-96 border-y border-line bg-background-muted" />,
-});
-
-const FAQ = dynamic(() => import('@/components/FAQ'), {
-  loading: () => <div className="h-80 border-y border-line bg-background-muted" />,
-});
-
-const ContactForm = dynamic(() => import('@/components/ContactForm'), {
-  loading: () => <div className="h-96 border-y border-line bg-background-muted" />,
-});
-
-const RecentBlogPosts = dynamic(() => import('@/components/RecentBlogPosts'), {
-  loading: () => <div className="h-96 border-y border-line bg-background-muted" />,
-});
-
-const Footer = dynamic(() => import('@/components/Footer'), {
-  loading: () => <div className="h-32 border-t border-line bg-background-muted" />,
-});
+/**
+ * ContactForm is the only heavy client component on this page, so it is the
+ * only one worth code-splitting. No `ssr: false` anywhere — every section must
+ * be present in the server-rendered HTML for crawlers.
+ */
+const ContactForm = dynamic(() => import('@/components/ContactForm'));
 
 export default function Home() {
   return (
-    <main className="bg-background">
+    <main id="main" className="bg-background">
       {/* Server-rendered FAQ schema — raw ld+json so non-JS crawlers see it */}
       <JsonLd
         id="json-ld-faq-server"
@@ -66,45 +40,42 @@ export default function Home() {
           })),
         }}
       />
-      <VideoHero />
 
-      <LazySection rootMargin="250px" fallback={<div className="h-96 border-y border-line bg-background-muted" />}>
-        <CaseStudies />
+      <Hero />
+
+      <LazySection intrinsicHeight="40rem">
+        <ServicesOverview />
       </LazySection>
 
-      <LazySection rootMargin="200px" fallback={<div className="h-96 border-y border-line bg-background-muted" />}>
-        <Services />
+      <LazySection intrinsicHeight="42rem">
+        <ProductsShowcase />
       </LazySection>
 
-      <LazySection rootMargin="200px" fallback={<div className="h-64 border-y border-line bg-background-muted" />}>
-        <Keywords />
+      <LazySection intrinsicHeight="36rem">
+        <Capabilities />
       </LazySection>
 
-      <LazySection rootMargin="150px" fallback={<div className="h-80 border-y border-line bg-background-muted" />}>
-        <DubaiDomination />
-      </LazySection>
-
-      <LazySection rootMargin="150px" fallback={<div className="h-96 border-y border-line bg-background-muted" />}>
-        <ROICalculator />
-      </LazySection>
-
-      <LazySection rootMargin="100px" fallback={<div className="h-96 border-y border-line bg-background-muted" />}>
+      <LazySection intrinsicHeight="38rem">
         <Process />
       </LazySection>
 
-      <LazySection rootMargin="100px" fallback={<div className="h-80 border-y border-line bg-background-muted" />}>
+      <LazySection intrinsicHeight="26rem">
+        <TechStack />
+      </LazySection>
+
+      <LazySection intrinsicHeight="36rem">
         <FAQ />
       </LazySection>
 
-      <LazySection rootMargin="100px" fallback={<div className="h-96 border-y border-line bg-background-muted" />}>
-        <RecentBlogPosts />
+      <LazySection intrinsicHeight="30rem">
+        <RecentPosts />
       </LazySection>
 
-      <LazySection rootMargin="50px" fallback={<div className="h-96 border-y border-line bg-background-muted" />}>
+      <LazySection intrinsicHeight="44rem">
         <ContactForm />
       </LazySection>
 
-      <LazySection rootMargin="0px" fallback={<div className="h-32 border-t border-line bg-background-muted" />}>
+      <LazySection intrinsicHeight="26rem">
         <Footer />
       </LazySection>
     </main>

@@ -1,0 +1,188 @@
+# WeThinkDigital Revamp — Shared Contract (READ FIRST)
+
+**Everyone working on this revamp must follow this file.** It is the single source of truth
+for routes, component names, data shapes, design tokens and copy positioning. Do not rename
+anything listed here without messaging the Lead.
+
+---
+
+## 1. Positioning (the whole point of the revamp)
+
+WeThinkDigital is **an AI and software engineering company**. Not a marketing agency.
+
+We do exactly four things:
+
+1. **AI automation** — agentic workflows that take real work off human hands.
+2. **Custom software development** — product engineering, platforms, APIs, cloud.
+3. **Web development** — fast, modern, accessible web applications and sites.
+4. **AI product engineering** — LLM/RAG/agent systems built into our clients' products.
+
+**Banned words and themes** (they must not appear anywhere in shipped copy, metadata,
+schema, nav, footer, blog content or keywords):
+
+`SEO`, `search engine optimisation`, `digital marketing`, `PPC`, `social media marketing`,
+`link building`, `keyword research`, `Google Business Profile`, `growth audit`,
+`rankings`, `SERP`, `content marketing`, `email marketing`, `Dubai domination`,
+`ROI calculator` (as a marketing gimmick).
+
+> Exception: the *technical* phrase "search engines" may appear in `robots.txt` / sitemap
+> code comments. Never in user-facing copy.
+
+**Geography:** global-first. Dubai/UAE appears only as the HQ line in the footer, the
+contact block and the `address` field in Organization schema. No Dubai in titles, H1s,
+keywords, or blog topics.
+
+**Tone:** precise, engineering-led, plain English. Claims must be concrete and defensible.
+No invented client names, no invented revenue numbers, no fake testimonials, no fabricated
+award badges. Where a metric is illustrative, frame it as a capability, not a client result.
+
+---
+
+## 2. Route map
+
+| Route | Owner | Notes |
+| --- | --- | --- |
+| `/` | core-shell (composes others' sections) | Home |
+| `/services/ai-automation` | services-eng | |
+| `/services/software-development` | services-eng | |
+| `/services/web-development` | services-eng | |
+| `/services/ai-engineering` | services-eng | LLM / RAG / agent systems |
+| `/products` | products-eng | Index of our two apps |
+| `/products/resume-ai` | products-eng | Promotes `https://resume.wethinkdigital.solutions` |
+| `/products/agents` | products-eng | Promotes `https://agents.wethinkdigital.solutions` |
+| `/blog` | content-eng | |
+| `/blog/[slug]` | content-eng | |
+| `/contact` | core-shell | Real page, not just an anchor |
+| `/not-found` | seo-eng | |
+
+**Deleted routes** (Lead already removed them): `/seo-services`, and the six SEO/marketing
+blog posts. They return 404 — that is intentional and approved by the client. Do **not**
+add redirects for them.
+
+---
+
+## 3. Component contract
+
+These exact paths and **default exports** must exist. The home page imports them by name.
+
+### core-shell owns
+- `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`, `src/app/contact/page.tsx`
+- `src/components/Navigation.tsx`
+- `src/components/Footer.tsx`
+- `src/components/Hero.tsx`
+- `src/components/ContactForm.tsx`
+- `src/components/WhatsAppButton.tsx`
+- `src/components/LazySection.tsx`, `src/hooks/useIntersectionObserver.ts`
+- `src/components/ui/*` (shared primitives — `Section.tsx`, `SectionHeading.tsx`, `Pill.tsx`, `CTA.tsx`)
+
+### services-eng owns
+- `src/app/services/**`
+- `src/components/home/ServicesOverview.tsx`  ← rendered on home
+- `src/components/home/Capabilities.tsx`      ← rendered on home
+- `src/components/home/Process.tsx`           ← rendered on home
+- `src/components/home/TechStack.tsx`         ← rendered on home
+- `src/components/home/FAQ.tsx`               ← rendered on home
+- `src/components/services/*`
+- `src/data/services.ts`, `src/data/faq.ts`
+
+### products-eng owns
+- `src/app/products/**`
+- `src/components/home/ProductsShowcase.tsx`  ← rendered on home
+- `src/components/products/*`
+- `src/data/products.ts`
+
+### content-eng owns
+- `src/app/blog/**`
+- `src/components/home/RecentPosts.tsx`       ← rendered on home
+- `src/components/blog/*`
+- `src/components/BlogPost.tsx`, `BlogPostList.tsx`, `BlogHeader.tsx`, `RelatedPosts.tsx`, `BlogIcon.tsx`, `Breadcrumb.tsx`
+- `src/data/posts.ts`, `src/data/posts.json`, `src/types/blog.ts`
+
+### seo-eng owns
+- `src/app/schema.tsx`, `src/app/not-found.tsx`, `src/app/robots.ts`, `src/app/sitemap.ts`
+- `src/components/JsonLd.tsx`
+- `next-sitemap.config.js`, `public/robots.txt`, `public/llms.txt`
+- `src/lib/seo.ts` (extensions only — the base file already exists)
+
+**Nobody else writes to another owner's files.** If you need a change in someone else's
+file, message the Lead.
+
+---
+
+## 4. Shared modules (already created by the Lead — read, do not rewrite)
+
+### `src/lib/site.ts`
+```ts
+siteConfig: {
+  name, legalName, url, description, tagline,
+  email, phone, whatsapp, addressLocality, addressCountry,
+  apps: { resume: {...}, agents: {...} },
+  nav: [...], social: [...]
+}
+```
+
+### `src/lib/seo.ts`
+```ts
+buildMetadata({ title, description, path, keywords?, type?, image?, publishedTime?, modifiedTime? }): Metadata
+absoluteUrl(path: string): string
+```
+Every page **must** export metadata built with `buildMetadata(...)` so canonicals, OG and
+Twitter tags stay consistent. Never hardcode `https://www.wethinkdigital.solutions` in a
+page — use `absoluteUrl()` or `siteConfig.url`.
+
+---
+
+## 5. Design tokens (already set in `globals.css` — use these, never raw hex)
+
+Tailwind v4 classes available: `bg-background`, `bg-background-muted`, `bg-surface`,
+`bg-surface-elevated`, `text-foreground`, `text-muted`, `text-primary`, `text-secondary`,
+`text-accent`, `border-line`, `text-danger`.
+
+Palette: near-black blue canvas, electric blue primary, cyan secondary, violet accent.
+
+Utility classes already defined: `.surface`, `.glass`, `.btn-primary`, `.btn-secondary`,
+`.gradient-text`, `.grid-bg`, `.glow`, `.mono-label`.
+
+**Layout rules**
+- Page container: `mx-auto max-w-7xl px-6 sm:px-10 lg:px-16`
+- Section padding: `py-24 sm:py-32`
+- Section separators: `border-y border-line`
+- Headings: `tracking-[-0.045em] font-bold`
+- Eyebrow labels: `font-mono text-xs uppercase tracking-[0.24em] text-primary`
+- Any page that is not the home page starts with `pt-32` to clear the fixed nav.
+
+**Motion:** `framer-motion` is available. Keep it to opacity/translate fade-ins,
+`viewport={{ once: true }}`. No parallax, no scroll-jacking. Respect
+`prefers-reduced-motion` (a global CSS rule already disables animation for it).
+
+---
+
+## 6. Technical rules
+
+- Next.js 16 App Router, React 19, TypeScript strict, Tailwind v4.
+- **Server Components by default.** Only add `'use client'` when you use hooks,
+  state or browser APIs. Metadata cannot be exported from a client component — keep
+  `page.tsx` server-side and push interactivity into a child client component.
+- `params` in dynamic routes is a `Promise` — `const { slug } = await params;`
+- No new dependencies. Everything must be built with what is already in `package.json`.
+- No `any`. No unused imports/vars (ESLint will flag them).
+- All external links: `target="_blank" rel="noopener noreferrer"`.
+- Images: use `next/image`. Remote images are only allowed from `images.unsplash.com` /
+  `plus.unsplash.com`. Prefer CSS/SVG over stock photography.
+- Accessibility: every interactive element needs an accessible name; heading levels must
+  not skip; colour contrast ≥ 4.5:1 for body text.
+- Every page needs exactly one `<h1>`.
+
+---
+
+## 7. Definition of done for each teammate
+
+1. Your files compile under `npx tsc --noEmit`.
+2. `npx eslint <your files>` is clean.
+3. No banned word from §1 appears in your output:
+   `grep -riE "seo|digital marketing|ppc|link building" <your files>` returns nothing
+   user-facing.
+4. You reported back to the Lead with a short summary of what you created.
+
+Do **not** run `npm run build` yourself — the Lead runs the integration build once at the
+end. Running it concurrently corrupts `.next/`.

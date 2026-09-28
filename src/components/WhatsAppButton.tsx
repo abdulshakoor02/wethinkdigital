@@ -1,24 +1,25 @@
-'use client';
-
 import { FaWhatsapp } from 'react-icons/fa';
+import { siteConfig } from '@/lib/site';
 
+const message = 'Hi — I would like to talk about a project.';
+
+/**
+ * Floating WhatsApp entry point. A plain anchor, so no client JS is needed.
+ * Sits above the mobile safe area and is nudged up on small screens so it does
+ * not cover the footer / contact CTA.
+ */
 export default function WhatsAppButton() {
-  const phoneNumber = '+971564713394';
-  const message = 'Hello, I would like to know more about your services.';
-
-  const openWhatsApp = () => {
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
+  const href = `${siteConfig.whatsapp}?text=${encodeURIComponent(message)}`;
 
   return (
-    <button
-      type="button"
-      onClick={openWhatsApp}
-      className="fixed bottom-6 right-6 z-50 inline-flex min-h-14 min-w-14 items-center justify-center rounded-full bg-[#25D366] px-4 text-white shadow-lg transition-colors hover:bg-[#1ebe5d]"
-      aria-label="Chat on WhatsApp"
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Chat with WeThinkDigital on WhatsApp"
+      className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-40 inline-flex min-h-12 min-w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-colors hover:bg-[#1ebe5d] sm:bottom-6 sm:right-6 sm:min-h-14 sm:min-w-14"
     >
-      <FaWhatsapp className="text-3xl" aria-hidden="true" />
-    </button>
+      <FaWhatsapp className="text-2xl sm:text-3xl" aria-hidden="true" />
+    </a>
   );
 }
