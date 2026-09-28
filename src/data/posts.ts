@@ -1,852 +1,1556 @@
-import type { BlogPost } from '@/types/blog';
+import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
 
 /**
- * Single source of truth for all blog posts.
- * Used by: blog listing, blog detail, related posts, recent posts, sitemap.
- * Add a new post here and it appears everywhere automatically.
+ * Engineering notes. Newest first is enforced by `sortedPosts`, not by the
+ * order of this array.
+ *
+ * `content` is a trusted, statically authored HTML fragment rendered inside a
+ * `.prose-wtd` container. It never contains user input.
  */
 export const blogPosts: BlogPost[] = [
   {
     id: '1',
-    slug: 'digital-marketing-trends-2025',
-    title: 'Digital marketing trends worth paying attention to',
-    excerpt: 'A clear view of the shifts changing digital growth and what they mean for a commercial team.',
-    content: `
-      <p>As we move further into 2025, the digital marketing landscape continues to evolve at a rapid pace. Businesses that want to stay ahead of the competition must keep up with the latest trends and adapt their strategies accordingly.</p>
+    slug: 'ai-code-review-best-practices',
+    title: 'Code Review in the Age of AI-Generated Code',
+    excerpt:
+      'Review used to be a conversation between two people who had both thought about the problem. That contract is broken, and most teams have not replaced it with anything.',
+    date: '2026-01-20',
+    author: 'WeThinkDigital Engineering',
+    readTime: '9 min read',
+    category: 'Engineering Practice',
+    tags: ['code review', 'engineering practice', 'AI-generated code', 'team process'],
+    metaTitle: 'Code Review in the Age of AI-Generated Code',
+    metaDescription:
+      'How code review changes when most code is AI-generated: authorship norms, diff-size limits, risk-tiered review, and the questions a machine cannot answer.',
+    keywords: ['AI code review', 'code review best practices', 'AI-generated code', 'pull request review process', 'engineering team practices', 'review risk tiers', 'reviewer fatigue'],
+    content: `<p>An engineer opens a pull request at 4pm. It is 900 lines, it touches eleven files, the tests pass, and the description says "implement subscription pausing as specified in TICKET-4412". The reviewer knows, without being told, that the author did not write most of it. And the reviewer has a decision to make that their team has never discussed: what is their job here?</p>
 
-      <h2>1. AI-Powered Personalization</h2>
-      <p>Artificial intelligence is revolutionizing how brands connect with their audiences. In 2025, we're seeing more sophisticated AI algorithms that can deliver hyper-personalized content, product recommendations, and user experiences. This level of personalization not only improves customer satisfaction but also significantly boosts conversion rates.</p>
+<p>Under the old implicit contract, review was a conversation between two people who had both thought about the problem. One had thought hard enough to write it; the other checked their reasoning. That contract is broken now, and most teams have not replaced it with anything. They have the same checklist, the same approval button, and quietly more code arriving than before.</p>
 
-      <h2>2. Voice Search Optimization</h2>
-      <p>With the proliferation of smart speakers and voice assistants, voice search is becoming increasingly important. Optimizing for voice search requires a different approach than traditional SEO, focusing on natural language queries and local search intent.</p>
+<p>The process needs rewriting, not the tooling. Here is what actually changes.</p>
 
-      <h2>3. Video Marketing Dominance</h2>
-      <p>Video content continues to dominate digital marketing efforts. Short-form videos on platforms like TikTok and Instagram Reels are particularly effective for reaching younger audiences. Meanwhile, live streaming and interactive video experiences are becoming more popular for building community and engagement.</p>
+<h2>The author's signal is gone</h2>
 
-      <h2>4. Privacy-First Marketing</h2>
-      <p>As data privacy regulations become more stringent, businesses are shifting toward privacy-first marketing approaches. This includes leveraging first-party data, implementing transparent data collection practices, and finding new ways to deliver personalized experiences without compromising user privacy.</p>
+<p>Human-authored code carries information beyond its content. Every line cost the author effort, so lines were scarce and roughly deliberate. If a function was 200 lines, someone had decided it needed to be. If an abstraction existed, someone had wanted it enough to build it. Reviewers read that signal without noticing they were reading it.</p>
 
-      <p>Staying ahead of these trends will be crucial for businesses looking to thrive in 2025 and beyond. Those who embrace these changes and adapt their strategies accordingly will be well-positioned for success in the evolving digital landscape.</p>
-    `,
-    date: '2025-08-15',
-    author: 'WeThinkDigital Team',
-    readTime: '5 min read',
-    tags: ['digital marketing', 'trends'],
+<p>Generated code carries none of it. Lines are free, so there are more of them. Abstractions appear because they are conventional rather than because anyone needed them. Error handling is thorough in places that cannot fail and absent where it matters. Nothing in the diff distinguishes a considered decision from a default.</p>
+
+<p>Worse, the code is <em>fluent</em>. It reads as though written by someone competent and confident, with consistent naming and tidy structure. Fluency suppresses scrutiny — it is much easier to be sceptical of awkward code than of code that looks like it knows what it is doing. Reviewers are being asked to apply more scepticism to material that invites less.</p>
+
+<blockquote>The reviewer's question has changed from "did you think about this correctly?" to "did anyone think about this at all?" Those require different reading, and most review checklists still assume the first.</blockquote>
+
+<h2>Authorship is not optional</h2>
+
+<p>The most important norm to establish is also the simplest: <strong>the person who opens the pull request owns the code, regardless of what produced it.</strong>
+
+</p>
+
+<p>That means being able to explain any line in it, having read all of it, and accepting the consequences when it breaks. "The agent wrote that part" is not an acceptable answer in a review thread or in an incident review. If you would not be comfortable defending a line you typed yourself, do not submit it.</p>
+
+<p>This sounds obvious written down. It is not the default behaviour, and it erodes silently — an engineer under deadline pressure skims a generated diff, sees nothing alarming, and submits. Making the expectation explicit and repeating it is genuinely most of the work here. Teams that state it clearly behave differently from teams that assume it.</p>
+
+<p>The practical corollary is that <strong>submission implies self-review first</strong>. Read your own diff before anyone else does. This one habit catches a large share of the leftover debris — the speculative abstraction, the unused parameter, the defensive check for a condition that cannot occur — and it is exactly what reviewers most resent spending their time on.</p>
+
+<h2>Diff size is now a process control, not a preference</h2>
+
+<p>Review quality falls off sharply with diff size. This was known long before agents; it is why "keep pull requests small" appears in every engineering handbook and why it was routinely ignored. What has changed is that the cost of producing a large diff has collapsed, so the natural size of a pull request has drifted upward with nothing pushing back.</p>
+
+<p>A reviewer can genuinely assess maybe 200–400 lines with full attention. Beyond that, behaviour changes in a predictable way: they read the first files carefully, skim the middle, and check that the tests pass. That is not review. It is a ceremony with an approval attached.</p>
+
+<p>So a size ceiling stops being a style guideline and becomes a control you enforce. Not as a lint rule that people learn to bypass, but as a norm with a stated reason: above this size we cannot review it properly, so we will not pretend to. The pushback is that decomposition costs the author time. It does. That is the trade — author time is now the cheap resource and reviewer attention is the scarce one, so spending the former to protect the latter is correct.</p>
+
+<p>Two adjustments help. Separate mechanical changes from behavioural ones into different pull requests, because a rename across sixty files reviewed alongside a logic change means the logic change gets lost. And have generated work declare its intended surface up front, so a diff that wandered outside it is visible immediately — something we build into the work-item shape described in our note on <a href="/blog/ai-agents-software-development-lifecycle">how agents change the development lifecycle</a>.</p>
+
+<h2>Review what the machine structurally cannot</h2>
+
+<p>Automated review handles the mechanical layer well — missing <code>await</code>, unhandled rejections, resource leaks, convention drift. There is no reason for a human to spend their first ten minutes there. But the boundary is sharp, and human review should be deliberately aimed at the far side of it, as we set out in more detail in our note on <a href="/blog/automated-pr-review-with-ai">what automated pull request review catches and misses</a>.</p>
+
+<p>The questions worth a human's attention, in rough order of value:</p>
+
+<ol>
+  <li><strong>Is this the right change?</strong> The code may be correct and solve a problem nobody had. Generated code is never wrong about syntax and frequently wrong about intent, because it optimises for satisfying the stated requirement rather than for the requirement being right.</li>
+  <li><strong>Does it hold the invariants the system depends on?</strong> The rules enforced three modules away, in a reconciliation job, or only in someone's head. This is where the genuinely expensive bugs live, and evidence for them is never inside the diff.</li>
+  <li><strong>Is it safe to deploy, in this order?</strong> Migration sequencing, backwards compatibility with clients already running, whether old code will encounter the new schema during rollout.</li>
+  <li><strong>Is the complexity necessary?</strong> The most reliable smell in generated code is unearned abstraction — an interface with one implementation, a configuration option nobody asked for, three layers where one would do. Every one of those is permanent maintenance cost incurred for nothing.</li>
+  <li><strong>Would the tests have caught the bug?</strong> Not "are there tests". Generated suites reliably assert what the implementation already does. Pick the most important new branch and ask whether any test would fail if it were wrong.</li>
+  <li><strong>Can the team maintain this?</strong> If it uses a pattern nobody else on the team uses, it is a liability at 3am regardless of its elegance.</li>
+</ol>
+
+<p>Question four is the one reviewers most often let through, because rejecting working code for being more complicated than necessary feels pedantic. It is the correct call. Complexity that nobody chose deliberately is the easiest kind to remove and the most expensive kind to keep.</p>
+
+<h2>Tier by blast radius, not by size</h2>
+
+<p>The volume problem does not get solved by asking reviewers to read faster. It gets solved by spending attention unevenly and on purpose.</p>
+
+<p>Not all changes carry equal risk, and treating them identically means either over-reviewing trivia or under-reviewing the dangerous parts. Usually both. A copy change in a presentational component and a change to token validation should not pass through the same process.</p>
+
+<table>
+  <thead>
+    <tr><th>Tier</th><th>Examples</th><th>Process</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Critical</td><td>Authentication, authorisation, payments, data deletion, migrations</td><td>Two human approvals, one senior; size ceiling enforced hard; no exceptions for urgency</td></tr>
+    <tr><td>Standard</td><td>Business logic, APIs, data access</td><td>One human approval focused on intent and invariants; automated pass first</td></tr>
+    <tr><td>Low risk</td><td>Presentational components, copy, configuration with tests</td><td>Automated checks plus lightweight human sign-off</td></tr>
+    <tr><td>Mechanical</td><td>Formatting, renames, dependency bumps with green CI</td><td>Automated verification; separated from behavioural changes</td></tr>
+  </tbody>
+</table>
+
+<p>Building this taxonomy for your own codebase is a half-day exercise and it is the highest-leverage process change available. It is also the one that makes the volume increase survivable — you are not reviewing less, you are reviewing the right things more.</p>
+
+<p>Route it mechanically where you can. A change touching your authentication paths should require the critical process automatically rather than depending on someone noticing. Encoding the taxonomy as configuration rather than as a wiki page is what makes it hold:</p>
+
+<pre><code># review-policy.yml — tier is derived from what the diff touches,
+# never from who opened it or how urgent they say it is.
+
+tiers:
+  critical:
+    paths:
+      - 'src/auth/**'
+      - 'src/billing/**'
+      - 'db/migrations/**'
+      - 'src/**/permissions.ts'
+    approvals: 2
+    require_codeowner: true
+    max_diff_lines: 400        # hard stop, no urgency override
+    checklist: [intent, invariants, deploy-order, rollback]
+
+  standard:
+    paths: ['src/**']
+    approvals: 1
+    max_diff_lines: 600
+    checklist: [intent, invariants, test-discriminates]
+
+  low_risk:
+    paths: ['src/components/**', 'content/**']
+    approvals: 1
+    checklist: [intent]
+
+  mechanical:
+    # Must not be mixed with behavioural change in the same pull request.
+    labels: ['formatting', 'rename', 'dependency-bump']
+    approvals: 0
+    requires: [ci_green, no_behavioural_diff]
+
+# Applies to every tier: authorship is not delegable.
+assertions:
+  - author_confirms_self_reviewed
+  - generated_code_declared_scope_respected</code></pre>
+
+<p>The <code>max_diff_lines</code> entry on the critical tier with no override is the line that matters, and it is the one teams are tempted to soften. The whole point is that urgency is precisely when review discipline is most valuable and least likely to be applied voluntarily.</p>
+
+<p>This is also how the PR Review agent in <a href="/products/agents">our agent platform</a> is configured: it clears the mechanical layer and flags which tier a change falls into, so human attention arrives already pointed at the right questions.</p>
+
+<h2>The team-level risks nobody puts on the roadmap</h2>
+
+<p>Two slower problems deserve naming, because neither shows up in a metric until it is well advanced.</p>
+
+<p><strong>Reviewer fatigue.</strong> Review is cognitively expensive and it has no visible output. When volume rises, review quality degrades before anyone reports a problem, because the approvals keep arriving on time. Watch for the signs: approvals within two minutes of opening, comment counts falling while diff sizes rise, the same one or two people reviewing everything. Review load needs to be a planned, distributed cost, not something absorbed between other work.</p>
+
+<p><strong>Learning loss.</strong> Struggling through an implementation is how engineers build models of a system. Accepting a generated one and reading it does not produce the same understanding, and the gap shows up eighteen months later in people who can ship features but cannot debug the system or reason about a design trade-off. This is a real cost and it lands on the most junior half of your team hardest. Some work should be done the slow way on purpose — and reviewing thoughtfully is itself one of the best remaining ways to learn a codebase, which is another reason not to let review become a rubber stamp.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Write down the authorship norm and say it out loud in a team meeting: you own what you submit, you have read all of it, you can explain any line. Then make self-review before submission an expectation. Those two things cost nothing and change behaviour more than any tool you could install.</p>
+
+<p>Build the risk taxonomy and tier your review process against it, so senior attention concentrates on authentication, money, migrations and data rather than being spread evenly across everything. Enforce a diff-size ceiling on the critical tier with a stated reason rather than as a style rule. Let automation own the mechanical layer entirely, and rewrite your human checklist to cover only what it cannot see — intent, invariants, deploy safety, unnecessary complexity, whether the tests discriminate, and whether the team can maintain it.
+
+</p>
+
+<p>Review has become the most important stage in the pipeline rather than the last chore before merge, and it is worth staffing and scheduling accordingly. If you are working out how to restructure yours around a much higher volume of code, <a href="/contact">we are happy to compare approaches</a> — it is the question we get asked most often once teams start shipping agent-written work.</p>`,
   },
   {
     id: '2',
-    slug: 'seo-best-practices',
-    title: 'SEO practices for modern websites',
-    excerpt: 'The technical and editorial decisions that help search work compound over time.',
-    content: `
-      <p>Search Engine Optimization (SEO) remains a critical component of any successful digital marketing strategy. However, SEO best practices have evolved significantly over the years, and what worked a few years ago may no longer be effective—or worse, could hurt your rankings.</p>
+    slug: 'llm-cost-optimization-strategies',
+    title: 'Controlling LLM Cost and Latency in Production Systems',
+    excerpt:
+      'LLM cost is rarely one expensive thing. It is a small per-call cost multiplied by a call volume nobody modelled, with context that grows quadratically.',
+    date: '2026-01-08',
+    author: 'WeThinkDigital Engineering',
+    readTime: '9 min read',
+    category: 'AI Engineering',
+    tags: ['LLM', 'cost optimisation', 'latency', 'prompt caching', 'production'],
+    metaTitle: 'Controlling LLM Cost and Latency in Production Systems',
+    metaDescription:
+      'Practical LLM cost optimization: prompt caching, model routing, context reduction and output limits — plus the token arithmetic to do before you build.',
+    keywords: ['LLM cost optimization', 'prompt caching', 'LLM latency', 'token cost', 'model routing', 'AI infrastructure cost', 'production LLM systems'],
+    content: `<p>A feature ships. It works. Two months later someone opens the provider dashboard and the monthly bill has four digits more than anyone budgeted, and nobody can say which endpoint is responsible. The investigation usually ends in the same place: one code path sends the full document on every turn of a conversation, so a ten-turn session re-sends the same 30,000 tokens ten times. Nobody noticed because each individual call looked reasonable.</p>
 
-      <h2>1. Focus on User Experience</h2>
-      <p>Google's algorithms increasingly prioritize user experience. This means your website should be fast, mobile-friendly, and easy to navigate. Core Web Vitals, which measure loading performance, interactivity, and visual stability, are now important ranking factors.</p>
+<p>This is the defining property of LLM cost. It is not one expensive thing. It is a small per-call cost multiplied by a call volume nobody modelled, made worse by context that grows quadratically with conversation length. And the same structural facts that drive cost drive latency, which is why they are worth fixing together.</p>
 
-      <h2>2. Create High-Quality Content</h2>
-      <p>Content is still king when it comes to SEO. However, it's not just about creating more content—it's about creating better content. Focus on providing comprehensive, valuable information that answers your audience's questions and solves their problems.</p>
+<h2>Do the arithmetic before you build</h2>
 
-      <h2>3. Optimize for Featured Snippets</h2>
-      <p>Featured snippets (also known as "position zero") appear at the top of search results and can significantly increase your visibility and click-through rates. Structure your content to answer questions directly, use header tags appropriately, and provide concise, informative answers.</p>
+<p>Most cost surprises are arithmetic that was never done. The calculation takes five minutes and it should be part of the design, not the retrospective.</p>
 
-      <h2>4. Technical SEO Matters</h2>
-      <p>Don't neglect the technical aspects of SEO. Ensure your website has a clean URL structure, proper internal linking, an XML sitemap, and a robots.txt file. Also, make sure your site is secure (HTTPS) and that you're handling redirects properly.</p>
+<p>Take a support assistant. Each request sends a 1,200-token system prompt, 6,000 tokens of retrieved context, a 300-token question, and generates 500 tokens. That is 7,500 input and 500 output per call. At 2,000 calls a day you are moving 15 million input tokens and 1 million output tokens daily — around 450 million input tokens a month.</p>
 
-      <p>By following these modern SEO best practices, you'll be well on your way to improving your search engine rankings and driving more organic traffic to your website.</p>
-    `,
-    date: '2025-08-01',
-    author: 'WeThinkDigital Team',
-    readTime: '6 min read',
-    tags: ['seo', 'optimization'],
+<p>The exact rate depends on your provider and model, but the ratios are stable and they are what matters. Output tokens typically cost several times more than input tokens. Frontier models cost roughly an order of magnitude more than small ones. Cached input, where supported, costs a fraction of uncached input. Those three ratios determine almost every optimisation decision you will make.</p>
+
+<p>Run the same calculation at ten times the volume. If the answer is unacceptable, the architecture is wrong now, not later — you will not optimise a 10x cost problem away with prompt tweaks.</p>
+
+<h2>Context is the cost driver, not call count</h2>
+
+<p>Teams instinctively try to reduce the number of calls. Usually the bigger win is reducing what each call carries.</p>
+
+<p>In the example above, retrieved context is 80% of input tokens. Sending twelve chunks instead of six halves nothing and doubles the dominant term. And as covered in our note on <a href="/blog/building-production-rag-systems">building RAG systems that work in production</a>, more chunks frequently makes answers <em>worse</em> as well as more expensive — material in the middle of a long context is used less reliably than material at the edges. Retrieving fifty candidates and reranking down to six is cheaper and better than sending twenty unranked.</p>
+
+<p>Conversation history is the other offender, and it is worse because it compounds. Naively appending every turn means turn ten re-sends turns one through nine. Total tokens across a session grow with the square of turn count. Fixes in ascending order of effort: cap history to the last few turns, summarise older turns into a compact running state, or — best — maintain structured state rather than a transcript, so turn ten sends a state object of a few hundred tokens instead of nine turns of prose.</p>
+
+<h2>Prompt caching is the highest-leverage change available</h2>
+
+<p>If your provider supports prompt caching and you are not using it, this is the first thing to fix. It typically requires no change to model, prompt content or output quality — only to the order in which you assemble the context.</p>
+
+<p>Caching works on a shared prefix. The provider recognises that the beginning of your request is identical to a recent one and skips recomputing it, charging a reduced rate for the cached portion. The requirement is an exact-match prefix, which means everything stable must come first and everything variable must come last.</p>
+
+<p>Most naive prompt assembly breaks this by putting a timestamp or a user identifier near the top. One variable token at position 40 invalidates the entire cacheable prefix behind it.</p>
+
+<pre><code>// Cache-hostile: the timestamp at the top invalidates everything after it.
+const bad = [
+  'Request at ' + now + ' for user ' + userId,  // variable, position 0
+  SYSTEM_PROMPT,                                // 1,200 tokens, stable
+  TOOL_DEFINITIONS,                             // 900 tokens, stable
+  retrievedContext,
+  question,
+].join('\\n\\n');
+
+// Cache-friendly: stable prefix first, longest-lived first,
+// variable material strictly at the tail.
+function assemble(retrievedContext: string, question: string, meta: RequestMeta) {
+  return [
+    SYSTEM_PROMPT,        // stable across every request
+    TOOL_DEFINITIONS,     // stable across every request
+    FEW_SHOT_EXAMPLES,    // stable; changes only on deploy
+    retrievedContext,     // varies per query
+    formatMeta(meta),     // varies per request
+    question,             // varies per request
+  ].join('\\n\\n');
+}</code></pre>
+
+<p>Order the stable material by how long it lives: things that change on deploy before things that change per user before things that change per request. In the worked example, the system prompt, tool definitions and examples might be 2,500 tokens of a 7,500-token request. Making that third of every call cacheable is a large recurring saving for an afternoon of work.</p>
+
+<h2>Stop using one model for everything</h2>
+
+<p>The single most common source of waste is routing every request to the most capable model because that was what the prototype used.</p>
+
+<p>Real workloads are a mix. Classification, extraction from structured input, routing decisions, short rewrites and yes/no judgements are handled well by small models. Multi-step reasoning, ambiguous synthesis and difficult code generation need a large one. If 70% of your traffic is the first category and you serve all of it with a frontier model, you are paying roughly ten times more than necessary for the majority of your volume.</p>
+
+<p>Two structures work in production:</p>
+
+<ul>
+  <li><strong>Static routing by task type.</strong> You know at the call site which kind of work this is. Configure the model per task rather than globally. This is unglamorous and captures most of the available saving.</li>
+  <li><strong>Escalation.</strong> Attempt with the small model, validate the output deterministically, escalate to the large model only on failure. Economical when the small model succeeds most of the time — if it succeeds 80% of the time, you pay 1.0 small calls plus 0.2 large calls instead of 1.0 large calls. If it succeeds 40% of the time, you are paying for both and you should just use the large model.</li>
+</ul>
+
+<p>The trap in escalation is validation. It only works if you can check the cheap output with code — schema conformance, a test run, a parse, a constraint check. If the only way to tell whether the small model got it right is to ask the large model, you have built a more expensive system, not a cheaper one.</p>
+
+<h2>Latency is a different problem with overlapping fixes</h2>
+
+<p>Cost and latency share causes but not remedies, and they occasionally conflict. Worth separating.</p>
+
+<p>Input tokens are processed in parallel; output tokens are generated one at a time. This asymmetry is the most useful thing to know about LLM latency. A request with 8,000 input tokens and 200 output tokens is usually faster than one with 1,000 input and 1,500 output. If a response feels slow, look at output length before you look at input size.</p>
+
+<p>Which gives a concrete lever: constrain output. Ask for structured output rather than prose with explanation. Request the fields you need and nothing else. A prompt that says "respond with JSON matching this schema, no commentary" can cut output tokens by more than half, which reduces both latency and the more expensive half of your bill.</p>
+
+<table>
+  <thead>
+    <tr><th>Lever</th><th>Cost effect</th><th>Latency effect</th><th>Risk</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Prompt caching</td><td>Large reduction on stable prefix</td><td>Improves time to first token</td><td>None if ordering is correct</td></tr>
+    <tr><td>Smaller model for simple tasks</td><td>Large</td><td>Large</td><td>Quality regression if misrouted</td></tr>
+    <tr><td>Fewer, reranked context chunks</td><td>Large</td><td>Moderate</td><td>Needs a reranker; usually improves quality</td></tr>
+    <tr><td>Structured, bounded output</td><td>Large — output is the costly side</td><td>Large</td><td>Minimal</td></tr>
+    <tr><td>Streaming</td><td>None</td><td>Perceived latency only</td><td>Complicates validation of the whole response</td></tr>
+    <tr><td>Semantic caching</td><td>Large where queries repeat</td><td>Large on hit</td><td>Serving a near-miss as an exact answer</td></tr>
+    <tr><td>Summarised history</td><td>Removes quadratic growth</td><td>Moderate</td><td>Loses detail; summarisation costs a call</td></tr>
+  </tbody>
+</table>
+
+<p>Streaming deserves its caveat. It changes nothing about cost or total completion time, but time to first token is what users experience as speed, and the difference between four seconds of blank screen and text appearing in 400ms is enormous perceptually. It conflicts with validating the complete response before display, so for anything where a malformed or unsafe answer matters, either validate incrementally or do not stream.</p>
+
+<p>Semantic caching — reusing a previous answer for a sufficiently similar question — is powerful where query distribution is concentrated, which in support-style workloads it usually is. The danger is the similarity threshold. "How do I cancel my subscription" and "how do I cancel my order" are close in embedding space and have different answers. Set the threshold conservatively, scope cache keys by anything that changes the correct answer (tenant, locale, entitlement), and expire on content updates.</p>
+
+<h2>Measure per unit of work, not per month</h2>
+
+<p>A monthly total tells you that you have a problem. It never tells you where. The metric that drives decisions is <strong>cost per completed unit of work</strong> — per resolved ticket, per processed document, per answered question — attributed to the feature that caused it.</p>
+
+<p>That means tagging every model call with the feature, the task type, the model and the prompt version, and recording input tokens, cached tokens, output tokens and latency. With that in place you can answer the questions that matter: which feature is 60% of spend, did last week's prompt change increase output length, what is our cache hit rate, what is the p95 latency of the escalation path.</p>
+
+<p>Two guardrails belong in the same layer. A per-request token ceiling, because a pathological input should fail fast rather than send 300,000 tokens. And a per-tenant or per-user rate limit, because unbounded automated traffic against a metered API is a financial incident waiting to happen. Both are trivial to add on day one and awkward to retrofit after a bill arrives. A cost regression check in CI — flagging when a prompt change materially increases tokens per unit of work — catches the slow drift that nobody attributes to anything.</p>
+
+<h2>What to skip</h2>
+
+<p>Two things absorb effort and rarely pay in the way teams expect.</p>
+
+<p>Self-hosting an open-weight model to avoid API costs looks compelling in a spreadsheet and often is not. You take on GPU capacity planning, batching, autoscaling for spiky traffic, evaluation, and version management — all of it engineering time. It becomes genuinely economical at sustained high volume, with steady load, and a task where a smaller open model is sufficient. At moderate or bursty volume, idle GPU capacity costs more than the API you replaced.</p>
+
+<p>Aggressive prompt compression — stripping words to save input tokens — is usually poor value. Input is the cheap side, and prompts degrade in ways that are hard to detect without a solid evaluation set. Removing a genuinely redundant thousand-token section is fine. Rewriting instructions telegraphically to save fifty tokens risks quality for a rounding error.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Instrument first. Until every call is tagged by feature and task type with token counts attached, every optimisation is a guess, and the distribution is almost never what the team predicts. A week of instrumentation routinely reveals that one endpoint nobody was worried about is most of the bill.</p>
+
+<p>Then work in order of leverage: enable prompt caching and reorder your context to make it effective; route simple tasks to small models; constrain output with structured schemas; reduce context through reranking rather than through sending more. Add a per-request token ceiling and a rate limit before you need them. Only after all of that is it worth evaluating semantic caching or self-hosting.</p>
+
+<p>Cost control is not a one-off exercise, because prompts change, context grows and usage patterns shift. Treat tokens per unit of work as a tracked metric with the same seriousness as p95 latency, and the problem stays boring. If you are looking at a bill that outgrew its forecast, <a href="/contact">we are glad to help work out where it is going</a> — that diagnosis is routine in our <a href="/services/ai-engineering">AI engineering work</a>, and the fix is usually structural rather than clever.</p>`,
   },
   {
     id: '3',
-    slug: 'web-development-frameworks',
-    title: 'Choosing a web development framework',
-    excerpt: 'A practical way to weigh team, product, and maintenance needs before you commit.',
-    content: `
-      <p>The world of web development offers a plethora of frameworks, each with its own strengths and weaknesses. Choosing the right one for your project can be a daunting task, but it's crucial for long-term success.</p>
+    slug: 'multi-agent-orchestration-patterns',
+    title: 'Multi-Agent Orchestration Patterns for Real Workloads',
+    excerpt:
+      'Nine agents on a diagram looked elegant and cost eleven times a single model call. Every agent boundary converts structured state to prose and back.',
+    date: '2025-12-16',
+    author: 'WeThinkDigital Engineering',
+    readTime: '9 min read',
+    category: 'AI Engineering',
+    tags: ['agents', 'orchestration', 'architecture', 'state management'],
+    metaTitle: 'Multi-Agent Orchestration Patterns for Real Workloads',
+    metaDescription:
+      'Multi-agent orchestration patterns for production: router, parallel fan-out, generate-then-verify and bounded supervision — and what each boundary costs.',
+    keywords: ['multi-agent orchestration', 'agent architecture patterns', 'AI agent workflows', 'agent state management', 'LLM pipeline design', 'generate and verify', 'agent observability'],
+    content: `<p>The architecture diagram had nine agents on it. A planner, a researcher, three specialists, a critic, a synthesiser, a validator and a supervisor coordinating the lot. It was genuinely elegant. In production it was slower than a single well-prompted model call, cost roughly eleven times as much, and failed in ways nobody could reproduce — because by the time an error surfaced it had passed through four agents, each of which had paraphrased the previous one's output.</p>
 
-      <h2>1. React: The Component-Based Giant</h2>
-      <p>React, developed by Facebook, has become one of the most popular JavaScript libraries for building user interfaces. Its component-based architecture and virtual DOM make it highly efficient and flexible. React's vast ecosystem and strong community support make it an excellent choice for complex applications.</p>
+<p>The rebuild had two agents and a deterministic state machine between them. It was faster, cheaper, and when it failed you could tell which step failed and why.</p>
 
-      <h2>2. Vue.js: The Progressive Framework</h2>
-      <p>Vue.js offers a more approachable learning curve while still providing powerful features for complex applications. Its progressive nature means you can use as much or as little of it as needed. Vue's clear documentation and gentle learning curve make it an excellent choice for teams new to modern JavaScript frameworks.</p>
+<p>This is the most common mistake in agent architecture: treating agents as the unit of decomposition when they should be the exception. Every agent boundary you add is a place where structured state becomes natural language and back again, and each of those conversions is lossy, slow and expensive.</p>
 
-      <h2>3. Angular: The Full-Fledged Framework</h2>
-      <p>Angular, Google's comprehensive framework, provides a complete solution with built-in features like dependency injection, routing, and form validation. While it has a steeper learning curve, it's ideal for large-scale enterprise applications that require a robust, opinionated structure.</p>
+<h2>The cost of a boundary</h2>
 
-      <h2>4. Svelte: The Compile-Time Framework</h2>
-      <p>Svelte takes a different approach by shifting much of the work to compile time rather than runtime. This results in smaller bundle sizes and better performance. Svelte's simplicity and performance make it an attractive option for projects where performance is critical.</p>
+<p>It is worth being concrete about what an agent handoff actually costs, because the diagram makes it look free.</p>
 
-      <p>When choosing a framework, consider your team's expertise, project requirements, and long-term maintenance needs. Each framework has its place, and the "best" choice depends on your specific circumstances.</p>
-    `,
-    date: '2025-07-20',
-    author: 'WeThinkDigital Team',
-    readTime: '7 min read',
-    tags: ['web development', 'frameworks'],
+<p>When agent A passes work to agent B, three things happen. The state is serialised into text. Agent B receives that text plus its own system prompt, its own tool definitions, and whatever context it needs to be useful — typically several thousand tokens before it has done anything. Then B re-derives an understanding of the situation that A already had.</p>
+
+<p>Add latency: another model round trip, often several seconds. Add cost: the context is re-sent, so a chain of five agents can easily send the same background information five times. Add the failure surface: B may misread A's summary, and there is no type system between them to catch it.</p>
+
+<blockquote>A function call costs microseconds and cannot misunderstand its arguments. An agent handoff costs seconds, dollars and a paraphrase. Use the second one only when you need judgement that the first cannot provide.</blockquote>
+
+<p>The test we apply before adding an agent: does this step require open-ended reasoning over unstructured input, or does it require a decision that a competent engineer could express as code? If it is the latter — and it usually is — it belongs in the orchestration layer, not in a model.</p>
+
+<h2>Start with a deterministic pipeline</h2>
+
+<p>Most workloads that get described as multi-agent are actually a fixed sequence of steps with one or two genuinely uncertain decisions in the middle. Extract fields from a document, validate them against a schema, look up the counterparty, decide whether it needs review, write the result. Only the extraction and possibly the decision need a model. Everything else is code.</p>
+
+<p>The pattern that works is a deterministic pipeline with model calls at specific stages, not a conversation between autonomous participants. The control flow lives in your language, where you can test it, log it, retry it and reason about it:</p>
+
+<pre><code>type Stage&lt;I, O&gt; = {
+  name: string;
+  run: (input: I, ctx: RunContext) =&gt; Promise&lt;O&gt;;
+  /** Deterministic gate: does this output satisfy the contract? */
+  validate: (output: O) =&gt; Result&lt;O, ValidationError&gt;;
+  retries: number;
+};
+
+async function runPipeline&lt;T&gt;(stages: Stage&lt;unknown, unknown&gt;[], input: T, ctx: RunContext) {
+  let current: unknown = input;
+
+  for (const stage of stages) {
+    let attempt = 0;
+    for (;;) {
+      const output = await stage.run(current, ctx);
+      const checked = stage.validate(output);
+
+      if (checked.ok) {
+        ctx.audit(stage.name, { attempt, output: checked.value });
+        current = checked.value;
+        break;
+      }
+
+      // Feed the validation failure back as context, do not just retry blind.
+      ctx.audit(stage.name, { attempt, error: checked.error });
+      if (++attempt &gt; stage.retries) throw new StageFailed(stage.name, checked.error);
+      current = withRepairHint(current, checked.error);
+    }
+  }
+  return current;
+}</code></pre>
+
+<p>Two things in there matter more than the structure. Every stage has a deterministic validator, so a model's output is checked by code rather than by another model. And a failed validation is fed back as a repair hint rather than triggering a blind retry — retrying an identical prompt against a non-deterministic model is a lottery, but telling it precisely what was wrong with its last attempt usually succeeds on the second try.</p>
+
+<h2>Four patterns that earn their keep</h2>
+
+<h3>Router</h3>
+
+<p>One cheap, fast classification call decides which specialised path handles the request. The router does not do the work; it picks the handler. This is the highest-value multi-agent pattern because the routing decision is small, the specialised handlers can have tight focused prompts instead of one enormous prompt covering every case, and you can use a small model for the routing and reserve the expensive model for the work.</p>
+
+<p>The failure mode is router misclassification, which is silent and cascades — the wrong specialist answers confidently. Mitigate by making the router return a confidence and a second choice, and escalating ambiguous cases rather than guessing.</p>
+
+<h3>Parallel fan-out with deterministic merge</h3>
+
+<p>Where subtasks are genuinely independent — analyse twelve documents, check a change against six policy categories — run them concurrently and merge the results in code. Latency becomes the slowest branch instead of the sum, which is often a five- or ten-fold improvement in wall-clock time.</p>
+
+<p>The critical detail is that the merge should be deterministic. The instinct is to add a synthesiser agent to combine the outputs. That reintroduces a serial model call over a large context, and the synthesiser frequently drops findings from the middle of its input. If the merge is "collect all findings, deduplicate, sort by severity", write that in code.</p>
+
+<h3>Generate then verify</h3>
+
+<p>Two roles with genuinely different objectives: one produces a candidate, the other checks it against criteria. This works because the verifier's job is narrower and more objective than the generator's, and because a fresh context is better at spotting a flaw than the context that produced it.</p>
+
+<p>It works considerably better when the verifier has tools that produce ground truth — running the test suite, executing the query, calling the schema validator — rather than forming an opinion. A verifier that only reasons agrees with the generator far more often than it should. This is the pattern behind the SDE and QA agents in <a href="/products/agents">our agent platform</a> sharing one backlog: generation without independent, executable verification just produces confident output faster.</p>
+
+<h3>Supervisor with bounded delegation</h3>
+
+<p>The pattern people reach for first and should reach for last. A coordinating agent decides which specialist to invoke, reads the result and decides what to do next. It is the right choice when the sequence of steps genuinely cannot be known in advance — open-ended investigation, debugging, research where each finding determines the next question.</p>
+
+<p>It needs hard bounds or it will not terminate. A maximum step count, a token budget, a wall-clock deadline, and a rule that the same subtask cannot be delegated twice. Without those, the characteristic failure is two agents politely handing a task back and forth while the meter runs.</p>
+
+<h2>State is the hard part, not coordination</h2>
+
+<p>Agent frameworks spend their documentation on how agents talk to each other. In production the difficulty is almost entirely about state: what is the source of truth, who may write to it, and what happens when a run dies at step four of seven.</p>
+
+<p>Passing state as conversation history — the default in most frameworks — is the root of several problems. Context grows with every turn until you are paying to re-send the entire history on each call, and eventually truncating it, which means the system silently forgets its earliest and often most important instructions. It is also unqueryable: you cannot ask "what did the extraction stage decide" without parsing prose.</p>
+
+<p>Keep a typed state object as the source of truth. Agents receive a projection of it — only the fields their step needs — and return structured output that is validated and merged back by the orchestrator. Conversation history becomes a debugging artefact rather than the data model.</p>
+
+<p>This buys you the operational properties that matter:</p>
+
+<ul>
+  <li><strong>Resumability.</strong> Persist state after each stage and a failed run restarts from the last good checkpoint instead of from the beginning. On a workflow with six model calls, this is the difference between a retry costing one call and costing six.</li>
+  <li><strong>Idempotency.</strong> Side-effecting steps need a stable key derived from the run and the stage, so a retry after a timeout cannot send the same message twice. Assume every step will execute more than once, because under retries it will.</li>
+  <li><strong>Inspectability.</strong> When something goes wrong, you need to see the state at each boundary, not reconstruct it from a transcript.</li>
+  <li><strong>Partial failure handling.</strong> In a fan-out, decide explicitly what a run means when two of twelve branches fail. Returning ten results as if they were twelve is the quiet failure that damages trust.</li>
+</ul>
+
+<h2>Cost and latency compound</h2>
+
+<p>The arithmetic here is unforgiving and worth doing before you build, not after.</p>
+
+<p>A single call with 4k tokens of context is one round trip. A five-agent chain where each agent carries its own 2k system prompt plus a growing shared context is five round trips and materially more than five times the tokens, because the shared context is re-sent each time. Sequential latency adds: five calls at three seconds each is fifteen seconds before any output reaches the user.</p>
+
+<table>
+  <thead>
+    <tr><th>Structure</th><th>Model calls</th><th>Latency</th><th>Relative token cost</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Single call</td><td>1</td><td>1 round trip</td><td>Baseline</td></tr>
+    <tr><td>Router plus one specialist</td><td>2</td><td>2 round trips</td><td>Often below baseline — small router, tighter specialist prompt</td></tr>
+    <tr><td>Fan-out of 6, code merge</td><td>6</td><td>1 round trip (slowest branch)</td><td>~6x, bought with a large latency win</td></tr>
+    <tr><td>Sequential chain of 5</td><td>5</td><td>5 round trips</td><td>&gt;5x from re-sent context</td></tr>
+    <tr><td>Supervisor, unbounded</td><td>Unbounded</td><td>Unbounded</td><td>Unbounded</td></tr>
+  </tbody>
+</table>
+
+<p>The router row is the interesting one: adding an agent can reduce total cost, because a focused specialist prompt is much shorter than a monolithic prompt that has to handle every case. That is the shape of a good boundary — one that reduces work downstream. The sequential chain is the shape of a bad one. Per-stage model selection and prompt-cache-friendly context ordering matter a great deal here, and we cover both in our note on <a href="/blog/llm-cost-optimization-strategies">controlling LLM cost and latency</a>.</p>
+
+<h2>Debugging a system that is different every time</h2>
+
+<p>Non-determinism makes conventional debugging useless. You cannot reproduce the failure by rerunning it, and a stack trace tells you nothing about why a model chose what it chose.</p>
+
+<p>What works is treating every run as a distributed trace. A run identifier threaded through every stage; for each stage the exact prompt sent, the raw response, the parsed output, the validation result, latency, token counts, and the model and prompt version used. Store it. When someone reports that the system did something strange last Tuesday, this is the only thing that will answer them.</p>
+
+<p>Then add replay: the ability to take a recorded run and re-execute it against a modified pipeline, diffing the decisions. This is how you ship a prompt change with any confidence, and it is the piece teams most often skip and most often regret. Track stage-level metrics too — validation failure rate and retry rate per stage will point at your weak link long before users complain.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Start with one model call and a lot of code around it. Add a second agent only when you can articulate what judgement it contributes that code cannot, and what it costs in latency and tokens. The burden of proof sits with the new boundary, not against it. Most systems that end up working well have two or three model calls in them, not nine.</p>
+
+<p>Put the control flow in your programming language and the judgement in the model. Validate every model output with deterministic code and feed failures back as repair hints. Keep typed state rather than conversation history, checkpoint it between stages, and make every side effect idempotent. Bound anything that loops with step, token and time limits, and decide up front what a partially successful run returns.</p>
+
+<p>Orchestration is a distributed systems problem with a non-deterministic component in it, and the discipline that makes it survivable is the same discipline that makes any distributed system survivable — clear contracts, checkpointed state, idempotent effects and real observability. The choices that matter are about where you draw the boundaries; for how to select the workloads worth orchestrating in the first place, see our note on <a href="/blog/ai-workflow-automation-business-processes">finding the processes worth automating</a>. If you are designing one of these and the diagram has more than three agents on it, <a href="/contact">talk it through with us</a> before you build — that conversation is a large part of our <a href="/services/ai-engineering">AI engineering work</a>.</p>`,
   },
   {
     id: '4',
-    slug: 'best-seo-company-in-dubai',
-    title: 'What a good SEO partner should measure in Dubai',
-    excerpt: 'A practical look at the difference between ranking reports and commercial progress.',
-    content: `
-      <h2>Stop Wasting Money on SEO Companies That Don't Deliver Results</h2>
-      <p>If you're looking for the best SEO company in Dubai, you're probably tired of agencies that promise the moon but deliver nothing. You're not alone. Most businesses in Dubai have been burned by SEO companies that:</p>
-      <ul>
-        <li>Charge premium prices for basic keyword stuffing</li>
-        <li>Promise #1 rankings without understanding your business goals</li>
-        <li>Focus on vanity metrics instead of revenue growth</li>
-        <li>Use black-hat tactics that get you penalized</li>
-      </ul>
-
-      <h2>What Makes a Truly Great SEO Company in Dubai?</h2>
-      <p>The best SEO company in Dubai isn't the one with the fanciest office or the most awards on their wall. It's the one that:</p>
-      <ol>
-        <li><strong>Understands Your Business Model</strong> - They don't just optimize your website; they optimize your entire revenue funnel</li>
-        <li><strong>Focuses on Revenue, Not Rankings</strong> - They measure success by the money you make, not the position you rank</li>
-        <li><strong>Provides Complete Transparency</strong> - You know exactly what they're doing and why</li>
-        <li><strong>Has Proven Results</strong> - They can show you case studies with real numbers and real business impact</li>
-      </ol>
-
-      <h2>Why WeThinkDigital is Dubai's Best SEO Company</h2>
-      <p>We don't just do SEO. We build revenue machines. Here's what sets us apart:</p>
-
-      <h3>1. We're Revenue-Focused, Not Traffic-Focused</h3>
-      <p>Most SEO companies in Dubai chase traffic like it's the ultimate goal. We don't care about traffic. We care about customers. We optimize for conversions, not just clicks.</p>
-
-      <h3>2. Our Pricing is Based on Results, Not Hours</h3>
-      <p>We don't bill you for keyword research and content optimization. We get paid when we deliver results. This aligns our incentives with yours - we only win when you win.</p>
-
-      <h3>3. We Understand Dubai's Unique Market</h3>
-      <p>Dubai isn't just another city. It's a global business hub with unique challenges and opportunities. Our team understands the local market dynamics, competition landscape, and customer behavior.</p>
-
-      <h3>4. We Use Data-Driven Strategies</h3>
-      <p>Every decision we make is backed by data. We don't guess. We test, measure, and optimize. This approach has helped our clients achieve an average ROI of 300%+ on their SEO investments.</p>
-
-      <h2>The Results We Deliver</h2>
-      <p>Don't just take our word for it. Here's what our clients have achieved:</p>
-      <ul>
-        <li>723% increase in organic traffic in 6 months</li>
-        <li>341% increase in qualified leads from search engines</li>
-        <li>215% improvement in conversion rates from organic search</li>
-        <li>$2.3M in additional revenue in the first year</li>
-      </ul>
-
-      <h2>Stop Settling for Average SEO Companies</h2>
-      <p>Dubai has dozens of SEO companies. But how many actually move the needle for your business? If you're ready to work with the best SEO company in Dubai that focuses on real business results, it's time to talk to WeThinkDigital.</p>
-
-      <p>Your competition isn't just optimizing their websites - they're optimizing their entire customer acquisition strategy. Are you?</p>
-    `,
-    date: '2025-08-20',
-    author: 'WeThinkDigital Team',
+    slug: 'legacy-system-modernization-ai',
+    title: 'Modernising Legacy Systems With AI-Assisted Refactoring',
+    excerpt:
+      'The blocker in legacy modernisation is never the typing. It is that nobody knows what the system does, so nobody can tell whether a change broke it.',
+    date: '2025-12-02',
+    author: 'WeThinkDigital Engineering',
     readTime: '8 min read',
-    tags: ['seo', 'dubai', 'revenue'],
+    category: 'Software Development',
+    tags: ['legacy systems', 'refactoring', 'modernisation', 'testing', 'migration'],
+    metaTitle: 'Modernising Legacy Systems With AI-Assisted Refactoring',
+    metaDescription:
+      'How AI actually helps legacy system modernisation: comprehension, characterisation tests and incremental strangulation — and why wholesale translation fails.',
+    keywords: ['legacy system modernization', 'AI-assisted refactoring', 'characterisation tests', 'strangler pattern', 'legacy code comprehension', 'incremental migration', 'technical debt'],
+    content: `<p>The system runs payroll for 4,000 people. It was written in 2009, the last engineer who understood the tax calculation module left in 2019, and there are 11,000 lines in a single file called <code>process.php</code> with no tests. Everyone agrees it must be modernised. Every attempt has been abandoned, because the first question — what does it currently do? — has no answer anyone will commit to.</p>
+
+<p>This is where AI assistance is genuinely transformative, and it is not where most people expect. The headline promise is automated translation: point a model at the old code and get the new code. That is the least valuable thing on offer and the most dangerous. The real value is in comprehension and in building the safety net that makes any change survivable.</p>
+
+<p>Because the thing that blocks legacy modernisation is almost never the typing. It is that nobody knows what the system does, so nobody can tell whether a change broke it.</p>
+
+<h2>Why rewrites fail, briefly</h2>
+
+<p>The instinct is a clean-slate rewrite. It fails for a reason that has nothing to do with engineering skill.</p>
+
+<p>The old system encodes a decade of accumulated correctness. Not in its architecture — the architecture is usually bad — but in its details. The special case for employees who transferred mid-quarter. The rounding rule that matters for one jurisdiction. The retry with the specific back-off that stops a downstream system from falling over. None of it is documented. Much of it looks like a bug until you find out why it is there.</p>
+
+<p>A rewrite reproduces the parts that are obvious and loses the parts that are subtle, and you discover the difference in production, one angry edge case at a time. Meanwhile the old system is still live, still accumulating changes, and you are maintaining two of everything.</p>
+
+<p>Incremental strangulation — routing traffic progressively from the old system to the new, module by module, with both running — is the approach that works. It has always been correct and has always been slow, because each increment needs you to understand one region of the old system well enough to replace it safely. That understanding step is where models change the economics.</p>
+
+<h2>Comprehension is the real win</h2>
+
+<p>Handing a model 800 lines of undocumented procedural code and asking what it does produces, in about a minute, something a human would take a day to write: a description of the control flow, the data it touches, the branches and what appears to trigger them, the side effects, and a list of things that look anomalous.</p>
+
+<p>It will be roughly 85% right. That number sounds disqualifying and is not, because the failure mode is favourable — you are not accepting the output as truth. You are using it as a map to direct your verification, and reading code with a hypothesis is enormously faster than reading it cold. The 15% that is wrong tends to be wrong in ways that a targeted check exposes quickly.</p>
+
+<p>Three uses are worth building into the work:</p>
+
+<ul>
+  <li><strong>Behavioural summaries per module</strong>, reviewed and corrected by an engineer, committed to the repository. You are creating the documentation that should have existed, as a by-product of needing it.</li>
+  <li><strong>Dependency and coupling maps.</strong> Which modules touch which tables, which globals are written where, what the implicit contracts are between regions of the code. This is the input to deciding where the seams are, and it is tedious to assemble by hand.</li>
+  <li><strong>Business-rule extraction.</strong> Pulling the conditional logic out as a list of stated rules — "employees with status T and a start date after the 15th are prorated using calendar days, not working days" — and taking that list to the people who own the process. Frequently half the rules turn out to be obsolete, and deleting a rule is cheaper than porting it.</li>
+</ul>
+
+<p>That last one changes scope more than anything else. Modernisation projects are usually sized on the assumption that everything must be reproduced. It usually must not.</p>
+
+<h2>Characterisation tests: the highest-value use</h2>
+
+<p>You cannot safely change code you cannot test, and legacy code is untestable for structural reasons — global state, no dependency injection, side effects everywhere.</p>
+
+<p>The way through is characterisation tests. Not tests of correct behaviour, which nobody can define. Tests of <em>current</em> behaviour: capture what the system does now, for a wide range of inputs, and pin it. When you then refactor, any deviation is visible immediately. If a pinned behaviour turns out to be a bug, you fix it deliberately, as its own change, with the test updated to say so.</p>
+
+<p>Ordinarily this is dull, enormous work, which is why teams skip it. Generating it is exactly the kind of mechanical breadth models are good at — and unlike generating tests for new code, the usual objection does not apply. A characterisation test is <em>supposed</em> to assert what the implementation currently does. Tautology is the goal.</p>
+
+<pre><code># Capture real behaviour from production inputs, then pin it.
+# The expected values are recorded, not reasoned about — that is the point.
+
+import json, pytest
+from legacy_bridge import call_legacy_payroll
+
+with open("fixtures/payroll_cases.json") as fh:
+    CASES = json.load(fh)   # inputs sampled from a year of production traffic
+
+@pytest.mark.parametrize("case", CASES, ids=lambda c: c["id"])
+def test_payroll_matches_recorded_behaviour(case):
+    result = call_legacy_payroll(case["input"])
+    assert result == case["recorded_output"], (
+        f"Behaviour changed for {case['id']}. If this change is intended, "
+        f"update the fixture in the same commit and say why."
+    )</code></pre>
+
+<p>Two details matter. Sample the inputs from real production traffic rather than inventing them, because the distribution is the value — the odd cases are the ones you need pinned, and you will not think of them. And where the legacy system is not callable in isolation, run the old and new implementations side by side against the same input and diff the outputs. That comparison harness is often the single most useful artefact of the whole project, and it is worth building before any code is replaced.</p>
+
+<h2>Where AI-assisted refactoring genuinely helps</h2>
+
+<p>With comprehension and a safety net in place, mechanical transformation becomes low-risk and fast. The categories that work well are the ones where the change is structural and the outcome is verifiable:</p>
+
+<table>
+  <thead>
+    <tr><th>Task</th><th>Suitability</th><th>Why</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Mechanical syntax and API migration</td><td>Strong</td><td>Pattern-uniform, compiler-verifiable, tedious at scale</td></tr>
+    <tr><td>Extracting pure functions from procedural blocks</td><td>Strong</td><td>Clear criterion; characterisation tests confirm equivalence</td></tr>
+    <tr><td>Adding types to untyped code</td><td>Strong</td><td>Inference from usage is exactly the model's strength</td></tr>
+    <tr><td>Introducing seams for dependency injection</td><td>Good</td><td>Repetitive and well-understood, but touches call sites broadly</td></tr>
+    <tr><td>Splitting a large file by responsibility</td><td>Good</td><td>Needs human judgement on the boundaries</td></tr>
+    <tr><td>Translating one language to another wholesale</td><td>Poor</td><td>Produces idiomatically wrong code carrying the old design</td></tr>
+    <tr><td>Redesigning the data model</td><td>Poor</td><td>Requires domain and business context the code does not contain</td></tr>
+    <tr><td>Deciding the target architecture</td><td>Not applicable</td><td>This is the actual engineering work</td></tr>
+  </tbody>
+</table>
+
+<p>The wholesale-translation row is the one to internalise. A model asked to convert 11,000 lines of PHP to TypeScript will produce 11,000 lines of TypeScript that looks like PHP — the same global state, the same procedural shape, the same undocumented special cases, now in a language where none of it is idiomatic. You have changed the syntax and kept every structural problem, and you have thrown away the one advantage the old code had, which is that it is battle-tested. This is the modernisation equivalent of a rewrite with extra steps.</p>
+
+<blockquote>Transformation without comprehension is just a rewrite you did not admit to. The order is always: understand, pin the behaviour, then change — and the model helps most with the first two.</blockquote>
+
+<h2>Sequencing the work</h2>
+
+<p>The order that holds up in practice, on a system nobody understands:</p>
+
+<ol>
+  <li><strong>Map before touching anything.</strong> Generate module-level summaries and a dependency map, have an engineer verify them, commit them. You now have documentation and a basis for planning.</li>
+  <li><strong>Build the comparison harness.</strong> The ability to run old and new against identical input and diff the results. Everything downstream depends on this.</li>
+  <li><strong>Pin current behaviour</strong> with characterisation tests generated from production-sampled inputs, prioritising the highest-risk modules.</li>
+  <li><strong>Extract the business rules and interrogate them.</strong> Take the list to the process owners. Delete what is obsolete before you port it.</li>
+  <li><strong>Choose seams and strangle incrementally.</strong> Start with a module that is low-risk, well-bounded and has a clear interface — not the most painful one. The first increment is where you prove the process works.</li>
+  <li><strong>Route traffic progressively</strong> with a flag, shadowing where possible: run both, serve the old result, compare the new one, and promote when the diff is clean.</li>
+  <li><strong>Delete the old path deliberately.</strong> Unretired legacy code is the most expensive thing in this list, because you are now maintaining both.</li>
+</ol>
+
+<p>Step five gets argued about. There is always pressure to start with the module causing the most pain. Resist it once — the first increment is as much about validating your comparison harness, your flagging and your rollback as it is about the code. Prove the machinery on something forgiving.</p>
+
+<p>Steps one through three are where agent assistance scales well, because they are broad, mechanical and independently verifiable. That is the kind of work we put through <a href="/products/agents">our agent platform</a>: generating characterisation suites across many modules in parallel, with the diff against recorded behaviour as an unambiguous pass criterion. Generation of that breadth needs executable verification behind it, which is the same argument we make in our note on <a href="/blog/ai-qa-automation-test-generation">AI-generated tests</a>.</p>
+
+<h2>The honest limits</h2>
+
+<p>Three things will not be solved by any amount of model assistance, and pretending otherwise is how these projects go wrong.</p>
+
+<p>Missing domain knowledge stays missing. If the code contains a rounding rule and no human alive knows which regulation it implements, a model can tell you what the code does but not whether it should. Those decisions need someone with authority over the business process, and finding that person is a project task, not a technical one.</p>
+
+<p>Data migration remains the hardest part, and it is where these projects actually fail. Twelve years of accumulated data with schema changes, partial backfills, encoding inconsistencies and rows that violate constraints added after they were written. No model reconciles that for you. Budget for it as its own workstream from the start.</p>
+
+<p>Finally, models generate code with confidence that is unrelated to their understanding of your system, and legacy code is dense with non-obvious load-bearing details. A plausible refactor that drops one special case is the characteristic failure, and it is why the characterisation suite comes before the refactor rather than after.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Spend the first phase on understanding, not on code. Generate the module map and the behavioural summaries, verify them, and commit them to the repository. The documentation is worth having on its own, and it is what turns an unsizable project into a plannable one.</p>
+
+<p>Then build the safety net before the first refactor. Characterisation tests from production-sampled inputs plus an old-versus-new comparison harness are what make incremental replacement safe, and they are the part most teams defer and then regret. Use models for the mechanical breadth — comprehension, test generation, type inference, uniform migrations — and keep architecture, data modelling and sequencing with your engineers.
+
+</p>
+
+<p>Done this way, modernisation stops being a multi-year gamble and becomes a series of small, reversible, verified steps. It is slower than the rewrite you were hoping for and it finishes, which the rewrite generally does not. If you are sitting on a system nobody wants to touch, <a href="/contact">tell us what it does and what you know about it</a> — mapping the unknown is where our <a href="/services/software-development">software engineering work</a> usually starts.</p>`,
   },
   {
     id: '5',
-    slug: 'best-seo-services-in-dubai',
-    title: 'The SEO services that actually move a business forward',
-    excerpt: 'Five ways to connect search work to the revenue decisions behind it.',
-    content: `
-      <h2>Most SEO Services in Dubai Are a Waste of Money</h2>
-      <p>If you've ever purchased SEO services in Dubai, you know the drill:</p>
-      <ul>
-        <li>Monthly reports filled with meaningless metrics</li>
-        <li>Promises of #1 rankings for keywords no one searches for</li>
-        <li>Services that don't translate to actual business growth</li>
-        <li>Prices that seem disconnected from value delivered</li>
-      </ul>
+    slug: 'building-production-rag-systems',
+    title: 'Building RAG Systems That Work in Production',
+    excerpt:
+      'Retrieve the chunks for a failing question and read them. Nine times out of ten the answer passage is simply not there — the generator was never the problem.',
+    date: '2025-11-18',
+    author: 'WeThinkDigital Engineering',
+    readTime: '10 min read',
+    category: 'AI Engineering',
+    tags: ['RAG', 'retrieval', 'LLM', 'evaluation', 'vector search'],
+    metaTitle: 'Building RAG Systems That Work in Production',
+    metaDescription:
+      'Production RAG engineering: structure-aware chunking, hybrid retrieval with reranking, grounded refusal, permission filtering and a real evaluation harness.',
+    keywords: ['production RAG systems', 'retrieval augmented generation', 'hybrid search', 'reciprocal rank fusion', 'cross-encoder reranking', 'RAG evaluation', 'chunking strategy', 'recall at k'],
+    content: `<p>The prototype indexed forty curated PDFs and answered beautifully. The production system indexes forty thousand documents — support tickets, contracts with three revisions each, spreadsheets exported to text, a decade of wiki pages nobody has reviewed — and the answers fall apart. The instinct is to blame the model and reach for a bigger one.</p>
 
-      <h2>The 5 SEO Services That Actually Move the Needle</h2>
-      <p>When evaluating SEO services in Dubai, focus on these five services that directly impact your bottom line:</p>
+<p>That is almost always the wrong diagnosis. Retrieve the chunks for a failing question and read them. Nine times out of ten the passage containing the answer is not in the set. The generator did not hallucinate out of malice; it was asked a question and handed context that did not contain the answer, and it did what such models do — produced something fluent and plausible from what it had.</p>
 
-      <h3>1. Revenue-Focused Keyword Research</h3>
-      <p>The best SEO services in Dubai don't just find high-volume keywords. They find keywords that:</p>
-      <ul>
-        <li>Have commercial intent (people ready to buy)</li>
-        <li>Align with your actual products/services</li>
-        <li>Have a reasonable competition-to-opportunity ratio</li>
-        <li>Fit into your overall business strategy</li>
-      </ul>
-      <p>This isn't about ranking for "Dubai marketing agency." It's about ranking for "Dubai SEO services for e-commerce businesses making $1M+ annually."</p>
+<p><strong>RAG failures are retrieval failures wearing a generation costume.</strong> Once you accept that, the work becomes tractable, because retrieval is a measurable engineering problem with well-understood levers.</p>
 
-      <h3>2. Conversion-Optimized Content Creation</h3>
-      <p>Content creation services in Dubai often focus on word count rather than conversion potential. The best SEO services create content that:</p>
-      <ul>
-        <li>Directly addresses customer pain points</li>
-        <li>Includes clear calls-to-action</li>
-        <li>Is structured for maximum readability and engagement</li>
-        <li>Supports your overall sales funnel</li>
-      </ul>
+<h2>Chunking destroys more answers than any other stage</h2>
 
-      <h3>3. Technical SEO Audits with Revenue Impact Analysis</h3>
-      <p>Technical SEO services should come with a clear ROI calculation. Before fixing any technical issue, the best SEO services in Dubai answer:</p>
-      <ul>
-        <li>How many visitors does this issue affect?</li>
-        <li>What's the estimated revenue impact of fixing it?</li>
-        <li>How does this compare to other optimization opportunities?</li>
-        <li>What's the expected timeline for seeing results?</li>
-      </ul>
+<p>The default in every tutorial is to split on a fixed character count with some overlap. It is the wrong default for real corpora, and the damage is silent.</p>
 
-      <h3>4. Link Building with Business Value Focus</h3>
-      <p>Link building services in Dubai often chase quantity over quality. The best approach focuses on links that:</p>
-      <ul>
-        <li>Come from authoritative sites in your industry</li>
-        <li>Generate direct referral traffic</li>
-        <li>Position your brand as a thought leader</li>
-        <li>Support your overall marketing objectives</li>
-      </ul>
+<p>Split a 900-token contract clause at 512 characters and the obligation ends up in one chunk while the party it binds ends up in another. Neither chunk answers "what is the supplier required to do", and the one that scores best is actively misleading. Split a table and every row loses its header, so a chunk reading <code>| 4.2 | 18 | 2031 |</code> is retrievable and meaningless.</p>
 
-      <h3>5. Performance Tracking with Business Metrics</h3>
-      <p>The best SEO services in Dubai don't just track rankings. They track:</p>
-      <ul>
-        <li>Revenue generated from organic search</li>
-        <li>Customer acquisition cost through SEO</li>
-        <li>Lifetime value of SEO-sourced customers</li>
-        <li>Return on investment for SEO activities</li>
-      </ul>
+<p>What works is structure-aware splitting: respect the document's own boundaries — headings, sections, list groups, table units — and only fall back to size-based splitting inside a section that genuinely exceeds your limit. For tables, serialise each row with its headers repeated so the row is self-describing. For long sections, keep a parent-document pointer: embed the small chunk for retrieval precision, then expand to the surrounding section before sending to the model, so you get precise matching with sufficient context.</p>
 
-      <h2>How to Evaluate SEO Services in Dubai</h2>
-      <p>When shopping for SEO services, ask these questions:</p>
-      <ol>
-        <li>Can you show me 3 case studies with specific revenue numbers?</li>
-        <li>How do you measure success - rankings or revenue?</li>
-        <li>What's your process for identifying high-value keywords?</li>
-        <li>How do you ensure content drives conversions, not just traffic?</li>
-        <li>What happens if we don't see results?</li>
-      </ol>
+<h3>Metadata matters more than chunk size</h3>
 
-      <h2>Your Next Step</h2>
-      <p>Dubai's SEO landscape is crowded with agencies offering similar services. The difference is in execution and focus. If you're looking for SEO services that actually drive business results, you need a partner that thinks like a business owner, not just an SEO technician.</p>
-    `,
-    date: '2025-08-18',
-    author: 'WeThinkDigital Team',
-    readTime: '9 min read',
-    tags: ['seo', 'dubai', 'revenue'],
+<p>Teams spend weeks tuning chunk size from 512 to 768 and gain very little. The same weeks spent on metadata change the system's behaviour entirely. Every chunk should carry, at minimum:</p>
+
+<ul>
+  <li><strong>Source identity and a stable deep link</strong> — without this you cannot cite, and an uncitable answer is unusable in any serious setting.</li>
+  <li><strong>Section path</strong> — "Master Services Agreement › Schedule 2 › Termination" is signal for both retrieval and the reader.</li>
+  <li><strong>Effective date and version</strong> — the difference between the current policy and the one it replaced. Both are in the index. Only one is the answer.</li>
+  <li><strong>Access-control identifiers</strong> — the groups or roles permitted to see this content, resolvable at query time.</li>
+  <li><strong>Document type</strong> — a support ticket and a signed contract deserve different trust weights.</li>
+</ul>
+
+<p>Staleness is the failure that erodes trust fastest. A system that confidently quotes a superseded policy is worse than no system, because the answer is well-formed and wrong. Version and effective-date filters at retrieval time are not a refinement; they are load-bearing.</p>
+
+<h2>Pure vector search fails on exactly what users ask about</h2>
+
+<p>Dense embeddings capture semantic similarity. That is their strength and it is precisely why they fail on identifiers. Error code <code>ERR_5521</code>, part number <code>BX-40-221</code>, the surname of a rarely mentioned counterparty, a specific SKU — these are tokens where you need exact lexical matching, and an embedding will cheerfully return <code>ERR_5522</code> as a near neighbour because the two strings are semantically almost identical and materially different.</p>
+
+<p>Real user queries are full of these. Support questions are mostly error codes; legal questions are mostly proper nouns. A dense-only system is structurally bad at its most common query type.</p>
+
+<p>The fix is hybrid retrieval — run BM25 and dense search in parallel and fuse the result lists. Reciprocal rank fusion is the right default because it combines by rank rather than by score, so you never have to normalise two incomparable scoring scales:</p>
+
+<pre><code>from collections import defaultdict
+
+def reciprocal_rank_fusion(result_lists, k=60, limit=50):
+    """Fuse ranked lists by rank position. k=60 is the standard damping
+    constant; it keeps any single list from dominating the head."""
+    scores = defaultdict(float)
+    chunks = {}
+    for results in result_lists:
+        for rank, chunk in enumerate(results):
+            scores[chunk.id] += 1.0 / (k + rank + 1)
+            chunks[chunk.id] = chunk
+    ordered = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)
+    return [chunks[cid] for cid, _ in ordered[:limit]]
+
+
+def retrieve(query: str, principal: Principal, top_k: int = 8):
+    # Permission filter is applied INSIDE each retriever, pre-ranking.
+    acl = principal.group_ids
+    dense = vector_index.search(embed(query), limit=50, filter={"acl_any": acl})
+    lexical = bm25_index.search(query, limit=50, filter={"acl_any": acl})
+
+    candidates = reciprocal_rank_fusion([dense, lexical], limit=50)
+
+    # Cross-encoder reranking: slow per pair, but only 50 pairs.
+    scored = cross_encoder.rank(query, candidates)
+    keep = [c for c in scored if c.score &gt;= RELEVANCE_FLOOR][:top_k]
+
+    if not keep:
+        raise NoGroundingAvailable(query)   # refuse, do not improvise
+    return keep</code></pre>
+
+<h3>Retrieve wide, then rerank</h3>
+
+<p>The most reliable quality improvement available in a RAG pipeline is a cross-encoder reranker, and it is underused because it looks expensive.</p>
+
+<p>The reason it works is architectural. An embedding model encodes the query and the document independently — it never sees them together, so it cannot reason about how they relate. A cross-encoder reads the query and the passage jointly and scores actual relevance. It is far too slow to run over your whole index, which is why you use approximate nearest neighbour search to get fifty cheap candidates and then spend real computation ranking only those fifty.</p>
+
+<p>Trusting the top five straight from vector search is leaving most of your quality on the table. Retrieving fifty and reranking to eight typically adds tens of milliseconds — an order of magnitude less than the generation call you are about to make — and it is the difference between the right passage being at position two and being at position nineteen where it never reaches the model.</p>
+
+<h2>More context is not better</h2>
+
+<p>Large context windows tempt teams into sending fifty chunks and letting the model sort it out. This degrades answers, and it does so in a way that is easy to miss in casual testing.</p>
+
+<p>Attention over long contexts is not uniform. Material at the beginning and end of the window is used far more reliably than material in the middle — the lost-in-the-middle effect is well documented and it is not a bug you can prompt your way out of. Padding the window with twenty marginally relevant chunks lowers the probability that the model uses the one chunk that mattered, because you have buried it.</p>
+
+<p>Past a fairly low threshold, precision beats recall. Set a relevance floor and send fewer, better passages. Order them with the highest-scoring first. And measure this: take a question set where you know the answer passage, and compare answer quality at five chunks versus twenty. The result is usually the opposite of the intuition.</p>
+
+<h2>Permissions are a retrieval concern, not a prompt concern</h2>
+
+<p>This is the most serious production mistake we see, and it is worth stating bluntly: <strong>instructing the model not to reveal documents the user is not allowed to see is not access control.</strong> It is a request. The content is already in the context window, the prompt is not a trust boundary, and the failure mode is a compliance incident rather than a bad answer.</p>
+
+<p>Filter at retrieval time, inside the query to the index, as a pre-filter rather than a post-filter. Post-filtering after ranking is also wrong for a subtler reason: if you retrieve the top fifty globally and then drop the ones the user cannot see, you may be left with three, and you have silently degraded the answer for privileged content the user could legitimately have received further down the list.</p>
+
+<p>Note also that permission checks must be evaluated at query time against current group membership. Baking permissions into the index at ingestion means every access-control change requires a reindex, and until that reindex runs, your index is wrong. Building this properly is ordinary, careful <a href="/services/software-development">platform and data engineering</a> — it is the part of a RAG system that looks least like AI work and carries the most risk.</p>
+
+<h2>Grounding, citation and the ability to refuse</h2>
+
+<p>A production system must be able to say it does not know. This sounds obvious and is routinely omitted, because a system that answers everything demos better than one that declines.</p>
+
+<p>Three mechanisms make refusal real. First, a relevance floor: if the best reranked passage scores below threshold, do not call the generator at all — you already know the answer is not in the corpus. Second, an explicit instruction that answers must be supported by the supplied passages, with a defined output for the unsupported case. Third, and most important, citation enforcement: require the model to attach passage identifiers to each claim, then verify programmatically that every cited identifier was actually in the context you sent. Claims without a valid citation get stripped or the response is regenerated.</p>
+
+<p>Citations serve two purposes and the second is the bigger one. They let a user verify an answer, and they make the system's errors visible instead of invisible. A wrong answer with a citation is debuggable. A wrong answer without one is indistinguishable from a right one.</p>
+
+<h2>You cannot improve what you do not measure</h2>
+
+<p>Most teams evaluate by asking a few questions and forming an impression. That does not survive the first tuning change, because you have no way to know whether a change that fixed three questions broke nine others.</p>
+
+<p>Build a golden set — 100 to 200 real questions, drawn from what users actually ask, each labelled with the passage or passages that contain the answer. This is a few days of unglamorous work and it is the highest-return investment in the entire project.</p>
+
+<p>Then measure retrieval and generation separately, because they fail separately and fixing one does nothing for the other.</p>
+
+<table>
+  <thead>
+    <tr><th>Symptom</th><th>Likely stage</th><th>What to change</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Answer invents plausible detail</td><td>Retrieval — answer passage absent</td><td>Hybrid search, reranking, chunk boundaries</td></tr>
+    <tr><td>Fails on error codes, part numbers, names</td><td>Retrieval — dense-only</td><td>Add BM25 and fuse</td></tr>
+    <tr><td>Right document, wrong or partial passage</td><td>Chunking</td><td>Structure-aware splits, parent expansion</td></tr>
+    <tr><td>Correct passage retrieved, answer still wrong</td><td>Generation or context order</td><td>Fewer chunks, better ordering, tighter prompt</td></tr>
+    <tr><td>Confidently quotes superseded policy</td><td>Metadata</td><td>Version and effective-date filters</td></tr>
+    <tr><td>Quality collapsed after a deploy</td><td>Operations</td><td>Embedding model version changed under you</td></tr>
+  </tbody>
+</table>
+
+<p>For retrieval, recall@k is the number that matters: in what fraction of questions does the correct passage appear in the top k you send to the model? It is a hard ceiling — if recall@8 is 0.62, then 38% of your questions cannot be answered correctly no matter how good the generator is. Track MRR alongside it to see whether the right passage is arriving near the top or scraping in at the bottom.</p>
+
+<p>For generation, measure faithfulness (is every claim supported by the retrieved passages) and answer relevance (does it address what was asked). An LLM judge is a reasonable instrument here, with two caveats: judges are biased toward longer and more confident answers, and they must be validated against human labels on a sample before you trust their verdicts. Use them for regression detection, not for absolute quality claims.</p>
+
+<h2>Operating the thing</h2>
+
+<p>Three operational realities catch teams out, and all three are cheap to handle if you plan for them and expensive if you do not.</p>
+
+<p><strong>Pin your embedding model version.</strong> Vectors from different model versions are not comparable. Silently upgrading the embedding model means your query vectors live in a different space from your indexed vectors, and quality degrades in a way that looks like a mysterious regression. Treat the embedding model as part of the index identity, build a new index when it changes, and cut over deliberately.</p>
+
+<p><strong>Plan incremental updates from day one.</strong> A full rebuild is fine at ten thousand documents and unacceptable at ten million. You need change detection, per-document upsert and delete, and a way to reconcile the index against the source of truth — deletions are the ones that get forgotten, and an index that still serves a retracted document is a real problem.</p>
+
+<p><strong>Know your latency budget before you design.</strong> Embedding, hybrid retrieval, reranking and generation each take a slice. Reranking is usually worth its cost; generation dominates. If the budget is tight, cut chunk count before you cut the reranker. Cost and latency in the generation stage have their own set of levers, which we cover in our note on <a href="/blog/llm-cost-optimization-strategies">controlling LLM cost and latency in production</a>.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Build the evaluation harness before you tune anything. Without a golden set you are not engineering, you are reacting to anecdotes, and every change you make will be an uncontrolled experiment.</p>
+
+<p>Then work in the order the failures occur: chunking and metadata first, because nothing downstream can recover a destroyed passage; hybrid retrieval and reranking second, because that is where the largest measurable gain sits; grounding and refusal third; prompt tuning last, because it is where teams instinctively start and where the least value is. Put permission filtering into the retrieval layer at the beginning — retrofitting a security boundary into a shipped system is the expensive version of this lesson.</p>
+
+<p>None of this is exotic. It is careful information-retrieval engineering with a language model at the end, and the teams that treat it that way get systems that hold up. If you are staring at a prototype that will not survive its corpus, <a href="/contact">describe the corpus to us</a> — that is usually where the diagnosis starts, and it is the shape of most of our <a href="/services/ai-engineering">AI engineering work</a>.</p>`,
   },
   {
     id: '6',
-    slug: 'crm-and-lead-management',
-    title: 'Where good leads disappear after they arrive',
-    excerpt: 'The handoffs between marketing, sales, and operations that quietly cost growth.',
-    content: `
-      <h2>Most Dubai Businesses Are Losing Money Because of Poor CRM and Lead Management</h2>
-      <p>Here's a harsh truth: Your business is probably hemorrhaging money because of poor CRM and lead management. It's not that you don't have leads - it's that you're not managing them effectively.</p>
+    slug: 'ai-workflow-automation-business-processes',
+    title: 'AI Workflow Automation: Finding the Processes Worth Automating',
+    excerpt:
+      'Route support tickets or approve supplier invoices. Same shape on a slide, completely different risk. Most automation programmes fail at selection, not build.',
+    date: '2025-11-04',
+    author: 'WeThinkDigital Engineering',
+    readTime: '9 min read',
+    category: 'AI Automation',
+    tags: ['automation', 'workflow design', 'human in the loop', 'process selection'],
+    metaTitle: 'AI Workflow Automation: Finding the Processes Worth Automating',
+    metaDescription:
+      'A scoring framework for AI workflow automation: volume, reversibility, determinism, ground truth and the autonomy ladder you earn one measured rung at a time.',
+    keywords: ['AI workflow automation', 'business process automation', 'human in the loop', 'automation selection criteria', 'agentic workflows', 'process reversibility', 'shadow mode'],
+    content: `<p>Two candidates arrive in the same planning session. Route inbound support tickets to the right team. Approve supplier invoices under a threshold. On a slide they are the same shape: read an input, make a decision, take an action. Both are described as "AI automation" and both get the same estimate.</p>
 
-      <h2>The CRM and Lead Management Crisis in Dubai</h2>
-      <p>Most businesses in Dubai face the same three problems:</p>
-      <ol>
-        <li><strong>Leads Fall Through the Cracks</strong> - Prospects contact you, then disappear into the void</li>
-        <li><strong>No Systematic Follow-Up</strong> - Important opportunities get forgotten or delayed</li>
-        <li><strong>Data Lives in Silos</strong> - Customer information is scattered across emails, spreadsheets, and minds</li>
-      </ol>
+<p>They are not remotely the same problem. A misrouted ticket costs a few minutes and is corrected by the person who receives it — the error is cheap, visible and reversible. A wrongly approved invoice moves money to an external party, and recovering it involves finance, the supplier and possibly a lawyer. One of these can run autonomously at 92% accuracy from week one. The other should not run autonomously at 99.5% accuracy, because the 0.5% is unrecoverable.</p>
 
-      <h2>What Proper CRM and Lead Management Actually Looks Like</h2>
-      <p>The best CRM and lead management systems in Dubai businesses share these characteristics:</p>
+<p>Most automation programmes do not fail during implementation. They fail at selection, months earlier, in a meeting where nobody asked what happens when the system is wrong.</p>
 
-      <h3>1. Automated Lead Scoring</h3>
-      <p>Not all leads are created equal. The best systems automatically score leads based on:</p>
-      <ul>
-        <li>Budget availability</li>
-        <li>Decision-making authority</li>
-        <li>Timeline for purchase</li>
-        <li>Fit with your ideal customer profile</li>
-      </ul>
+<h2>Six dimensions that actually predict success</h2>
 
-      <h3>2. Systematic Follow-Up Sequences</h3>
-      <p>Every lead gets a personalized follow-up sequence based on their:</p>
-      <ul>
-        <li>Interest level</li>
-        <li>Buying stage</li>
-        <li>Preferred communication channels</li>
-        <li>Past interactions with your business</li>
-      </ul>
+<p>Here is the assessment we run before writing any code. It is deliberately boring and it kills a lot of proposals, which is the point — the cheapest automation project is the one you correctly decline.</p>
 
-      <h3>3. Revenue Tracking</h3>
-      <p>The best CRM systems track not just contacts, but revenue potential:</p>
-      <ul>
-        <li>Pipeline value by stage</li>
-        <li>Conversion rates at each touchpoint</li>
-        <li>Customer lifetime value predictions</li>
-        <li>ROI on lead generation activities</li>
-      </ul>
+<h3>1. Volume multiplied by handling time</h3>
 
-      <h2>The $2.3M Impact of Proper CRM Implementation</h2>
-      <p>One of our Dubai clients was losing an estimated $2.3M annually due to poor lead management. Here's what changed after implementing proper CRM:</p>
+<p>This is the only source of value, so compute it first and compute it honestly.</p>
 
-      <h3>Before CRM Implementation:</h3>
-      <ul>
-        <li>67% of leads never received follow-up</li>
-        <li>Average sales cycle: 120 days</li>
-        <li>Customer retention rate: 43%</li>
-        <li>Annual revenue: $8.2M</li>
-      </ul>
+<p>Take a process running 200 times a day at 6 minutes of human handling time. That is 1,200 minutes, or roughly 20 hours of human time per day — three people. Automate 70% of it end to end and you have recovered around 14 hours a day. That is a real project with a real return.</p>
 
-      <h3>After CRM Implementation:</h3>
-      <ul>
-        <li>98% of leads receive immediate follow-up</li>
-        <li>Average sales cycle: 45 days</li>
-        <li>Customer retention rate: 89%</li>
-        <li>Annual revenue: $14.7M</li>
-      </ul>
+<p>Now take a process running 3 times a day at 6 minutes. That is 18 minutes a day. Automate it perfectly and you have saved an hour and a half a week, against an engineering build, an integration surface, a monitoring burden and a permanent maintenance obligation. The arithmetic says do nothing, and the arithmetic is right.</p>
 
-      <h2>Key CRM and Lead Management Features for Dubai Businesses</h2>
-      <p>When evaluating CRM systems for your Dubai business, look for:</p>
+<p>People systematically overestimate the volume of processes that annoy them and underestimate the volume of processes that are merely tedious. Get the numbers from a system, not from a conversation.</p>
 
-      <h3>Multi-Currency Support</h3>
-      <p>Dubai businesses deal with multiple currencies daily. Your CRM should handle this seamlessly.</p>
+<h3>2. Error cost and reversibility</h3>
 
-      <h3>Mobile-First Design</h3>
-      <p>Your sales team is always on the move. Your CRM should work perfectly on mobile devices.</p>
+<p>Volume tells you the upside. This tells you what you can actually ship.</p>
 
-      <h3>Integration Capabilities</h3>
-      <p>Your CRM should integrate with your existing tools: email, marketing automation, accounting software, and communication platforms.</p>
+<p><strong>Reversibility is the single best predictor of whether a process can run autonomously.</strong> Not accuracy — reversibility. A system that misroutes a ticket has created a correctable inconvenience. A system that sends the wrong email to a customer has created an impression you cannot retract. A system that approves a payment, deletes a record or files a regulatory submission has done something you may not be able to undo at any price.</p>
 
-      <h3>Advanced Reporting</h3>
-      <p>You need real-time visibility into pipeline health, team performance, and ROI metrics.</p>
+<p>The useful way to think about it: expected cost is error rate multiplied by cost per error, and if cost per error is effectively unbounded, no achievable error rate makes autonomy acceptable. That is not a modelling problem to be solved with a better prompt. It is a structural property of the process, and the correct response is a human approval gate, permanently.</p>
 
-      <h2>Stop Losing Money to Poor Lead Management</h2>
-      <p>Proper CRM and lead management isn't just about organizing contacts - it's about building a revenue engine. If your Dubai business isn't implementing these systems effectively, you're leaving money on the table every single day.</p>
+<h3>3. Determinism of the decision</h3>
 
-      <p>Looking for a cost-effective starting point? Read our guide to the <a href="/blog/free-crm-software-for-small-business-dubai">best free CRM software for small businesses in Dubai</a> — including options with Arabic support, AED currency, and UAE phone formatting.</p>
-    `,
-    date: '2025-08-15',
-    author: 'WeThinkDigital Team',
-    readTime: '10 min read',
-    tags: ['crm', 'leads', 'dubai'],
+<p>This is where we disappoint people, so we do it early.</p>
+
+<p>If the decision rule is stable and expressible — route to the billing queue when the account has an open invoice and the message matches a known set of billing intents — then you want code. Not a model. Code is deterministic, testable, debuggable at 3am, free to run, and behaves identically on the millionth execution as on the first. A model will do the same job with a latency budget, a per-call cost, non-determinism and an evaluation harness you now have to maintain.</p>
+
+<p><strong>A large share of requests that arrive labelled "AI automation" are ordinary integration work.</strong> Two systems that do not talk to each other, a form that should write to a database, a report that someone assembles by hand from three exports every Monday. There is no inference problem anywhere in it. The honest answer is to build it as <a href="/services/software-development">a piece of software</a>, deliver it faster and cheaper than the AI version, and spend the model budget where variability actually demands it.</p>
+
+<p>We say this to clients before we quote, and it costs us work occasionally. It is still the right call — an unnecessary model in a workflow is a permanent tax on reliability.</p>
+
+<h3>4. Input variability</h3>
+
+<p>So when <em>is</em> a model the right tool? When the input is unstructured and heterogeneous and no rule survives contact with it.</p>
+
+<p>Free-text email threads where the request is buried in paragraph four. Invoices from 300 suppliers in 300 layouts. Support messages in multiple languages with typos and screenshots. Contract clauses that mean the same thing in nine different phrasings. This is the genuine use case: the variability is irreducible, a rules engine would need a thousand rules and would still miss, and a model handles the long tail gracefully.</p>
+
+<p>The test is simple. If you can write the rules, write the rules. If every attempt to write the rules produces an ever-growing list of exceptions, you have found a real inference problem.</p>
+
+<h3>5. Availability of ground truth</h3>
+
+<p>Ask one question: after the system produces an output, can anyone determine whether it was correct, and how soon?</p>
+
+<p>For ticket routing, yes — a reassignment is a labelled error, available within hours, essentially for free. For invoice coding, yes, at month-end close. For "assess whether this supplier poses a delivery risk", often no: there may be no event that confirms or refutes the judgement, and if there is, it arrives eighteen months later.</p>
+
+<p><strong>No ground truth means no evaluation, and no evaluation means no operation.</strong> You cannot detect drift, you cannot tell whether a prompt change helped, and you cannot justify raising the autonomy level. Processes without a feedback signal are the ones that quietly degrade for six months before somebody notices.</p>
+
+<h3>6. Process stability</h3>
+
+<p>A process that is restructured every quarter will consume your engineering capacity in maintenance. You are not automating a process; you are automating a snapshot of it. Ask when it last changed materially and who owns it. A process with no clear owner is a process that will change without telling you.</p>
+
+<p>And the related trap: automating a broken process instead of fixing it. If the ticket queue needs routing because the intake form asks the wrong questions, the automation is an expensive workaround for a ten-minute form change. Map the process before you automate it and you will occasionally find the whole step should be deleted.</p>
+
+<h2>Scoring it</h2>
+
+<p>We make this explicit rather than intuitive, because an explicit score is arguable and an intuition is not. The gate matters more than the score — a candidate can look excellent on volume and still be disqualified on ground truth.</p>
+
+<pre><code>interface Candidate {
+  name: string;
+  runsPerDay: number;
+  minutesPerRun: number;
+  /** Unbounded when the action cannot be undone: payments, deletions, filings. */
+  reversibility: 'trivial' | 'costly' | 'irreversible';
+  /** 'rules' means build software, not a model. */
+  decisionType: 'rules' | 'judgement-over-structured' | 'judgement-over-unstructured';
+  groundTruth: 'immediate' | 'delayed' | 'none';
+  materialChangesPerYear: number;
+}
+
+const DAILY_HOURS_FLOOR = 4;   // below this, the build rarely pays for itself
+
+function assess(c: Candidate) {
+  const dailyHours = (c.runsPerDay * c.minutesPerRun) / 60;
+
+  const disqualifiers: string[] = [];
+  if (dailyHours &lt; DAILY_HOURS_FLOOR) disqualifiers.push('insufficient volume');
+  if (c.groundTruth === 'none') disqualifiers.push('not evaluable — cannot be operated');
+  if (c.materialChangesPerYear &gt; 3) disqualifiers.push('process too unstable');
+
+  const recommendation =
+    disqualifiers.length &gt; 0 ? 'decline'
+    : c.decisionType === 'rules' ? 'build-as-software'
+    : c.reversibility === 'irreversible' ? 'draft-for-approval-only'
+    : 'automate-with-autonomy-ladder';
+
+  return { dailyHours, disqualifiers, recommendation };
+}</code></pre>
+
+<p>Note that the highest-value processes are frequently <em>not</em> the ones with the most executive attention. Invoice line-item coding is nobody's strategic priority and is often the best candidate in the building: high volume, unstructured input, reversible before close, immediate ground truth, stable for years.</p>
+
+<h2>The autonomy ladder</h2>
+
+<p>Once a candidate passes, the question is how much authority to grant it. The answer is not a design decision made up front. It is a position you earn with measured accuracy.</p>
+
+<table>
+  <thead>
+    <tr><th>Rung</th><th>System behaviour</th><th>What it takes to get here</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Shadow</td><td>Runs on live input, writes nothing, decisions logged and compared to the human's</td><td>Nothing. Always start here</td></tr>
+    <tr><td>Suggest</td><td>Proposes an option the human accepts or overrides in one click</td><td>Shadow accuracy that beats the current process</td></tr>
+    <tr><td>Draft for approval</td><td>Produces the complete action; a human approves before it takes effect</td><td>High acceptance rate on suggestions. Terminal rung for irreversible actions</td></tr>
+    <tr><td>Act with reversal window</td><td>Executes, notifies, holds a defined window in which it can be cleanly undone</td><td>A genuine undo path, plus measured accuracy at the target rate</td></tr>
+    <tr><td>Autonomous</td><td>Executes, escalates only low-confidence cases</td><td>Sustained accuracy, stable drift metrics, and reversible consequences</td></tr>
+  </tbody>
+</table>
+
+<p>Shadow mode is the rung teams skip and the one that does all the work. It costs almost nothing, it runs against real production traffic rather than a sanitised test set, and it produces the labelled dataset you need to argue for promotion. It also surfaces the input distribution you did not anticipate — the 8% of tickets that arrive as forwarded threads with four quoted replies — before those cases can cause damage.</p>
+
+<blockquote>Autonomy is not a setting you configure. It is a claim about measured accuracy and bounded consequences, and it should require evidence in the same way a production deployment does.</blockquote>
+
+<p>Within a rung, confidence thresholds do the routing. Below the threshold, escalate to a human with the reasoning attached. Above it, proceed. Two rules keep this honest: model-reported confidence must be calibrated against your own outcome data before you trust it as a threshold, and the escalation path needs a named owner and a service level. An escalation queue nobody watches is just a slower failure.</p>
+
+<h2>The unglamorous parts are what make it survive</h2>
+
+<p>The decision logic is a fraction of the work. What determines whether an automation is still running in a year is the operational scaffolding, and it is the first thing cut when a pilot is rushed.</p>
+
+<ul>
+  <li><strong>Idempotency.</strong> Every action needs a stable key so a retry cannot double-post an invoice or send a message twice. Assume every step will be retried, because eventually it will be.</li>
+  <li><strong>Decision audit log.</strong> For every execution: the input, the retrieved context, the decision, the confidence, the model and prompt version, and the action taken. When someone asks why the system did something in March, this is the only acceptable answer.</li>
+  <li><strong>Replay.</strong> The ability to rerun historical inputs through a new version and diff the decisions. This is how you ship a change without gambling.</li>
+  <li><strong>An off switch.</strong> One flag, no deploy required, that any operations person can flip. Every autonomous system needs one and it should be tested, not theoretical.</li>
+  <li><strong>Drift monitoring.</strong> Alert on the distribution, not just on errors: a sudden shift in confidence, in escalation rate, or in the mix of categories usually means the input changed and you are now operating outside your evaluation set.</li>
+</ul>
+
+<p>When a workflow needs several specialised steps that hand work to each other — extract, validate, decide, act — the coordination becomes its own design problem, with its own failure modes around retries and partial completion. We work through those in our note on <a href="/blog/multi-agent-orchestration-patterns">multi-agent orchestration patterns</a>.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Inventory before you build. List the candidate processes, get real volume and handling-time numbers from systems rather than from opinions, and score each one on error cost, reversibility, determinism, input variability, ground truth and stability. Expect most of the list to be disqualified, and expect a meaningful share of the survivors to be integration work with no inference problem in them at all. Both outcomes are wins — you have avoided spending a quarter on something that would not have paid back.</p>
+
+<p>For whatever survives, start in shadow mode and climb the ladder on evidence. Build the audit log, the replay path and the off switch in the first version, not the second. And fix the process before you automate it, because automating a broken process just makes the brokenness faster and harder to see.</p>
+
+<p>The pattern across the programmes that work is unremarkable: they picked fewer processes, picked them on reversibility and volume rather than on enthusiasm, and invested in the operational plumbing that makes an autonomous system safe to leave running. If you want a second opinion on your own shortlist — including which items we would tell you not to automate — <a href="/contact">send us the list</a>. Sorting that out is the first thing we do in any <a href="/services/ai-automation">AI automation</a> engagement.</p>`,
   },
   {
     id: '7',
-    slug: 'website-design-development-services-in-dubai',
-    title: 'Why most business websites fail to convert',
-    excerpt: 'What separates a useful commercial path from a digital brochure.',
-    content: `
-      <h2>Stop Wasting Money on Website Design Services in Dubai</h2>
-      <p>If you've ever worked with website design services in Dubai, you know the typical process:</p>
-      <ol>
-        <li>Agency shows you pretty mockups that look great in Photoshop</li>
-        <li>Development takes 3x longer than promised</li>
-        <li>Final product doesn't convert visitors to customers</li>
-        <li>You're stuck with a digital brochure that generates zero ROI</li>
-      </ol>
+    slug: 'ai-qa-automation-test-generation',
+    title: 'AI-Generated Tests: Making QA Automation Actually Useful',
+    excerpt:
+      'A model can take a module from 12% to 90% coverage before lunch, and the suite will catch nothing — because every assertion came from the implementation.',
+    date: '2025-10-27',
+    author: 'WeThinkDigital Engineering',
+    readTime: '9 min read',
+    category: 'AI Automation',
+    tags: ['testing', 'QA automation', 'mutation testing', 'test generation'],
+    metaTitle: 'AI-Generated Tests: Making QA Automation Actually Useful',
+    metaDescription:
+      'Why AI-generated tests reach 90% coverage and catch nothing, and how to fix it: mutation testing, spec-driven generation and property-based tests that work.',
+    keywords: ['AI generated tests', 'QA automation', 'mutation testing', 'test coverage', 'property based testing', 'regression tests', 'test generation'],
+    content: `<p>Point a capable model at a module sitting on 12% line coverage and you can be at 90% before lunch. The suite is green. The coverage badge is a pleasant colour. And the suite will not catch a single regression you care about, because almost every assertion in it was derived from the implementation rather than from what the code is supposed to do.</p>
 
-      <h2>What Separates Winning Websites from Digital Billboards</h2>
-      <p>The best website design and development services in Dubai understand one thing: your website isn't an art project - it's a revenue machine.</p>
+<p>Here is the shape of it, taken from a discount calculator with an off-by-one in its tier boundary:</p>
 
-      <h3>1. Conversion-Centered Design</h3>
-      <p>Great website design services in Dubai focus on:</p>
-      <ul>
-        <li>Clear value propositions above the fold</li>
-        <li>Strategic call-to-action placement</li>
-        <li>Frictionless conversion paths</li>
-        <li>Psychological triggers that drive action</li>
-      </ul>
+<pre><code>// The implementation, containing a bug: the tier boundary should be &gt;=
+export function discountFor(orderTotal: number): number {
+  if (orderTotal &gt; 500) return 0.1;
+  return 0;
+}
 
-      <h3>2. Performance-First Development</h3>
-      <p>Top-tier website development services in Dubai prioritize:</p>
-      <ul>
-        <li>Page load speeds under 2 seconds</li>
-        <li>Mobile responsiveness that actually works</li>
-        <li>SEO-friendly code structure</li>
-        <li>Scalable architecture for future growth</li>
-      </ul>
+// The generated test. 100% line coverage. Passes. Useless.
+it('returns 0.1 for orders over 500', () =&gt; {
+  expect(discountFor(501)).toBe(0.1);
+});
+it('returns 0 for orders of 500 or less', () =&gt; {
+  expect(discountFor(500)).toBe(0);
+});</code></pre>
 
-      <h3>3. Data-Driven Optimization</h3>
-      <p>The best services don't just build and forget. They:</p>
-      <ul>
-        <li>Implement comprehensive analytics</li>
-        <li>Run A/B tests on key conversion points</li>
-        <li>Continuously optimize based on user behavior</li>
-        <li>Provide actionable insights for improvement</li>
-      </ul>
+<p>The second test does not merely fail to catch the bug. It <em>codifies</em> the bug. When someone later fixes the boundary to match the specification, this test goes red and a well-meaning engineer will "fix the test" back to the broken behaviour. You have taken a defect and given it institutional protection.</p>
 
-      <h2>The 5 Fatal Flaws of Dubai Website Design Services</h2>
-      <p>Avoid agencies that make these common mistakes:</p>
+<h2>Coverage is a proxy, and generation games proxies perfectly</h2>
 
-      <h3>Flaw #1: Focusing on Aesthetics Over Functionality</h3>
-      <p>Your website needs to work, not just look pretty. Prioritize user experience and conversion optimization over flashy design elements.</p>
+<p>Line coverage measures whether a line executed during the test run. It says nothing about whether anything was asserted, whether the assertion was meaningful, or whether the expected value was derived from a specification or read off the current output.</p>
 
-      <h3>Flaw #2: Ignoring Mobile-First Design</h3>
-      <p>Over 70% of Dubai business website traffic comes from mobile devices. If your site isn't optimized for mobile first, you're losing the majority of potential customers.</p>
+<p>That was always a weak proxy. It was tolerable when writing tests was expensive, because the cost of authoring imposed a rough discipline — a human writing an assertion by hand generally has some opinion about what the answer ought to be. Remove the cost and you remove the discipline. Generation optimises precisely for the measured thing, which is execution, not verification.</p>
 
-      <h3>Flaw #3: Neglecting Sales Funnel Integration</h3>
-      <p>Your website should be the center of your sales funnel, not a standalone asset. It needs to integrate seamlessly with your CRM, email marketing, and lead nurturing systems.</p>
+<p>The question worth asking is not "what is our coverage". It is: <strong>would this suite have gone red before the last three incidents shipped?</strong> That question is answerable, and the answer for a freshly generated suite is usually no.</p>
 
-      <h3>Flaw #4: Underestimating Technical SEO</h3>
-      <p>A beautiful website that's invisible to search engines is worthless. Ensure your website design services include proper technical SEO implementation.</p>
+<h2>Four ways generated suites fail</h2>
 
-      <h3>Flaw #5: Forgetting About Scalability</h3>
-      <p>Your website should grow with your business. Avoid solutions that require complete rebuilds as you scale.</p>
+<h3>Tautological tests</h3>
 
-      <h2>What to Look for in Dubai Website Design Services</h2>
-      <p>When evaluating website design and development services in Dubai, ask these critical questions:</p>
-      <ol>
-        <li>Can you show me 5 websites you've built that generate consistent revenue for the business?</li>
-        <li>How do you approach conversion rate optimization during the design process?</li>
-        <li>What's your process for ensuring mobile performance and user experience?</li>
-        <li>How do you handle ongoing optimization and maintenance after launch?</li>
-        <li>What happens if we need to scale or add new features post-launch?</li>
-      </ol>
+<p>The category above. The model reads the implementation, computes what it returns, and asserts that. This is a circular argument rendered in code. It pins behaviour rather than verifying it, which has some narrow value in refactoring — but it is not testing, and calling it testing is how teams end up with false confidence.</p>
 
-      <h2>The Real Cost of Cheap Website Design Services</h2>
-      <p>Many Dubai businesses fall into the trap of choosing the cheapest website design services. Here's what they don't realize:</p>
+<h3>Mock-shaped tests</h3>
 
-      <p>A poorly designed website costs you:</p>
-      <ul>
-        <li>$50,000+ in lost revenue annually from poor conversions</li>
-        <li>Countless hours of your team's time managing technical issues</li>
-        <li>Damage to your brand reputation when customers have bad experiences</li>
-        <li>Missed opportunities as prospects go to competitors instead</li>
-      </ul>
+<p>Ask for a unit test of a service with four collaborators and you will often get a test that mocks all four. What remains under test is the orchestration glue. The assertions become "was <code>repo.save</code> called once with this object", which passes forever regardless of whether <code>save</code> actually persists anything or whether the object shape is right.</p>
 
-      <p>Investing in quality website design and development services is one of the highest ROI decisions you can make for your Dubai business.</p>
-    `,
-    date: '2025-08-12',
-    author: 'WeThinkDigital Team',
-    readTime: '12 min read',
-    tags: ['website', 'development', 'dubai'],
+<p>These tests are worse than no tests on two counts: they are coupled to implementation structure, so they break on every legitimate refactor, and they verify the test double rather than the system.</p>
+
+<h3>Snapshot sprawl</h3>
+
+<p>Snapshots are the path of least resistance for a generator, because no judgement about correct output is required — whatever comes out becomes the expectation. A few snapshots of stable, meaningful output are fine. Two hundred auto-generated snapshots produce a workflow where every change turns thirty snapshots red and the team resolves it by running the update flag. Now the suite asserts nothing at all, and it takes four minutes of CI to do so.</p>
+
+<h3>Tests generated from buggy code</h3>
+
+<p>The general case of the first failure. If the source of truth for generation is the implementation, then every existing defect becomes an expected behaviour. You are not writing a safety net. You are taking a photograph of the current state and framing it.</p>
+
+<h2>Mutation testing is the honest scoreboard</h2>
+
+<p>If coverage cannot tell you whether a suite has value, something else has to. Mutation testing does it directly: it introduces small changes to your source — flip a comparison operator, change a boundary, remove a statement, negate a condition — and reruns the suite. Each mutant that the suite fails to catch is a defect of that exact shape that could ship today.</p>
+
+<p>Run it against our discount calculator. Mutate <code>&gt;</code> to <code>&gt;=</code> and the suite goes red, so that mutant is killed — but only because the test encoded the wrong boundary in the first place, which mutation score alone will not tell you. Mutate the return value of <code>0.1</code> to <code>0.11</code> and it also dies. Now mutate a branch that the generated tests executed without asserting on, and it survives. Survivors are where the real information is.</p>
+
+<p>Stryker covers JavaScript and TypeScript; mutmut and cosmic-ray cover Python. The results are uncomfortable the first time. It is common for a suite with 85% line coverage to sit somewhere around 45–55% mutation score, and that gap is an exact measurement of how much of your suite is decoration.</p>
+
+<blockquote>Coverage tells you which lines ran. Mutation score tells you which bugs your suite would notice. Only one of those is a test result.</blockquote>
+
+<p>Mutation testing is expensive — you are running the suite once per mutant, so runtime scales with mutant count. Do not put it on every pull request. Run it nightly, or scoped to changed files, and treat the score as a gate on new code rather than a quest to fix the whole repository.</p>
+
+<h2>Where generation is genuinely excellent</h2>
+
+<p>None of this is an argument against generating tests. It is an argument about what you generate them <em>from</em>. Point the generator at the specification, the bug report or the input space rather than at the implementation, and it becomes one of the highest-value uses of a model in the entire delivery pipeline.</p>
+
+<h3>Regression tests from a failing trace</h3>
+
+<p>The single best use, with no close competitor. You have a bug report, a stack trace, maybe a request payload. Generating a minimal failing test from that artefact is fast, the correctness criterion is unambiguous (it must fail now and pass after the fix), and the resulting test is permanently valuable. Every incident should produce one, and nobody has ever enjoyed writing them by hand.</p>
+
+<h3>Boundary and edge-case enumeration</h3>
+
+<p>Humans are lazy about the unhappy path. Models are relentless about it. Empty collection, single element, duplicate keys, maximum integer, negative zero, unicode surrogate pairs, leap day, daylight-saving transition, timezone at the date line, string that looks like a number, deeply nested null. Ask for the edge cases and evaluate the list yourself — the enumeration is the value, the assertions still need your judgement.</p>
+
+<h3>Property-based tests</h3>
+
+<p>This is where generation and good testing genuinely align, because a property is a statement about intent rather than about implementation, so there is nothing to be tautological about. The framework then searches the input space far more thoroughly than any handwritten example set.</p>
+
+<pre><code>import fc from 'fast-check';
+
+// A property is derived from the spec, not from the code.
+// Any implementation satisfying the spec passes; the bug above does not.
+it('discount never decreases as order total increases', () =&gt; {
+  fc.assert(
+    fc.property(
+      fc.double({ min: 0, max: 100_000, noNaN: true }),
+      fc.double({ min: 0, max: 100_000, noNaN: true }),
+      (a, b) =&gt; {
+        const [lo, hi] = a &lt;= b ? [a, b] : [b, a];
+        return discountFor(lo) &lt;= discountFor(hi);
+      },
+    ),
+  );
+});
+
+it('applied discount never exceeds the order total', () =&gt; {
+  fc.assert(
+    fc.property(fc.double({ min: 0, max: 100_000, noNaN: true }), (total) =&gt; {
+      const off = total * discountFor(total);
+      return off &gt;= 0 &amp;&amp; off &lt;= total;
+    }),
+  );
+});</code></pre>
+
+<p>Monotonicity and bounded-output are properties a model can propose well when you describe what the function is for. The generator's job is proposing candidate invariants; yours is deciding which ones are actually true of your domain.</p>
+
+<h3>Parametrised table tests and fixture data</h3>
+
+<p>For pure functions with a specified input-output relation, table-driven tests are mechanical to expand and genuinely useful. Similarly, generating realistic fixture data — a few hundred plausible records with correct referential integrity and nasty-but-valid values — removes a real chore and improves test realism.</p>
+
+<h2>Generate from the spec, and close the loop</h2>
+
+<p>The operational change that matters is source of truth. If your work items carry machine-checkable acceptance criteria, those criteria are the correct generation input, and the resulting test is a genuine check on the implementation rather than a mirror of it. We described that work-item shape in our note on <a href="/blog/ai-agents-software-development-lifecycle">how agents change the development lifecycle</a>; test generation is the stage where the discipline pays off most visibly.</p>
+
+<p>Two rules make this concrete and are worth enforcing in CI:</p>
+
+<ul>
+  <li><strong>A generated test for new behaviour must fail against the unmodified branch.</strong> Run it before the implementation lands. If it passes, it is not testing the new behaviour, and it should be rejected automatically. This one check eliminates the tautological category outright.</li>
+  <li><strong>Generation should not see the implementation when the specification is available.</strong> Give it the acceptance criteria and the function signature. Withholding the body is the difference between verification and transcription.</li>
+  </ul>
+
+<p>The second operational change is closing the loop. A generator that emits files into a pull request has done the easy half. A QA agent that runs the suite against a real environment, observes the failures, distinguishes a genuine defect from its own bad assumption, and iterates is doing the job. That feedback loop is why the QA agent in <a href="/products/agents">our agent platform</a> shares a backlog with the SDE and PR-Review agents rather than running as a standalone generator — tests written in isolation from execution are guesses.</p>
+
+<h2>The maintenance bill nobody costs</h2>
+
+<p>A test suite is code, and generated tests are code nobody has read. Three thousand generated tests that take eleven minutes of CI on every push impose a real tax: on build time, on the patience of engineers waiting for feedback, and on every future refactor, which now breaks four hundred tests that were coupled to structure rather than behaviour.</p>
+
+<p>When those four hundred go red, the team faces a question they cannot answer: which of these failures indicate a real regression? Nobody knows, because nobody wrote them. The rational response is to delete or bulk-update them, at which point the entire exercise was negative value.</p>
+
+<p>Volume is not the goal. A hundred tests that would each have caught a distinct real defect beat three thousand that assert the code does what the code does.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Stop reporting coverage as a quality metric and start reporting mutation score on changed code. It is a harder number and a much more honest one, and it will immediately tell you whether your generated tests are worth their runtime. Set the gate on new code only — retrofitting the whole repository is a project nobody will finish.</p>
+
+<p>Change what you generate from. Specifications and failing traces produce tests with real discriminating power; implementations produce mirrors. Add the "must fail before the fix" check to CI, because it is a handful of lines of pipeline configuration and it removes the single most common defect in generated suites. Review generated tests with the same seriousness as production code, and delete aggressively — a test that cannot fail is a liability with a maintenance cost.
+
+</p>
+
+<p>Used well, this is genuinely one of the better applications of models in engineering: the unhappy paths finally get written, incidents reliably produce regression tests, and property-based testing stops being something teams mean to get around to. If you want help wiring that into a delivery pipeline rather than just generating files, <a href="/services/ai-automation">our automation work</a> is largely this shape of problem — <a href="/contact">tell us what your suite looks like today</a>. For the review side of the same loop, see our note on <a href="/blog/automated-pr-review-with-ai">what automated pull request review catches and misses</a>.</p>`,
   },
   {
     id: '8',
-    slug: 'top-10-digital-marketing-company-in-dubai',
-    title: 'Why agency rankings do not make the decision',
-    excerpt: 'A better way to compare partners when the stakes are commercial.',
-    content: `
-      <h2>Stop Falling for "Top 10" Digital Marketing Company Lists</h2>
-      <p>Every week, another "Top 10 Digital Marketing Company in Dubai" list pops up. But here's the dirty secret: these lists are usually:</p>
-      <ul>
-        <li>Paid advertisements disguised as editorial content</li>
-        <li>Based on outdated information or superficial criteria</li>
-        <li>Created by people who've never run a business</li>
-        <li>Completely irrelevant to your specific needs</li>
-      </ul>
+    slug: 'nextjs-15-performance-optimization',
+    title: 'Building Fast Next.js Applications: A Performance Checklist',
+    excerpt:
+      'One client component in the root layout shipped 340KB the server could have rendered. Most App Router performance work is two or three structural decisions.',
+    date: '2025-10-20',
+    author: 'WeThinkDigital Engineering',
+    readTime: '8 min read',
+    category: 'Web Development',
+    tags: ['Next.js', 'performance', 'React', 'Core Web Vitals', 'web development'],
+    metaTitle: 'Building Fast Next.js Applications: A Performance Checklist',
+    metaDescription:
+      'A Next.js performance checklist for the App Router: client boundaries, fetch waterfalls, rendering modes, LCP, bundle weight and guarding against regressions.',
+    keywords: ['Next.js performance', 'App Router optimization', 'React Server Components', 'Core Web Vitals', 'bundle size', 'LCP optimization', 'streaming and Suspense'],
+    content: `<p>A dashboard we were asked to look at scored 34 on mobile. The team had already done the obvious things: images were optimised, fonts were subset, the bundle had been through an analyser. The problem was a single line in the root layout — a client component wrapping the whole tree to provide a theme context. That one wrapper turned every page beneath it into a client component, shipped 340KB of JavaScript that the server could have rendered, and delayed interactivity on every route in the application.</p>
 
-      <h2>Why "Top 10" Lists Are Meaningless</h2>
-      <p>Here's why these rankings don't help you find the right digital marketing company:</p>
+<p>That is the shape of most performance work in the App Router. It is rarely a thousand small inefficiencies. It is usually two or three structural decisions — where the client boundary sits, what blocks the initial response, how data is fetched — each costing hundreds of kilobytes or hundreds of milliseconds. Find those and the rest is noise.</p>
 
-      <h3>1. One-Size-Fits-None Approach</h3>
-      <p>What works for a luxury real estate developer in Dubai Marina won't work for a fintech startup in DIFC. The "best" digital marketing company depends entirely on your:</p>
-      <ul>
-        <li>Industry and target market</li>
-        <li>Budget and growth stage</li>
-        <li>Specific business objectives</li>
-        <li>Internal team capabilities</li>
-      </ul>
+<p>Here is the checklist we actually work through, in the order the wins tend to appear.</p>
 
-      <h3>2. Vanity Metrics Over Real Results</h3>
-      <p>Most "top 10" lists focus on:</p>
-      <ul>
-        <li>Office locations and size</li>
-        <li>Number of employees</li>
-        <li>Awards and certifications</li>
-        <li>Social media followers</li>
-      </ul>
-      <p>But none of these correlate with business results.</p>
+<h2>1. Audit the client boundary first</h2>
 
-      <h3>3. No Accountability for Performance</h3>
-      <p>Being on a "top 10" list doesn't guarantee results. Many agencies on these lists have:</p>
-      <ul>
-        <li>High client churn rates</li>
-        <li>Poor ROI for their clients</li>
-        <li>No proven track record in your industry</li>
-        <li>Generic approaches that don't scale</li>
-      </ul>
+<p><code>'use client'</code> is not a per-file annotation. It marks an entry point into the client bundle, and everything that file imports — plus everything those files import — goes with it. A single misplaced directive near the root of the tree can pull most of your application into the browser.</p>
 
-      <h2>How to Actually Choose the Right Digital Marketing Company</h2>
-      <p>Instead of chasing rankings, focus on these criteria:</p>
+<p>Start by finding every occurrence and asking what it is there for. The legitimate reasons are state, effects, event handlers, browser APIs and hook-based libraries. Everything else belongs on the server.</p>
 
-      <h3>1. Industry-Specific Expertise</h3>
-      <p>The best digital marketing company in Dubai for your business has:</p>
-      <ul>
-        <li>Deep understanding of your industry challenges</li>
-        <li>Proven results with similar businesses</li>
-        <li>Knowledge of your target audience behavior</li>
-        <li>Familiarity with industry-specific regulations</li>
-      </ul>
+<p>The recurring mistake is the provider wrapper. A theme, an analytics context or a state store wrapped around <code>{children}</code> in the root layout does not have to make the children client components — but it will if you write it carelessly. The fix is to keep the provider itself as a thin client component and pass server-rendered children through it:</p>
 
-      <h3>2. Results-Based Pricing Models</h3>
-      <p>Top-tier agencies align their incentives with yours by:</p>
-      <ul>
-        <li>Offering performance-based pricing</li>
-        <li>Guaranteeing specific business outcomes</li>
-        <li>Sharing risk and reward with clients</li>
-        <li>Providing transparent reporting on ROI</li>
-      </ul>
+<pre><code>// app/layout.tsx — stays a Server Component.
+import Providers from './providers';
 
-      <h3>3. Full-Funnel Approach</h3>
-      <p>The best digital marketing companies understand that success requires:</p>
-      <ul>
-        <li>Traffic generation AND conversion optimization</li>
-        <li>Brand awareness AND direct response tactics</li>
-        <li>Short-term wins AND long-term growth strategies</li>
-        <li>Creative campaigns AND data-driven optimization</li>
-      </ul>
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {/* Providers is a client component, but children was already
+            rendered on the server and passes through as an opaque payload. */}
+        &lt;Providers&gt;{children}&lt;/Providers&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}
 
-      <h3>4. Transparent Communication</h3>
-      <p>Quality agencies provide:</p>
-      <ul>
-        <li>Regular, actionable reporting</li>
-        <li>Clear explanations of strategies and tactics</li>
-        <li>Honest assessment of opportunities and challenges</li>
-        <li>Direct access to senior team members</li>
-      </ul>
+// app/providers.tsx
+'use client';
+export default function Providers({ children }: { children: React.ReactNode }) {
+  return &lt;ThemeProvider&gt;{children}&lt;/ThemeProvider&gt;;
+}</code></pre>
 
-      <h2>Questions to Ask Potential Digital Marketing Companies</h2>
-      <p>When evaluating agencies, ask these questions:</p>
-      <ol>
-        <li>Show me 3 case studies with specific revenue numbers and timelines</li>
-        <li>How do you measure success - vanity metrics or business impact?</li>
-        <li>What does a typical client journey look like with your agency?</li>
-        <li>How do you handle underperforming campaigns or strategies?</li>
-        <li>What's included in your service packages vs. add-on costs?</li>
-      </ol>
+<p>Because <code>children</code> is passed as a prop rather than imported, the server components inside it are never pulled into the client graph. This distinction is responsible for more wasted bundle weight than any other single thing in the App Router.</p>
 
-      <h2>Your Competition Isn't Looking at Lists</h2>
-      <p>While you're scrolling through "top 10" lists, your competition is:</p>
-      <ul>
-        <li>Interviewing agencies that specialize in their industry</li>
-        <li>Evaluating partners based on actual business results</li>
-        <li>Building relationships with agencies that think strategically</li>
-        <li>Investing in partnerships that drive measurable growth</li>
-      </ul>
+<p>Then push boundaries down. A page with one interactive element should not be a client component; the element should be. We routinely see a 400-line page marked <code>'use client'</code> for the sake of one dropdown.</p>
 
-      <p>Stop chasing rankings. Start building relationships with digital marketing companies that understand your business and can deliver real results.</p>
-    `,
-    date: '2025-08-10',
-    author: 'WeThinkDigital Team',
-    readTime: '11 min read',
-    tags: ['digital marketing', 'dubai'],
+<h2>2. Fix waterfalls, not query speed</h2>
+
+<p>Sequential awaits are the most common latency bug in server components, and they hide well because each individual query looks fast.</p>
+
+<p>Three awaits at 120ms each is 360ms of server time before a single byte is sent. Run them concurrently and it is 120ms. Nothing got faster; the dependency was imaginary.</p>
+
+<pre><code>// Waterfall: 360ms. Each await blocks the next.
+const user = await getUser(id);
+const orders = await getOrders(id);
+const offers = await getOffers(id);
+
+// Concurrent: ~120ms. Only genuinely dependent calls should be sequential.
+const [user, orders, offers] = await Promise.all([
+  getUser(id),
+  getOrders(id),
+  getOffers(id),
+]);</code></pre>
+
+<p>Where a dependency is real — you need the user before you can fetch their organisation — move the dependent part into its own component and wrap it in <code>&lt;Suspense&gt;</code> so the rest of the page streams immediately rather than waiting.</p>
+
+<p>Two related points. Requests are deduplicated within a single render pass, so calling the same fetch in two components is not the problem people assume it is. And a slow third-party call in a layout is the worst case in the entire framework: layouts render on every navigation within their segment, so one 800ms call there taxes every page below it.</p>
+
+<h2>3. Know which rendering mode each route is in</h2>
+
+<p>Routes that could be static frequently are not, because something in them opted into dynamic rendering by accident. Reading <code>cookies()</code>, <code>headers()</code> or <code>searchParams</code>, or setting <code>cache: 'no-store'</code>, makes the whole route dynamic.</p>
+
+<p>The cost is significant: a static route is served from the edge in tens of milliseconds, while a dynamic one runs your server on every request. Check the build output — it reports which routes are static and which are dynamic — and for anything unexpectedly dynamic, find the cause.</p>
+
+<p>For content that changes occasionally, time-based revalidation is usually the right answer rather than full dynamic rendering. For pages with a static shell and a small personalised region, render the shell statically and stream the personalised part inside <code>&lt;Suspense&gt;</code>. Most "this page must be dynamic" requirements turn out to be about one component, not the whole page.</p>
+
+<h2>4. Treat LCP as a layout problem</h2>
+
+<p>Largest Contentful Paint is usually decided by the hero area, and the mistakes are consistent.</p>
+
+<ul>
+  <li><strong>The LCP image must not be lazy.</strong> Set <code>priority</code> on it. Lazy-loading the hero image is self-inflicted and common, because lazy is the sensible default everywhere else.</li>
+  <li><strong>Always give images explicit dimensions.</strong> Width and height, or <code>fill</code> with a sized container. Missing dimensions cause layout shift, and CLS is the easiest of the three core metrics to get to zero.</li>
+  <li><strong>Set <code>sizes</code> when using <code>fill</code> or responsive images.</strong> Without it the browser assumes full viewport width and downloads a far larger file than the layout needs — often the difference between a 40KB and a 300KB image on mobile.</li>
+  <li><strong>Serve modern formats at sane quality.</strong> AVIF and WebP at quality 75–80 are visually indistinguishable from quality 95 at a fraction of the bytes.</li>
+</ul>
+
+<p>Fonts deserve their own note because they block text rendering. Use <code>next/font</code> so files are self-hosted and the CSS is generated with the correct preload — this removes a connection to a third-party font host from the critical path. Set <code>display: 'swap'</code>, subset to the character ranges you need, and be honest about weights: four weights of two families is eight files, and most designs use three.</p>
+
+<p>If your hero is a heavy 3D scene or a video, that is an LCP decision more than a design one. A CSS-rendered hero with a small amount of motion is dramatically cheaper than a canvas that needs a large library parsed and executed before anything appears — which is exactly why this site's hero is CSS.</p>
+
+<h2>5. Find the three largest things in your bundle</h2>
+
+<p>Run the bundle analyser and look at the biggest modules rather than the long tail. The pattern is almost always the same handful of causes.</p>
+
+<p>A date library imported wholesale for one <code>format</code> call. An icon set imported as a namespace so tree-shaking cannot help. A charting library loaded on a page where the chart is below the fold. A markdown or syntax-highlighting bundle pulled into the client when the rendering could have happened on the server. A utility library where three functions are used and the whole package ships.</p>
+
+<p>Three fixes cover most of it. Import only what you use, with named imports rather than namespace imports. Move formatting and transformation to the server, where the library is free. And for genuinely heavy components that are not immediately visible — editors, charts, maps — use <code>next/dynamic</code> so the code loads on interaction or when scrolled into view.</p>
+
+<p>One warning on dynamic imports: they are frequently applied to components that <em>are</em> above the fold, which replaces a bundle cost with a visible loading delay and a layout shift. Dynamic import is for things the user might never need, not for things they will need immediately.</p>
+
+<h2>6. Measure on real devices and real networks</h2>
+
+<p>A local production build on a development machine over localhost is not a measurement. It is a sanity check.</p>
+
+<p>The gap between a development-machine score and a mid-range Android on a throttled connection is not marginal — parsing and executing JavaScript is several times slower on that hardware, which is precisely why bundle size matters more than it appears to on a laptop. Test with CPU throttling on, and prefer field data over lab data where you have it, because your actual users are the distribution that counts.</p>
+
+<table>
+  <thead>
+    <tr><th>Symptom</th><th>Most likely cause</th><th>First thing to check</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>High TTFB</td><td>Sequential data fetching or a dynamic route that could be static</td><td>Awaits in the page and its layouts; build output rendering mode</td></tr>
+    <tr><td>Slow LCP, fast TTFB</td><td>Hero image not prioritised, or oversized download</td><td><code>priority</code> and <code>sizes</code> on the hero image</td></tr>
+    <tr><td>Poor INP</td><td>Too much client JavaScript hydrating</td><td>Where the <code>'use client'</code> boundary sits</td></tr>
+    <tr><td>Layout shift</td><td>Unsized images, or a font swap moving text</td><td>Explicit image dimensions; font loading strategy</td></tr>
+    <tr><td>Fine on desktop, poor on mobile</td><td>Main-thread execution cost</td><td>Total client bundle for that route</td></tr>
+    <tr><td>Regressed after a feature</td><td>A new client component or a heavy import</td><td>Bundle diff against the previous release</td></tr>
+  </tbody>
+</table>
+
+<h2>7. Keep it from regressing</h2>
+
+<p>Performance work that is not defended in CI decays within two quarters. Someone adds a provider, someone imports a chart library, and the score drifts back down with no single commit to blame.</p>
+
+<p>Two cheap guards catch nearly everything. A bundle-size budget per route that fails the build on a material increase, which is the check that catches accidental client boundaries and heavy imports at the moment they are introduced. And a Lighthouse run in CI against a production build, treated as a regression signal rather than a target — a route dropping fifteen points on one pull request is actionable information, whereas an absolute score in a CI container is not worth arguing about.</p>
+
+<blockquote>Bundle size is the metric to defend automatically, because it is deterministic, it is measurable per route, and almost every serious client-side performance problem shows up there first.</blockquote>
+
+<h2>What this means in practice</h2>
+
+<p>Work top-down. Audit the client boundary, then the data-fetching waterfalls, then the rendering mode of each route. Those three account for the large majority of available improvement in a typical App Router codebase, and all three are structural — you fix them once rather than continuously.</p>
+
+<p>Only then spend time on images, fonts and bundle trimming, which are real but smaller and more evenly distributed. Measure on a throttled mid-range device throughout, because the desktop numbers will tell you everything is fine well past the point where it is not.</p>
+
+<p>Then defend it with a per-route size budget in CI, because the alternative is doing this work again next year. If you are looking at a slow application and cannot tell whether the problem is structural or a thousand small things, <a href="/contact">send us the route and the numbers</a> — untangling that is standard <a href="/services/web-development">web development work</a> for us, and the answer is usually narrower than it looks.</p>`,
   },
   {
     id: '9',
-    slug: 'top-5-digital-marketing-company-in-dubai',
-    title: 'How to find the right growth partner',
-    excerpt: 'The questions that reveal whether an agency understands your business.',
-    content: `
-      <h2>The Problem with "Top 5" Digital Marketing Company Lists</h2>
-      <p>Every month, another "Top 5 Digital Marketing Company in Dubai" list appears. But here's the reality: these lists are fundamentally flawed because:</p>
-      <ul>
-        <li>They're often based on subjective opinions, not measurable results</li>
-        <li>They don't consider your specific business needs and goals</li>
-        <li>They focus on agency size rather than effectiveness</li>
-        <li>They ignore industry specialization and expertise</li>
-      </ul>
+    slug: 'automated-pr-review-with-ai',
+    title: 'Automated Pull Request Review: What AI Catches and What It Misses',
+    excerpt:
+      'A missing await gets caught every time. A change that violates an invariant enforced three modules away gets approved. The difference is where the evidence lives.',
+    date: '2025-10-13',
+    author: 'WeThinkDigital Engineering',
+    readTime: '8 min read',
+    category: 'AI Engineering',
+    tags: ['code review', 'automation', 'pull requests', 'LLM', 'developer tooling'],
+    metaTitle: 'Automated Pull Request Review: What AI Catches and What It Misses',
+    metaDescription:
+      'An honest audit of automated pull request review: the defects AI reliably catches, the ones it structurally cannot, and why precision decides adoption.',
+    keywords: ['automated pull request review', 'AI code review tool', 'LLM code analysis', 'review automation', 'static analysis limits', 'false positive rate', 'review precision'],
+    content: `<p>Two defects, same pull request. The first is a missing <code>await</code> on an audit-log write inside a request handler — the function returns, the response ships, and the promise resolves into nothing. An automated reviewer catches that essentially every time. The second is a change to an order-cancellation handler that sets <code>status = 'cancelled'</code> without also clearing the reserved-inventory row, breaking an invariant that is enforced by a reconciliation job in a different service. The automated reviewer approves it without comment.</p>
 
-      <h2>What Actually Makes a "Top" Digital Marketing Company?</h2>
-      <p>The best digital marketing companies in Dubai share these characteristics:</p>
+<p>Both defects are real. Both ship bugs. The difference between them is not difficulty, and it is not model capability. It is where the evidence lives. The first defect is fully visible inside the diff. The second requires knowing something the diff does not contain.</p>
 
-      <h3>1. Obsession with Client Revenue Growth</h3>
-      <p>Top agencies measure success by the money they help you make, not:</p>
-      <ul>
-        <li>Impressions or reach</li>
-        <li>Engagement rates</li>
-        <li>Follower counts</li>
-        <li>Awards won</li>
-      </ul>
+<p>That distinction explains almost every result you will get from an automated reviewer, and it is the right frame for deciding what to trust it with.</p>
 
-      <h3>2. Data-Driven Decision Making</h3>
-      <p>Leading agencies base every strategy on:</p>
-      <ul>
-        <li>Customer behavior analytics</li>
-        <li>Market research and competitive intelligence</li>
-        <li>A/B testing results</li>
-        <li>ROI calculations for every tactic</li>
-      </ul>
+<h2>Local correctness versus systemic correctness</h2>
 
-      <h3>3. Full-Service Capabilities with Specialized Expertise</h3>
-      <p>Top digital marketing companies offer comprehensive services while maintaining deep expertise in:</p>
-      <ul>
-        <li>Search engine optimization and paid advertising</li>
-        <li>Conversion rate optimization</li>
-        <li>Content marketing and brand storytelling</li>
-        <li>Marketing automation and CRM integration</li>
-      </ul>
+<p>A language model reviewing a pull request sees a few hundred lines of changed code, some surrounding context if your tooling is good, and whatever instructions you gave it. It is reasoning over that window. It is not reasoning over your system.</p>
 
-      <h2>Case Study: How the "Right" Agency Outperforms "Top" Agencies</h2>
-      <p>One of our Dubai clients was working with a "Top 10" agency but seeing zero growth. After switching to a specialized partner:</p>
+<p>Within the window, it is genuinely strong. Pattern recognition over code is what these models are best at, and a surprising share of production defects are local pattern violations — the kind a very well-rested reviewer would spot on the first read and a tired one would miss on the third.</p>
 
-      <h3>Results in First 6 Months:</h3>
-      <ul>
-        <li>340% increase in qualified leads</li>
-        <li>210% improvement in conversion rates</li>
-        <li>185% growth in customer lifetime value</li>
-        <li>$1.8M in additional revenue</li>
-      </ul>
+<p>Outside the window, it has no basis for judgement and, critically, it usually does not know that. The failure mode is not "I cannot assess this." It is silence, or worse, confident approval.</p>
 
-      <p>The difference? The new agency understood their business model and focused on revenue growth rather than vanity metrics.</p>
+<h2>What it catches reliably</h2>
 
-      <h2>How to Identify Truly Top Digital Marketing Companies</h2>
-      <p>Look for these red flags and success indicators:</p>
+<p>In our experience the dependable categories share a property: a competent engineer could identify the defect with no knowledge of the system beyond the diff itself.</p>
 
-      <h3>Red Flags to Avoid:</h3>
-      <ul>
-        <li>Promises of guaranteed #1 rankings</li>
-        <li>Generic strategies for every client</li>
-        <li>Focus on tactics over business outcomes</li>
-        <li>Lack of transparency in reporting</li>
-        <li>No clear process for handling underperformance</li>
-      </ul>
+<ul>
+  <li><strong>Unhandled promise rejections and missing <code>await</code></strong> — including the subtle version where the value is awaited but the error path is not.</li>
+  <li><strong>Null and undefined paths</strong> the type system was talked out of, particularly after an <code>as</code> assertion or a non-null <code>!</code>.</li>
+  <li><strong>Resource leaks</strong> — a file handle, connection, subscription or interval acquired on a path that can throw before release.</li>
+  <li><strong>N+1 queries visible in the hunk</strong> — an <code>await</code> inside a loop over a collection, with a database call on the inside.</li>
+  <li><strong>Missing branch coverage</strong> — a new conditional with no corresponding test, which is a mechanical observation over the changed files.</li>
+  <li><strong>Error handling that swallows</strong> — a <code>catch</code> that logs and continues where the caller needed to know.</li>
+  <li><strong>Unsafe type assertions</strong> and validation gaps at boundaries where external data enters typed code.</li>
+  <li><strong>Forgotten cleanup</strong> — a feature flag referenced but never read, a debug log at info level, a commented-out block, a hardcoded value that belongs in config.</li>
+  <li><strong>Convention drift</strong> — naming, error-construction patterns, module layout that deviates from what the rest of the file does. Consistency is a pure pattern-matching task and models are excellent at it.</li>
+</ul>
 
-      <h3>Success Indicators to Look For:</h3>
-      <ul>
-        <li>Industry-specific case studies with real numbers</li>
-        <li>Performance-based pricing models</li>
-        <li>Senior team involvement in client accounts</li>
-        <li>Proactive optimization and testing culture</li>
-        <li>Clear communication and regular strategic reviews</li>
-      </ul>
+<p>Two of these are worth more than the rest combined, for an unglamorous reason: missing <code>await</code> and swallowed errors are both silent in testing and loud in production, and both are exactly the kind of thing human reviewers stop seeing after twenty minutes of reading.</p>
 
-      <h2>The Real "Top 5" Criteria for Digital Marketing Success</h2>
-      <p>When evaluating potential partners, rank them based on:</p>
+<h2>What it misses reliably</h2>
 
-      <ol>
-        <li><strong>Revenue Impact Potential</strong> - How much additional revenue can they realistically generate for your business?</li>
-        <li><strong>Industry Expertise</strong> - Do they understand your market, competition, and customer behavior?</li>
-        <li><strong>Cultural Fit</strong> - Do their values and working style align with your organization?</li>
-        <li><strong>Scalability</strong> - Can they grow with your business and adapt to changing needs?</li>
-        <li><strong>Transparency</strong> - Will you have clear visibility into costs, strategies, and performance?</li>
-      </ol>
+<p>The misses are not random. They cluster around a single cause — the information required to make the judgement is not in the diff.</p>
 
-      <h2>Stop Chasing Lists, Start Building Partnerships</h2>
-      <p>The best digital marketing company for your Dubai business isn't necessarily the one with the flashiest website or the most social media followers. It's the one that:</p>
-      <ul>
-        <li>Understands your business model inside and out</li>
-        <li>Focuses obsessively on driving revenue growth</li>
-        <li>Communicates clearly and works collaboratively</li>
-        <li>Has a proven track record in your industry</li>
-        <li>Aligns their success with yours through performance-based pricing</li>
-      </ul>
+<table>
+  <thead>
+    <tr><th>Defect class</th><th>Why the reviewer cannot see it</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Cross-module invariant violation</td><td>The rule is enforced somewhere else in the system, or nowhere explicit at all</td></tr>
+    <tr><td>Migration ordering and backfill safety</td><td>Requires knowing deploy sequencing and whether old code will run against the new schema</td></tr>
+    <tr><td>Backwards incompatibility for in-flight clients</td><td>Requires knowing who calls this and which versions are still live</td></tr>
+    <tr><td>Concurrency under real load</td><td>The race is between two executions; the diff shows one. Lock ordering, idempotency and retry interactions are invisible</td></tr>
+    <tr><td>Cost and latency regressions</td><td>A correct-looking call added to a hot path is only wrong if you know the path is hot</td></tr>
+    <tr><td>Authorisation at a trust boundary</td><td>Depends on where the boundary sits in your architecture, not on the shape of the code</td></tr>
+    <tr><td>Product intent</td><td>The code may be flawless and solve the wrong problem. Nothing in the diff says so</td></tr>
+    <tr><td>Deletions of load-bearing code</td><td>Absence of evidence reads as absence of risk</td></tr>
+  </tbody>
+</table>
 
-      <p>Your competition isn't looking at "Top 5" lists. They're building strategic partnerships with agencies that drive measurable business results.</p>
-    `,
-    date: '2025-08-08',
-    author: 'WeThinkDigital Team',
-    readTime: '10 min read',
-    tags: ['digital marketing', 'dubai'],
+<p>Concurrency deserves its own warning. Automated reviewers do sometimes produce a comment about locking or race conditions, which creates an impression of competence in this area. Read those comments carefully. They are typically pattern-triggered — the word <code>transaction</code> appeared, or a shared mutable structure is visible — rather than the product of reasoning about interleaved executions. The correct expectation is that concurrency correctness is not covered, and to design your review process accordingly.</p>
+
+<h2>The false positive problem decides everything</h2>
+
+<p>This is the part teams underestimate, and it is the difference between a tool people rely on and a tool people mute.</p>
+
+<p>Consider a reviewer bot that comments fourteen times on a 200-line pull request. Four comments are useful. Ten are stylistic noise, restatements of what the code plainly does, or speculative concerns that do not apply. The precision is 29%. The engineer reading it has to evaluate all fourteen to find the four, which costs more attention than reading the diff unaided would have.</p>
+
+<p>Within a week, the team learns to scroll past the bot. At that point your recall is irrelevant. A finding nobody reads has the same value as a finding you never produced.</p>
+
+<blockquote>An automated reviewer is a classifier, and it should be evaluated like one. Precision is the metric that determines whether it survives contact with your team; recall only starts to matter once precision is high enough that people still read the output.</blockquote>
+
+<p>The practical consequences are unpopular but straightforward. Comment far less than you can. Require both high severity and high confidence before posting. Aim for two or three comments on a typical pull request, not fourteen. Default to advisory rather than blocking, and promote a rule to blocking only after you have evidence of its precision on your own codebase.</p>
+
+<p>Making that tractable means the reviewer should emit structured findings, not prose, so you can threshold and measure them:</p>
+
+<pre><code>interface ReviewFinding {
+  file: string;
+  line: number;
+  severity: 'blocking' | 'high' | 'medium' | 'nit';
+  /** Model-reported, calibrated against your own labelled history. */
+  confidence: number;
+  category:
+    | 'correctness' | 'resource-leak' | 'error-handling'
+    | 'performance' | 'security' | 'test-gap' | 'convention';
+  rationale: string;
+  /** Required for correctness findings: the concrete input that breaks it. */
+  failingScenario?: string;
+}
+
+const POST_THRESHOLD: Record&lt;ReviewFinding['severity'], number&gt; = {
+  blocking: 0.9,
+  high: 0.8,
+  medium: 0.9,
+  nit: 1.1,           // effectively never: let the linter own style
+};
+
+export function selectComments(findings: ReviewFinding[]): ReviewFinding[] {
+  return findings
+    .filter((f) =&gt; f.confidence &gt;= POST_THRESHOLD[f.severity])
+    .filter((f) =&gt; f.category !== 'correctness' || Boolean(f.failingScenario))
+    .sort((a, b) =&gt; b.confidence - a.confidence)
+    .slice(0, 5);
+}</code></pre>
+
+<p>Two details in there carry most of the weight. Setting the <code>nit</code> threshold above 1.0 disables style commentary entirely — a formatter and a linter do that job deterministically and for free, and every style comment spends credibility you need elsewhere. And requiring a <code>failingScenario</code> for correctness claims is a cheap, effective filter: a model that cannot name the input that triggers the bug is usually pattern-matching on the shape of risky code rather than finding a real defect.</p>
+
+<h2>Context is the lever, not the model</h2>
+
+<p>When teams are unhappy with automated review quality, the instinct is to change models. The larger gains are almost always in what you put in the window.</p>
+
+<ul>
+  <li><strong>Send whole functions, not hunks.</strong> A diff hunk with three lines of context above and below is not enough to judge whether an early return skips necessary cleanup. Expand to enclosing function bodies.</li>
+  <li><strong>Include the repository conventions file.</strong> Your error-handling pattern, your logging rules, your "never do X" list. This converts vague style opinions into checks against a stated standard, which raises precision sharply.</li>
+  <li><strong>Include the related test files.</strong> The reviewer cannot flag a missing test for a new branch if it never saw the test file.</li>
+  <li><strong>Include the pull request description and the linked work item.</strong> Without stated intent, the reviewer can only assess whether the code is internally consistent, never whether it does the right thing.</li>
+  <li><strong>Include definitions of the symbols the diff calls.</strong> Resolving the signature of the function being called is often the difference between catching an argument-order bug and missing it.</li>
+</ul>
+
+<p>Adding the conventions file and the enclosing function bodies is usually a bigger quality jump than any model upgrade, and it costs a few thousand extra tokens per review. That is the trade you want.</p>
+
+<h2>The composition that actually works</h2>
+
+<p>Treat automated review as the first of several layers, each covering what the previous one structurally cannot.</p>
+
+<ol>
+  <li><strong>Deterministic tooling first.</strong> Types, linting, formatting, dependency audit. If a rule can be expressed deterministically, never spend model attention on it.</li>
+  <li><strong>Automated review second</strong>, for local correctness, error handling and test gaps — the categories where evidence lives in the diff.</li>
+  <li><strong>Human review third</strong>, explicitly scoped to what the machine cannot see: is this the right change, does it hold the system's invariants, is it safe to deploy in this order, who else depends on this.</li>
+</ol>
+
+<p>Naming that third scope is the most valuable thing you can do to your review checklist. Reviewers who know the mechanical layer is already covered stop spending their first ten minutes on null checks and start spending it on architecture. That reallocation is where the value is — not in removing humans from review.</p>
+
+<p>This is how the PR Review agent in <a href="/products/agents">our agent platform</a> is built: it runs after the deterministic checks, posts a small number of high-confidence findings, and is deliberately quiet about anything it cannot ground in the diff. It works alongside SDE and QA agents on the same backlog, which matters, because an implementation agent without a reviewer behind it just increases the load on the humans downstream.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Start in advisory mode and measure. For the first month, label every comment the bot posts as useful or not useful. You will have a precision number for your own codebase within a few hundred pull requests, and it will be lower than the vendor benchmark. Tune thresholds against that number rather than against a marketing claim.</p>
+
+<p>Be honest with your team about the boundary. Tell them explicitly that the bot covers local correctness and does not cover invariants, migration safety, concurrency or intent. A reviewer who believes the machine has already checked everything is a worse reviewer than one who had no machine at all — the failure mode of automated review is not bad comments, it is unearned confidence.</p>
+
+<p>And keep the human review checklist short and pointed at the gaps. Three questions a machine cannot answer beat twenty it already covered. If you are wiring this into your own pipeline, or thinking about the broader <a href="/services/ai-engineering">LLM and agent systems</a> around it, <a href="/contact">tell us how your review process looks today</a> — the process usually needs more work than the model does. For the human side of the same problem, our note on <a href="/blog/ai-code-review-best-practices">code review in the age of AI-generated code</a> picks up where this one stops.</p>`,
   },
   {
     id: '10',
-    slug: 'free-crm-software-for-small-business-dubai',
-    title: 'Free CRM Software for Small Business in Dubai: The 7 Best Options That Actually Work',
-    excerpt: 'Discover the best free CRM software options for small businesses in Dubai. Real solutions that drive growth without breaking the bank.',
-    content: `
-      <h2>Stop Paying for CRM Software When Free Solutions Exist</h2>
-      <p>As a small business owner in Dubai, you're constantly told you need a CRM. You're shown enterprise solutions costing thousands of dirhams per month. But here's the truth: most businesses don't need expensive CRM software.</p>
+    slug: 'ai-agents-software-development-lifecycle',
+    title: 'How AI Agents Are Changing the Software Development Lifecycle',
+    excerpt:
+      'The ticket still takes two hours. The time moved — into the review queue, and into the question the ticket asserted and never justified. Not acceleration. Redistribution.',
+    date: '2025-10-05',
+    author: 'WeThinkDigital Engineering',
+    readTime: '8 min read',
+    category: 'AI Automation',
+    tags: ['AI agents', 'SDLC', 'delivery process', 'specification', 'review'],
+    metaTitle: 'How AI Agents Are Changing the Software Development Lifecycle',
+    metaDescription:
+      'AI agents did not remove work from the software development lifecycle, they moved it. Where the bottleneck went, and how to redesign delivery around it.',
+    keywords: ['AI agents software development', 'software development lifecycle', 'AI in SDLC', 'delivery pipeline design', 'agentic development', 'review bottleneck', 'specification quality'],
+    content: `<p>Take a well-specified ticket: add a rate limit to an internal API, 429 on breach, per-API-key, sliding window, configuration in the existing settings module. Eighteen months ago that was roughly two hours of an engineer's day — forty minutes reading the surrounding code, fifty minutes writing it, thirty minutes on tests and self-review. Hand the same ticket to an agent today and a complete branch with tests exists in under ten minutes.</p>
 
-      <p>In fact, many free CRM options provide 80% of the functionality at 0% of the cost. We've tested dozens of free CRM solutions specifically for Dubai small businesses. Here are the 7 best options that actually work.</p>
+<p>Here is the part nobody puts on the slide. The ticket still takes about two hours to land. The time moved. It now sits in the queue before a human opens the diff, in the twenty minutes that human spends deciding whether the sliding window is actually correct at the boundary, and in the follow-up conversation about whether per-API-key was the right axis in the first place — a question the ticket asserted and never justified.</p>
 
-      <h2>The 7 Best Free CRM Software for Dubai Small Businesses</h2>
+<p>That is the real story of agents in the software development lifecycle. Not acceleration. Redistribution. And if you do not know where the work moved to, you will staff the wrong side of it.</p>
 
-      <h3>1. HubSpot CRM - The All-Rounder</h3>
-      <p>HubSpot offers one of the most robust free CRM solutions available. What makes it great for Dubai businesses:</p>
-      <ul>
-        <li><strong>Unlimited users and contacts</strong> - Perfect for growing teams</li>
-        <li><strong>Mobile app with Arabic language support</strong> - Essential for Dubai's mobile-first market</li>
-        <li><strong>Local UAE number formatting</strong> - Proper +971 support</li>
-        <li><strong>Email tracking and templates</strong> - Built-in marketing tools</li>
-        <li><strong>Deal pipeline management</strong> - Visual sales tracking</li>
-      </ul>
-      <p><strong>Best for:</strong> Service businesses, agencies, consulting firms</p>
-      <p><strong>Dubai-specific benefits:</strong> Excellent mobile experience, Arabic interface options, UAE timezone support</p>
+<h2>Writing code was never the bottleneck</h2>
 
-      <h3>2. Zoho CRM - The Powerhouse</h3>
-      <p>Zoho's free plan is surprisingly powerful for small businesses:</p>
-      <ul>
-        <li><strong>3 users included</strong> - Great for small teams</li>
-        <li><strong>Customizable dashboards</strong> - Tailor to your business needs</li>
-        <li><strong>Multi-currency support</strong> - Essential for Dubai's international business environment</li>
-        <li><strong>Email integration</strong> - Gmail and Outlook support</li>
-        <li><strong>Basic automation</strong> - Workflow rules and task automation</li>
-      </ul>
-      <p><strong>Best for:</strong> E-commerce, retail, import/export businesses</p>
-      <p><strong>Dubai-specific benefits:</strong> Multi-currency (AED, USD, EUR), VAT tracking, international business support</p>
+<p>This is uncomfortable for a profession that identifies with typing, but the data has been consistent for decades: the time between a work item being ready and the change being in production is dominated by waiting, not by authoring. Waiting for clarification. Waiting for review. Waiting for a release window. Waiting for the flaky test suite to go green on the third retry.</p>
 
-      <h3>3. Bitrix24 - The Complete Suite</h3>
-      <p>Bitrix24 offers more than just CRM - it's a complete business suite:</p>
-      <ul>
-        <li><strong>12 users free</strong> - Largest free user allowance</li>
-        <li><strong>Project management tools</strong> - Built-in task management</li>
-        <li><strong>CRM + website builder</strong> - All-in-one solution</li>
-        <li><strong>Telephony integration</strong> - UAE phone number support</li>
-        <li><strong>Social media integration</strong> - Manage social channels</li>
-      </ul>
-      <p><strong>Best for:</strong> Startups, small teams needing multiple tools</p>
-      <p><strong>Dubai-specific benefits:</strong> Large team support, telephony integration, comprehensive business tools</p>
+<p>In a typical team, the implementation step is a minority of cycle time. So making implementation ten times faster does not make delivery ten times faster. It makes implementation stop being the constraint and hands the crown to whatever was second in line.</p>
 
-      <h3>4. Freshsales (Freshworks) - The Sales Focus</h3>
-      <p>Freshsales offers a sales-focused free CRM with excellent features:</p>
-      <ul>
-        <li><strong>Unlimited contacts</strong> - No caps on your database</li>
-        <li><strong>AI-powered lead scoring</strong> - Identify hot prospects</li>
-        <li><strong>Email tracking</strong> - See who opens your emails</li>
-        <li><strong>Mobile app</strong> - On-the-go access</li>
-        <li><strong>Basic reporting</strong> - Sales performance insights</li>
-      </ul>
-      <p><strong>Best for:</strong> Sales teams, B2B businesses</p>
-      <p><strong>Dubai-specific benefits:</strong> AI features optimized for international markets, mobile-first design</p>
+<p>Queueing theory is unkind here. If you increase the arrival rate at a workstation without increasing its service rate, the queue does not grow a little. It grows non-linearly as utilisation approaches one. A review function that was comfortably absorbing twelve pull requests a day at 70% utilisation does not calmly absorb twenty. It saturates, and then wait times explode.</p>
 
-      <h3>5. Agile CRM - The Marketing Machine</h3>
-      <p>Agile CRM combines CRM with marketing automation:</p>
-      <ul>
-        <li><strong>10 users free</strong> - Good for small teams</li>
-        <li><strong>Marketing automation</strong> - Email campaigns</li>
-        <li><strong>Social suite</strong> - Social media management</li>
-        <li><strong>Telephony</strong> - Built-in calling</li>
-        <li><strong>Project management</strong> - Task tracking</li>
-      </ul>
-      <p><strong>Best for:</strong> Marketing agencies, businesses needing automation</p>
-      <p><strong>Dubai-specific benefits:</strong> Comprehensive marketing tools, social media management for local platforms</p>
+<blockquote>Agents do not remove work from the lifecycle. They move work from a stage that scales with headcount to stages that scale with attention — and attention is the resource you have least of.</blockquote>
 
-      <h3>6. Really Simple Systems - The Simple Solution</h3>
-      <p>Perfect for businesses that want simplicity:</p>
-      <ul>
-        <li><strong>2 users free</strong> - Basic team support</li>
-        <li><strong>100 contacts</strong> - Good for small databases</li>
-        <li><strong>Email marketing</strong> - Basic campaigns</li>
-        <li><strong>Mobile access</strong> - Simple mobile app</li>
-        <li><strong>Easy setup</strong> - Quick implementation</li>
-      </ul>
-      <p><strong>Best for:</strong> Solo entrepreneurs, very small businesses</p>
-      <p><strong>Dubai-specific benefits:</strong> Simple interface, easy to use for non-technical users</p>
+<h2>Stage by stage: where it actually helps</h2>
 
-      <h3>7. Capsule CRM - The Minimalist Choice</h3>
-      <p>Capsule offers a clean, simple CRM experience:</p>
-      <ul>
-        <li><strong>2 users free</strong> - Basic team functionality</li>
-        <li><strong>250 contacts</strong> - Decent capacity</li>
-        <li><strong>Sales pipeline</strong> - Visual deal tracking</li>
-        <li><strong>Task management</strong> - Basic to-do lists</li>
-        <li><strong>Calendar integration</strong> - Sync with Google Calendar</li>
-      </ul>
-      <p><strong>Best for:</strong> Service businesses, consultants, freelancers</p>
-      <p><strong>Dubai-specific benefits:</strong> Clean interface, easy learning curve, good for service-based businesses</p>
+<p>It is worth being specific rather than generically enthusiastic, because the effect differs sharply by stage.</p>
 
-      <h3>8. WeThinkDigital CRM - The Dubai-First Solution</h3>
-      <p>WeThinkDigital offers a CRM specifically designed for Dubai small businesses:</p>
-      <ul>
-        <li><strong>Unlimited users and contacts</strong> - Perfect for growing Dubai businesses</li>
-        <li><strong>Built-in UAE phone number support</strong> - Automatic +971 formatting</li>
-        <li><strong>AED currency integration</strong> - Native UAE dirham support</li>
-        <li><strong>Arabic language interface</strong> - Full RTL support</li>
-        <li><strong>Local business hour tracking</strong> - Dubai timezone and working hours</li>
-        <li><strong>Free forever plan</strong> - No credit card required</li>
-      </ul>
-      <p><strong>Best for:</strong> Dubai-based businesses wanting local support</p>
-      <p><strong>Dubai-specific benefits:</strong> Built specifically for UAE market, local support team, Arabic language support</p>
-      <p><strong>Get started:</strong> <a href="https://crm.wethinkdigital.solutions" target="_blank" rel="noopener noreferrer">crm.wethinkdigital.solutions</a></p>
+<h3>Specification and backlog refinement: gets harder</h3>
 
-      <h2>Why Dubai Small Businesses Need CRM Software</h2>
-      <p>Dubai's competitive business environment demands efficiency. Here's why CRM is essential:</p>
+<p>An agent will satisfy your acceptance criteria with unsettling literalism. A human engineer reading "rate limit per API key" pauses and thinks: what about unauthenticated traffic? What about our own internal service accounts, which share a key and will now throttle each other? They raise it in standup. An agent implements exactly what you wrote and the problem surfaces in production three weeks later.</p>
 
-      <h3>1. Multi-Cultural Customer Base</h3>
-      <p>Dubai businesses serve customers from around the world. A good CRM helps you:</p>
-      <ul>
-        <li>Track customer preferences and communication styles</li>
-        <li>Manage relationships across different cultures</li>
-        <li>Provide personalized service to diverse clients</li>
-      </ul>
+<p>This is not a model failure. It is a specification failure that the model faithfully reproduced. Underspecified tickets have always carried debt; agents make you pay it sooner and in public.</p>
 
-      <h3>2. High Customer Expectations</h3>
-      <p>Dubai customers expect premium service. CRM helps you deliver:</p>
-      <ul>
-        <li>Quick response times</li>
-        <li>Personalized communication</li>
-        <li>Consistent follow-up</li>
-        <li>Professional relationship management</li>
-      </ul>
+<h3>Implementation: genuinely transformed</h3>
 
-      <h3>3. Competitive Market Advantage</h3>
-      <p>In Dubai's crowded market, efficiency wins. CRM gives you:</p>
-      <ul>
-        <li>Better organization than competitors</li>
-        <li>Faster response to opportunities</li>
-        <li>More professional customer interactions</li>
-        <li>Data-driven decision making</li>
-      </ul>
+<p>For bounded, well-described changes inside an established codebase, first-draft quality is high and the marginal cost is close to zero. The categories that work best are the ones where the pattern already exists in the repository: a new endpoint alongside nine similar endpoints, a new migration, a new adapter behind an interface that already has three implementations, a mechanical refactor across forty files.</p>
 
-      <h2>Key Features to Look for in Dubai CRM Software</h2>
-      <p>When choosing CRM software for your Dubai business, prioritize these features:</p>
+<h3>Testing: high volume, variable value</h3>
 
-      <h3>Mobile Accessibility</h3>
-      <p>Dubai business happens on mobile. Ensure your CRM has:</p>
-      <ul>
-        <li>Full-featured mobile app</li>
-        <li>Offline capabilities</li>
-        <li>Arabic language support</li>
-        <li>Quick loading times on mobile networks</li>
-      </ul>
+<p>Agents produce enormous quantities of tests quickly. Whether those tests would have caught anything is a separate question, and coverage percentage will not answer it for you — generated suites are extremely good at asserting the behaviour the implementation already has. We wrote about the trap and the ways out of it in our note on <a href="/blog/ai-qa-automation-test-generation">making AI-generated tests actually useful</a>.</p>
 
-      <h3>Multi-Currency Support</h3>
-      <p>Essential for Dubai's international business environment:</p>
-      <ul>
-        <li>AED currency support</li>
-        <li>Automatic currency conversion</li>
-        <li>Multi-currency invoicing</li>
-        <li>Exchange rate integration</li>
-      </ul>
+<h3>Review: the new constraint</h3>
 
-      <h3>Local Integration</h3>
-      <p>Look for CRM that works with local tools:</p>
-      <ul>
-        <li>UAE phone number formatting</li>
-        <li>Local payment gateway integration</li>
-        <li>Dubai-specific calendar support</li>
-        <li>Local business hour tracking</li>
-      </ul>
+<p>This is where the pressure lands, and it is worse than a straight volume increase. Human-authored diffs carry an implicit signal: the author suffered for every line, so lines are scarce and roughly intentional. Agent-authored diffs lose that signal. Code is cheap to produce, so diffs get bigger, more defensive, more speculative. A 400-line diff takes a careful reviewer somewhere between forty and ninety minutes to review properly, and review quality is known to fall off a cliff past a few hundred lines of change.</p>
 
-      <h2>Implementation Tips for Dubai Businesses</h2>
-      <p>Successfully implementing CRM in your Dubai business:</p>
+<p>Worse, agent output is fluent. It reads as if it were written by someone competent and confident, which suppresses exactly the scepticism reviewers should be applying. Reviewers start skimming. Skimmed review is theatre.</p>
 
-      <h3>1. Start Small</h3>
-      <p>Begin with basic features and gradually expand. Don't try to implement everything at once.</p>
+<h3>Integration and release: mostly unchanged, now more contended</h3>
 
-      <h3>2. Train Your Team</h3>
-      <p>Ensure everyone understands how to use the CRM effectively. Provide training in relevant languages.</p>
+<p>Merge conflicts, migration ordering and environment drift do not care who wrote the code. What changes is that more branches are in flight at once, so conflicts are more frequent and the integration window is more contended.</p>
 
-      <h3>3. Customize for Dubai</h3>
-      <p>Set up local business hours, currency settings, and communication templates specific to Dubai.</p>
+<h3>On-call: quietly riskier</h3>
 
-      <h3>4. Monitor and Adjust</h3>
-      <p>Regularly review how the CRM is being used and make adjustments based on team feedback.</p>
+<p>At three in the morning, the relevant question is whether anyone on the team understands the change that broke. Code that no human ever fully read is code with no owner, and ownership is what makes incidents short.</p>
 
-      <h2>When to Upgrade from Free CRM</h2>
-      <p>Free CRM works great until you hit these milestones:</p>
-      <ul>
-        <li>Team size exceeds free user limits</li>
-        <li>Contact database grows beyond free tier</li>
-        <li>Need advanced automation features</li>
-        <li>Require custom reporting and analytics</li>
-        <li>Need integration with other business tools</li>
-      </ul>
+<h2>What a good work item looks like when an agent is the consumer</h2>
 
-      <h2>Final Recommendation</h2>
-      <p>For most Dubai small businesses, we recommend starting with:</p>
-      <ul>
-        <li><strong>HubSpot CRM</strong> - Best overall free CRM with unlimited features</li>
-        <li><strong>Zoho CRM</strong> - Excellent for sales-focused teams</li>
-        <li><strong>WeThinkDigital CRM</strong> - Specifically built for Dubai businesses with local support</li>
-      </ul>
+<p>The single highest-leverage change most teams can make is rewriting how they specify work. A ticket written for a human is a conversation starter. A ticket written for an agent has to be a contract, because there will be no conversation.</p>
 
-      <p>If you want a CRM that understands the Dubai market specifically, try our free CRM at <a href="https://crm.wethinkdigital.solutions" target="_blank" rel="noopener noreferrer">crm.wethinkdigital.solutions</a> - built by Dubai experts for Dubai businesses.</p>
+<p>Four things matter more than everything else:</p>
 
-      <p>Remember: the best CRM is the one your team will actually use. Start with a free option, get comfortable with the basics, and upgrade only when you've outgrown the free features.</p>
+<ul>
+  <li><strong>Machine-checkable acceptance criteria.</strong> Not "handle errors gracefully" but "returns 429 with a <code>Retry-After</code> header; existing 200-path latency unchanged; new behaviour covered by a test that fails against the current main branch."</li>
+  <li><strong>Explicit non-goals.</strong> Agents pattern-match toward completeness and will refactor adjacent code you did not ask about. Say what is out of scope.</li>
+  <li><strong>File and module boundaries.</strong> Naming the surface the change may touch is the cheapest way to keep the diff reviewable.</li>
+  <li><strong>The invariant behind the requirement.</strong> Say <em>why</em>, in one line. It is the only defence against a locally correct change that violates a system-level rule.</li>
+</ul>
 
-      <p>Your Dubai business deserves professional customer relationship management. With these free options, there's no excuse not to start today.</p>
-    `,
-    date: '2025-09-05',
-    author: 'WeThinkDigital Team',
-    readTime: '12 min read',
-    tags: ['crm', 'free crm', 'dubai', 'small business'],
+<p>In practice we express this as structured metadata alongside the prose, so the definition of done is executable rather than aspirational:</p>
+
+<pre><code>interface AgentWorkItem {
+  id: string;
+  intent: string;                 // one line: the invariant this protects
+  scope: {
+    allow: string[];              // glob paths the change may touch
+    deny: string[];               // hard boundaries, e.g. 'db/migrations/**'
+  };
+  acceptance: AcceptanceCheck[];  // must be executable, not prose
+  nonGoals: string[];
+  maxDiffLines: number;           // reject and re-plan above this
+}
+
+type AcceptanceCheck =
+  | { kind: 'test'; command: string; mustFailBefore: boolean }
+  | { kind: 'invariant'; assertion: string; verifiedBy: string };
+
+const item: AgentWorkItem = {
+  id: 'API-2841',
+  intent: 'No single API key can exhaust shared request capacity.',
+  scope: {
+    allow: ['src/middleware/**', 'src/config/limits.ts', 'test/middleware/**'],
+    deny: ['db/migrations/**', 'src/auth/**'],
+  },
+  acceptance: [
+    { kind: 'test', command: 'pnpm test middleware/rate-limit', mustFailBefore: true },
+    { kind: 'invariant', assertion: 'p99 latency on the 200 path unchanged', verifiedBy: 'bench/api.bench.ts' },
+  ],
+  nonGoals: ['Quota billing', 'Per-endpoint overrides', 'Changing the auth middleware'],
+  maxDiffLines: 400,
+};</code></pre>
+
+<p>The <code>mustFailBefore</code> flag does a lot of quiet work. It forces a test that actually discriminates between the old behaviour and the new one, which rules out the most common class of worthless generated test.</p>
+
+<h2>Redesigning the pipeline around the new constraint</h2>
+
+<p>If review is the constraint, optimise review. That is the whole strategy, and it mostly means reducing the volume of human attention each change requires rather than asking humans to read faster.</p>
+
+<table>
+  <thead>
+    <tr><th>Lever</th><th>What it does</th><th>Cost</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Hard diff-size ceiling</td><td>Forces decomposition; keeps changes inside the range where review quality holds</td><td>More work items, more planning overhead</td></tr>
+    <tr><td>Automated first-pass review</td><td>Clears mechanical defects before a human looks</td><td>Useless if noisy; see the limits below</td></tr>
+    <tr><td>Machine-verifiable acceptance</td><td>Moves "does it work" from opinion to CI</td><td>Requires real investment in test infrastructure</td></tr>
+    <tr><td>Tiered review by blast radius</td><td>Concentrates senior attention on auth, money, migrations and data</td><td>Needs an honest risk taxonomy of your own codebase</td></tr>
+    <tr><td>Agent writes the change, human writes the test</td><td>Keeps a human in the loop on intent, not syntax</td><td>Slower; worth it on high-risk paths</td></tr>
+  </tbody>
+</table>
+
+<p>Automated first-pass review deserves a caveat rather than a cheer. It is genuinely good at defects whose evidence is inside the diff and genuinely blind to violations of invariants enforced elsewhere in the system — the boundary is sharp enough that we wrote a whole note on <a href="/blog/automated-pr-review-with-ai">what automated review catches and what it misses</a>.</p>
+
+<p>Tiered review is the lever most teams underuse. Not every change carries the same risk. A copy change in a marketing surface and a change to token validation should not receive the same process. Once you accept that, you can route mechanically: a change touching <code>src/auth/**</code> requires two human approvals regardless of size, a change confined to a presentational component with passing visual tests may need none.</p>
+
+<h2>Where this leaves the team</h2>
+
+<p>The composition of engineering work shifts rather than shrinking. Less time producing first drafts. More time on system design, on interface and invariant definition, on building the verification infrastructure that makes autonomous work safe to accept, and on review judgement.</p>
+
+<p>Notice that every one of those is a senior activity. The uncomfortable implication is that agents raise the floor on output while raising the bar on the judgement needed to use that output safely. Teams that are strong on specification, testing and architecture get compounding returns. Teams that were already shipping underspecified work into a thin review process get the same problems, faster.</p>
+
+<p>This is the design principle behind <a href="/products/agents">our own agent platform</a>: the SDE, QA and PR-Review agents work the same backlog because implementation, verification and review are one loop. An implementation agent with no verification agent behind it just moves the queue.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Instrument before you scale. Measure where cycle time actually goes today — time in backlog, time in implementation, time waiting for review, time in review, time waiting to deploy. If review is already your longest stage, adding implementation throughput will make delivery slower, not faster, and you will have the metrics to prove it before you spend the budget.</p>
+
+<p>Then fix specification quality, because it is the cheapest change with the largest effect and it improves human-authored work too. Then invest in verification: the amount of autonomy you can safely grant is capped by the quality of your automated checks, and nothing else. Start agents on the reversible, well-patterned, low-blast-radius end of your backlog and expand the envelope as your evidence improves — the same way you would extend trust to a capable new engineer.</p>
+
+<p>The teams getting real value here are not the ones that adopted the best model. They are the ones that treated this as a delivery-pipeline redesign rather than a tooling upgrade. If you are working through where the constraint actually sits in your own pipeline, <a href="/contact">we are happy to compare notes</a> — and if the problem is broader than code, our <a href="/services/ai-automation">AI automation work</a> starts from the same question: which stage is really the bottleneck?</p>`,
   },
 ];
 
-/** Get a post by slug */
+/** Newest first. Every consumer should read from here, not from `blogPosts`. */
+export const sortedPosts: BlogPost[] = [...blogPosts].sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+);
+
+/** All post slugs, newest first. Used for static params and the sitemap. */
+export const blogSlugs: string[] = sortedPosts.map((post) => post.slug);
+
+/** Strip the body so post lists never ship multi-kilobyte HTML to the client. */
+export function toSummary(post: BlogPost): PostSummary {
+  return {
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    date: post.date,
+    readTime: post.readTime,
+    category: post.category,
+    tags: post.tags,
+  };
+}
+
 export function getPostBySlug(slug: string): BlogPost | undefined {
   return blogPosts.find((post) => post.slug === slug);
 }
 
-/** All blog post slugs (used by sitemap) */
-export const blogSlugs: string[] = blogPosts.map((post) => post.slug);
+/** The `n` most recent posts. */
+export function getRecentPosts(n = 3): BlogPost[] {
+  return sortedPosts.slice(0, n);
+}
+
+/**
+ * Related posts: same category first, then posts sharing the most tags, then
+ * most recent. Never includes the post itself.
+ */
+export function getRelatedPosts(post: BlogPost, n = 3): BlogPost[] {
+  const scored = sortedPosts
+    .filter((candidate) => candidate.id !== post.id)
+    .map((candidate) => {
+      const sharedTags = candidate.tags.filter((tag) => post.tags.includes(tag)).length;
+      const sameCategory = candidate.category === post.category ? 1 : 0;
+      // Category dominates; tag overlap breaks ties within and across categories.
+      return { candidate, score: sameCategory * 100 + sharedTags };
+    })
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        new Date(b.candidate.date).getTime() - new Date(a.candidate.date).getTime(),
+    );
+
+  return scored.slice(0, n).map((entry) => entry.candidate);
+}
+
+/** Categories that actually have posts, in the order they first appear. */
+export function getAllCategories(): BlogCategory[] {
+  return [...new Set(sortedPosts.map((post) => post.category))];
+}

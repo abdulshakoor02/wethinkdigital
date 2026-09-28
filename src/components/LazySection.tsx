@@ -1,38 +1,39 @@
-'use client';
-
-import { ReactNode, memo } from 'react';
-import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import type { CSSProperties, ReactNode } from 'react';
 
 interface LazySectionProps {
   children: ReactNode;
-  fallback?: ReactNode;
   className?: string;
-  rootMargin?: string;
-  threshold?: number;
+  /**
+   * Approximate rendered height, e.g. "36rem". Drives `contain-intrinsic-size`
+   * so the scrollbar and anchor offsets stay stable before the section paints.
+   */
+  intrinsicHeight?: string;
 }
 
-const LazySection = memo(function LazySection({
+/**
+ * Defers *rendering work* for below-the-fold sections without deferring the
+ * *markup*.
+ *
+ * The previous implementation gated children behind an IntersectionObserver,
+ * which meant the server-rendered HTML contained only a grey placeholder — any
+ * crawler that does not execute JavaScript (and every AI answer engine that
+ * reads raw HTML) saw an empty page. `content-visibility: auto` gets the same
+ * paint/layout savings from the browser while keeping the real content in the
+ * HTML for both crawlers and the accessibility tree.
+ */
+export default function LazySection({
   children,
-  fallback,
   className = '',
-  rootMargin = '100px',
-  threshold = 0.1,
+  intrinsicHeight = '40rem',
 }: LazySectionProps) {
-  const { elementRef, hasIntersected } = useIntersectionObserver({
-    threshold,
-    rootMargin,
-    triggerOnce: true,
-  });
+  const style: CSSProperties = {
+    contentVisibility: 'auto',
+    containIntrinsicSize: `auto ${intrinsicHeight}`,
+  };
 
   return (
-    <div ref={elementRef} className={className}>
-      {hasIntersected ? children : (fallback || (
-        <div className="flex h-96 items-center justify-center border-y border-line bg-background-muted" aria-label="Loading section">
-          <div className="h-6 w-6 animate-spin border-2 border-primary border-t-transparent" />
-        </div>
-      ))}
+    <div className={className} style={style}>
+      {children}
     </div>
   );
-});
-
-export default LazySection;
+}

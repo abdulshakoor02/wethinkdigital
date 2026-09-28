@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
+import { siteConfig } from '@/lib/site';
 
-interface FormData {
+/** Exactly the field names `/api/contact` destructures — do not rename. */
+interface ContactPayload {
   name: string;
   email: string;
   company: string;
@@ -14,91 +15,361 @@ interface FormData {
   message: string;
 }
 
-export default function ContactForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [validationSummary, setValidationSummary] = useState<string | null>(null);
-  const { register, handleSubmit, reset, setFocus, formState: { errors } } = useForm<FormData>();
+/** Client-side only; never submitted. Bots fill it, humans never see it. */
+interface FormValues extends ContactPayload {
+  companyWebsite: string;
+}
 
-  const onSubmit = async (data: FormData) => {
+const projectTypes = [
+  'AI automation',
+  'AI agents / LLM product',
+  'Custom software',
+  'Web application',
+  'Existing system integration',
+  'Something else',
+];
+
+const budgets = [
+  'Under $10k — prototype or scoped build',
+  '$10k – $30k — one product workstream',
+  '$30k – $75k — multi-workstream delivery',
+  '$75k+ — ongoing engineering partnership',
+  'Not sure yet',
+];
+
+const inputClass =
+  'w-full rounded-md border border-line bg-background px-4 py-3 text-foreground transition-colors placeholder:text-muted/60 focus:border-primary aria-[invalid=true]:border-danger';
+const labelClass = 'mb-2 block text-sm font-medium text-foreground';
+
+interface ContactFormProps {
+  /**
+   * `section` (default) renders the full home-page band with its own heading.
+   * `bare` renders only the form card, for pages that supply their own heading.
+   */
+  variant?: 'section' | 'bare';
+}
+
+export default function ContactForm({ variant = 'section' }: ContactFormProps) {
+  const uid = useId();
+  const fid = (name: string) => `${uid}-${name}`;
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setFocus,
+    formState: { errors },
+  } = useForm<FormValues>();
+
+  const onSubmit = async (values: FormValues) => {
+    // Honeypot tripped — pretend success, send nothing.
+    if (values.companyWebsite) {
+      setStatus('success');
+      setStatusMessage('Thanks — your message is through.');
+      reset();
+      return;
+    }
+
     setIsSubmitting(true);
-    setSubmitError(null);
+    setStatus('idle');
+    setStatusMessage('');
+
+    const payload: ContactPayload = {
+      name: values.name,
+      email: values.email,
+      company: values.company,
+      phone: values.phone,
+      budget: values.budget,
+      projectType: values.projectType,
+      message: values.message,
+    };
 
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        setSubmitSuccess(true);
-        setValidationSummary(null);
+        setStatus('success');
+        setStatusMessage('Thanks — your message is through. We reply within one business day.');
         reset();
       } else {
-        const errorData = await response.json();
-        setSubmitError(errorData.error || 'We could not send your request. Please try again.');
+        setStatus('error');
+        setStatusMessage(
+          `We could not send your message. Please try again, or email ${siteConfig.email} directly.`,
+        );
       }
     } catch {
-      setSubmitError('We could not reach the enquiry service. Please try again or email us directly.');
+      setStatus('error');
+      setStatusMessage(
+        `We could not reach the server. Please try again, or email ${siteConfig.email} directly.`,
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const onInvalid = (fieldErrors: typeof errors) => {
-    setSubmitError(null);
-    const errorCount = Object.keys(fieldErrors).length;
-    setValidationSummary(`Please review ${errorCount} required ${errorCount === 1 ? 'field' : 'fields'} before sending your enquiry.`);
-    const firstError = Object.keys(fieldErrors)[0] as keyof FormData | undefined;
-    if (firstError) setFocus(firstError);
+    const count = Object.keys(fieldErrors).length;
+    setStatus('error');
+    setStatusMessage(
+      `Please complete ${count} required ${count === 1 ? 'field' : 'fields'} before sending.`,
+    );
+    const first = Object.keys(fieldErrors)[0] as keyof FormValues | undefined;
+    if (first) setFocus(first);
   };
+
+  const form = (
+    <div className="surface p-6 sm:p-9">
+      {/* Polite live region — announced without interrupting the user. */}
+      <p
+        role="status"
+        aria-live="polite"
+        className={
+          status === 'idle'
+            ? 'sr-only'
+            : `mb-6 rounded-md border-l-2 px-4 py-3 text-sm leading-6 text-foreground ${
+                status === 'success' ? 'border-success bg-success/10' : 'border-danger bg-danger/10'
+              }`
+        }
+      >
+        {statusMessage}
+      </p>
+
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6" noValidate>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <label htmlFor={fid('name')} className={labelClass}>
+              Full name <span className="text-primary">*</span>
+            </label>
+            <input
+              id={fid('name')}
+              type="text"
+              autoComplete="name"
+              {...register('name', { required: 'Please add your name.' })}
+              aria-invalid={errors.name ? 'true' : 'false'}
+              aria-describedby={errors.name ? fid('name-error') : undefined}
+              className={inputClass}
+            />
+            {errors.name && (
+              <p id={fid('name-error')} className="mt-2 text-sm text-danger">
+                {errors.name.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor={fid('email')} className={labelClass}>
+              Work email <span className="text-primary">*</span>
+            </label>
+            <input
+              id={fid('email')}
+              type="email"
+              autoComplete="email"
+              {...register('email', {
+                required: 'Please add your email.',
+                pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Please check the email address.' },
+              })}
+              aria-invalid={errors.email ? 'true' : 'false'}
+              aria-describedby={errors.email ? fid('email-error') : undefined}
+              className={inputClass}
+            />
+            {errors.email && (
+              <p id={fid('email-error')} className="mt-2 text-sm text-danger">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor={fid('company')} className={labelClass}>
+              Company <span className="text-primary">*</span>
+            </label>
+            <input
+              id={fid('company')}
+              type="text"
+              autoComplete="organization"
+              {...register('company', { required: 'Please add your company.' })}
+              aria-invalid={errors.company ? 'true' : 'false'}
+              aria-describedby={errors.company ? fid('company-error') : undefined}
+              className={inputClass}
+            />
+            {errors.company && (
+              <p id={fid('company-error')} className="mt-2 text-sm text-danger">
+                {errors.company.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor={fid('phone')} className={labelClass}>
+              Phone <span className="text-muted">(optional)</span>
+            </label>
+            <input
+              id={fid('phone')}
+              type="tel"
+              autoComplete="tel"
+              {...register('phone')}
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label htmlFor={fid('projectType')} className={labelClass}>
+              What do you need built? <span className="text-primary">*</span>
+            </label>
+            <select
+              id={fid('projectType')}
+              {...register('projectType', { required: 'Please choose what you need built.' })}
+              aria-invalid={errors.projectType ? 'true' : 'false'}
+              aria-describedby={errors.projectType ? fid('projectType-error') : undefined}
+              className={inputClass}
+              defaultValue=""
+            >
+              <option value="" disabled>
+                Select an option
+              </option>
+              {projectTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            {errors.projectType && (
+              <p id={fid('projectType-error')} className="mt-2 text-sm text-danger">
+                {errors.projectType.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor={fid('budget')} className={labelClass}>
+              Engagement size <span className="text-primary">*</span>
+            </label>
+            <select
+              id={fid('budget')}
+              {...register('budget', { required: 'Please choose an engagement size.' })}
+              aria-invalid={errors.budget ? 'true' : 'false'}
+              aria-describedby={errors.budget ? fid('budget-error') : undefined}
+              className={inputClass}
+              defaultValue=""
+            >
+              <option value="" disabled>
+                Select a range
+              </option>
+              {budgets.map((band) => (
+                <option key={band} value={band}>
+                  {band}
+                </option>
+              ))}
+            </select>
+            {errors.budget && (
+              <p id={fid('budget-error')} className="mt-2 text-sm text-danger">
+                {errors.budget.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor={fid('message')} className={labelClass}>
+            What are you trying to build? <span className="text-primary">*</span>
+          </label>
+          <textarea
+            id={fid('message')}
+            rows={5}
+            {...register('message', {
+              required: 'Please describe the problem you want solved.',
+              minLength: { value: 20, message: 'A couple of sentences helps us reply usefully.' },
+            })}
+            aria-invalid={errors.message ? 'true' : 'false'}
+            aria-describedby={
+              errors.message ? `${fid('message-error')} ${fid('message-hint')}` : fid('message-hint')
+            }
+            className={inputClass}
+            placeholder="The problem, the systems involved, any hard constraints or deadlines."
+          />
+          <p id={fid('message-hint')} className="mt-2 text-sm text-muted">
+            The more concrete the problem, the more concrete our answer.
+          </p>
+          {errors.message && (
+            <p id={fid('message-error')} className="mt-2 text-sm text-danger">
+              {errors.message.message}
+            </p>
+          )}
+        </div>
+
+        {/* Honeypot — hidden from humans and assistive tech. */}
+        <div aria-hidden="true" className="absolute left-[-9999px] h-px w-px overflow-hidden">
+          <label htmlFor={fid('companyWebsite')}>Company website</label>
+          <input
+            id={fid('companyWebsite')}
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            {...register('companyWebsite')}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          aria-busy={isSubmitting}
+          className="btn-primary w-full"
+        >
+          {isSubmitting ? 'Sending…' : 'Send message'}
+        </button>
+      </form>
+    </div>
+  );
+
+  if (variant === 'bare') return form;
 
   return (
     <section id="contact" className="border-t border-line bg-background-muted py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
-        <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6 }}>
-            <p className="mb-5 font-mono text-xs uppercase tracking-[0.24em] text-primary">Start with the baseline</p>
-            <h2 className="text-4xl font-bold leading-tight tracking-[-0.05em] text-foreground sm:text-6xl">Tell us where growth is getting stuck.</h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-muted">Share enough context for a useful first response. We&apos;ll come back with the questions, constraints, and next move that matter.</p>
-            <div className="mt-12 divide-y divide-line border-y border-line">
-              <div className="py-5"><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Email</p><a href="mailto:info@wethinkdigital.solutions" className="mt-2 inline-block text-foreground hover:text-primary">info@wethinkdigital.solutions</a></div>
-              <div className="py-5"><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Phone</p><a href="tel:+971564713394" className="mt-2 inline-block text-foreground hover:text-primary">+971 (564) 713-394</a></div>
-              <div className="py-5"><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Based in</p><p className="mt-2 text-foreground">Dubai, UAE</p></div>
-            </div>
-          </motion.div>
+        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+          <div>
+            <p className="mono-label mb-5">Start a project</p>
+            <h2 className="text-3xl font-bold leading-[1.1] tracking-[-0.045em] text-foreground sm:text-5xl">
+              Tell us what you are trying to build.
+            </h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-muted">
+              Send the problem, the constraints and the deadline. You will get a technical read on
+              the approach, a shape for the team, and an honest view of what is achievable.
+            </p>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, delay: 0.1 }} className="surface p-6 sm:p-9">
-            {submitSuccess ? (
-              <div className="py-8" role="status">
-                <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Request received</p>
-                <h3 className="mt-5 text-3xl font-bold tracking-[-0.04em] text-foreground">We&apos;ll come back with a useful next step.</h3>
-                <p className="mt-4 max-w-xl leading-7 text-muted">Your message is through. We aim to reply within 24 hours with a clear read on what to discuss first.</p>
-                <button type="button" onClick={() => setSubmitSuccess(false)} className="btn-secondary mt-8">Send another enquiry</button>
+            <dl className="mt-12 divide-y divide-line border-y border-line">
+              <div className="py-5">
+                <dt className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Email</dt>
+                <dd className="mt-2">
+                  <a href={`mailto:${siteConfig.email}`} className="text-foreground hover:text-primary">
+                    {siteConfig.email}
+                  </a>
+                </dd>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6" noValidate>
-                {validationSummary && (
-                  <p id="contact-form-errors" className="border-l-2 border-danger bg-danger/10 px-4 py-3 text-sm leading-6 text-foreground" role="alert">
-                    {validationSummary}
-                  </p>
-                )}
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div><label htmlFor="name" className="mb-2 block text-sm font-medium text-foreground">Full name <span className="text-primary">*</span></label><input id="name" type="text" {...register('name', { required: 'Please add your name.' })} aria-invalid={errors.name ? 'true' : 'false'} aria-describedby={errors.name ? 'name-error contact-form-errors' : undefined} className="w-full border border-line bg-background px-4 py-3 text-foreground" />{errors.name && <p id="name-error" className="mt-2 text-sm text-danger" role="alert">{errors.name.message}</p>}</div>
-                  <div><label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">Email address <span className="text-primary">*</span></label><input id="email" type="email" {...register('email', { required: 'Please add your email.' })} aria-invalid={errors.email ? 'true' : 'false'} aria-describedby={errors.email ? 'email-error contact-form-errors' : undefined} className="w-full border border-line bg-background px-4 py-3 text-foreground" />{errors.email && <p id="email-error" className="mt-2 text-sm text-danger" role="alert">{errors.email.message}</p>}</div>
-                  <div><label htmlFor="company" className="mb-2 block text-sm font-medium text-foreground">Company <span className="text-primary">*</span></label><input id="company" type="text" {...register('company', { required: 'Please add your company.' })} aria-invalid={errors.company ? 'true' : 'false'} aria-describedby={errors.company ? 'company-error contact-form-errors' : undefined} className="w-full border border-line bg-background px-4 py-3 text-foreground" />{errors.company && <p id="company-error" className="mt-2 text-sm text-danger" role="alert">{errors.company.message}</p>}</div>
-                  <div><label htmlFor="phone" className="mb-2 block text-sm font-medium text-foreground">Phone number</label><input id="phone" type="tel" {...register('phone')} className="w-full border border-line bg-background px-4 py-3 text-foreground" /></div>
-                  <div><label htmlFor="budget" className="mb-2 block text-sm font-medium text-foreground">Project budget <span className="text-primary">*</span></label><select id="budget" {...register('budget', { required: 'Please select a budget range.' })} aria-invalid={errors.budget ? 'true' : 'false'} aria-describedby={errors.budget ? 'budget-error contact-form-errors' : undefined} className="w-full border border-line bg-background px-4 py-3 text-foreground"><option value="">Select a range</option><option value="100-1k">AED100 – AED1000</option><option value="1k-5k">AED1000 – AED5000</option><option value="5k-10k">AED5000 – AED10,000</option><option value="10k+">AED10,000+</option></select>{errors.budget && <p id="budget-error" className="mt-2 text-sm text-danger" role="alert">{errors.budget.message}</p>}</div>
-                  <div><label htmlFor="projectType" className="mb-2 block text-sm font-medium text-foreground">What needs attention? <span className="text-primary">*</span></label><select id="projectType" {...register('projectType', { required: 'Please select what needs attention.' })} aria-invalid={errors.projectType ? 'true' : 'false'} aria-describedby={errors.projectType ? 'project-type-error contact-form-errors' : undefined} className="w-full border border-line bg-background px-4 py-3 text-foreground"><option value="">Select an area</option><option value="web-development">Website</option><option value="mobile-app">Mobile product</option><option value="ecommerce">E-commerce</option><option value="marketing">Search and marketing</option><option value="consultation">Strategy</option></select>{errors.projectType && <p id="project-type-error" className="mt-2 text-sm text-danger" role="alert">{errors.projectType.message}</p>}</div>
-                </div>
-                <div><label htmlFor="message" className="mb-2 block text-sm font-medium text-foreground">What are you trying to change? <span className="text-primary">*</span></label><textarea id="message" rows={5} {...register('message', { required: 'Please share a little context.' })} aria-invalid={errors.message ? 'true' : 'false'} aria-describedby={errors.message ? 'message-error contact-form-errors' : undefined} className="w-full border border-line bg-background px-4 py-3 text-foreground" placeholder="Share the current baseline, the target, and what feels stuck." />{errors.message && <p id="message-error" className="mt-2 text-sm text-danger" role="alert">{errors.message.message}</p>}</div>
-                {submitError && <p className="border-l-2 border-danger bg-danger/10 px-4 py-3 text-sm leading-6 text-foreground" role="alert">{submitError}</p>}
-                <button type="submit" disabled={isSubmitting} className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50">{isSubmitting ? 'Sending your enquiry…' : 'Send enquiry'}</button>
-              </form>
-            )}
-          </motion.div>
+              <div className="py-5">
+                <dt className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Phone</dt>
+                <dd className="mt-2">
+                  <a href={siteConfig.phoneHref} className="text-foreground hover:text-primary">
+                    {siteConfig.phone}
+                  </a>
+                </dd>
+              </div>
+              <div className="py-5">
+                <dt className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Based in</dt>
+                <dd className="mt-2 text-foreground">Dubai, UAE — working with teams worldwide</dd>
+              </div>
+            </dl>
+          </div>
+
+          {form}
         </div>
       </div>
     </section>

@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WeThinkDigital
 
-## Getting Started
+Marketing and content site for **WeThinkDigital** — an AI and software engineering company.
 
-First, run the development server:
+We build AI automation, autonomous agent systems, custom software and modern web
+applications. The site also promotes our two products:
+
+- **[Agents](https://agents.wethinkdigital.solutions)** — an autonomous software delivery
+  platform. SDE, QA and PR Review agents work a shared backlog: the SDE agent implements
+  work items, the QA agent tests them, and the PR Review agent reviews raised pull requests.
+- **[Resume](https://resume.wethinkdigital.solutions)** — an AI app that redesigns an
+  existing resume into a cleaner, better-structured, recruiter-ready document.
+
+## Stack
+
+| Concern | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Language | TypeScript (strict) |
+| UI | React 19 |
+| Styling | Tailwind CSS v4 + CSS custom properties |
+| Motion | Framer Motion |
+| Forms | React Hook Form |
+| Mail | Nodemailer (contact API route) |
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+npm run build        # production build
+npm run start        # serves on port 3201
+npm run lint         # ESLint
+npx tsc --noEmit     # type check
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` and fill in the SMTP values used by
+`src/app/api/contact/route.ts`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Structure
 
-## Learn More
+```
+src/
+├── app/
+│   ├── layout.tsx              # Root layout, fonts, global JSON-LD
+│   ├── page.tsx                # Home — composes the /components/home sections
+│   ├── schema.tsx              # Organization / WebSite / Service / SoftwareApplication JSON-LD
+│   ├── sitemap.ts              # Native Next.js sitemap
+│   ├── robots.ts               # Native Next.js robots
+│   ├── not-found.tsx           # 404
+│   ├── contact/                # Contact page
+│   ├── services/               # 4 service pages + index
+│   ├── products/               # Agents + Resume product pages + index
+│   ├── blog/                   # Blog index and [slug] articles
+│   └── api/contact/            # Contact form handler
+├── components/
+│   ├── ui/                     # Section, SectionHeading, Pill, CTA primitives
+│   ├── home/                   # Home page sections
+│   ├── services/               # Service page template + parts
+│   ├── products/               # Product page parts
+│   ├── blog/                   # Blog cards, filter, table of contents
+│   └── *.tsx                   # Navigation, Footer, Hero, ContactForm, ...
+├── data/                       # services.ts, products.ts, posts.ts, faq.ts
+├── lib/
+│   ├── site.ts                 # Site identity, contact, nav, product config
+│   └── seo.ts                  # buildMetadata() + absoluteUrl()
+└── types/
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Conventions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Every page** exports metadata built with `buildMetadata()` from `src/lib/seo.ts`.
+  That is what keeps canonicals, Open Graph and Twitter cards consistent.
+- **Never hardcode the site URL.** Use `siteConfig.url` or `absoluteUrl()`.
+- **Server Components by default.** Add `'use client'` only for state, hooks or browser APIs.
+- **Design tokens only** — the classes defined in `src/app/globals.css`
+  (`bg-surface`, `text-muted`, `border-line`, `.btn-primary`, `.mono-label`, …).
+  No raw hex values in components.
+- One `<h1>` per page. Inner pages start with `pt-32` to clear the fixed nav.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See `REVAMP_CONTRACT.md` for the full authoring contract.
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Builds with `output: 'standalone'`. Production server listens on port **3201**.

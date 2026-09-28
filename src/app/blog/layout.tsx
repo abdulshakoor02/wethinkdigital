@@ -1,17 +1,6 @@
-import React from 'react';
-import Breadcrumb from '@/components/Breadcrumb';
+import type { ReactNode } from 'react';
 
-export default function BlogLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="min-h-screen bg-background">
-      <Breadcrumb />
-      <div className="pt-0">
-        {children}
-      </div>
-    </div>
-  );
+/** Blog shell. The root layout already renders the nav, footer and skip link. */
+export default function BlogLayout({ children }: { children: ReactNode }) {
+  return <div className="min-h-screen bg-background">{children}</div>;
 }

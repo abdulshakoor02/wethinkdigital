@@ -1,12 +1,62 @@
 [
-  { "id": "1", "slug": "digital-marketing-trends-2025", "title": "Digital marketing trends worth paying attention to", "date": "2025-08-15" },
-  { "id": "2", "slug": "seo-best-practices", "title": "SEO practices for modern websites", "date": "2025-08-01" },
-  { "id": "3", "slug": "web-development-frameworks", "title": "Choosing a web development framework", "date": "2025-07-20" },
-  { "id": "4", "slug": "best-seo-company-in-dubai", "title": "What a good SEO partner should measure in Dubai", "date": "2025-08-20" },
-  { "id": "5", "slug": "best-seo-services-in-dubai", "title": "The SEO services that actually move a business forward", "date": "2025-08-18" },
-  { "id": "6", "slug": "crm-and-lead-management", "title": "Where good leads disappear after they arrive", "date": "2025-08-15" },
-  { "id": "7", "slug": "website-design-development-services-in-dubai", "title": "Why most business websites fail to convert", "date": "2025-08-12" },
-  { "id": "8", "slug": "top-10-digital-marketing-company-in-dubai", "title": "Why agency rankings do not make the decision", "date": "2025-08-10" },
-  { "id": "9", "slug": "top-5-digital-marketing-company-in-dubai", "title": "How to find the right growth partner", "date": "2025-08-08" },
-  { "id": "10", "slug": "free-crm-software-for-small-business-dubai", "title": "Free CRM Software for Small Business in Dubai: The 7 Best Options That Actually Work", "date": "2025-09-05" }
+  {
+    "id": "1",
+    "slug": "ai-code-review-best-practices",
+    "title": "Code Review in the Age of AI-Generated Code",
+    "date": "2026-01-20"
+  },
+  {
+    "id": "2",
+    "slug": "llm-cost-optimization-strategies",
+    "title": "Controlling LLM Cost and Latency in Production Systems",
+    "date": "2026-01-08"
+  },
+  {
+    "id": "3",
+    "slug": "multi-agent-orchestration-patterns",
+    "title": "Multi-Agent Orchestration Patterns for Real Workloads",
+    "date": "2025-12-16"
+  },
+  {
+    "id": "4",
+    "slug": "legacy-system-modernization-ai",
+    "title": "Modernising Legacy Systems With AI-Assisted Refactoring",
+    "date": "2025-12-02"
+  },
+  {
+    "id": "5",
+    "slug": "building-production-rag-systems",
+    "title": "Building RAG Systems That Work in Production",
+    "date": "2025-11-18"
+  },
+  {
+    "id": "6",
+    "slug": "ai-workflow-automation-business-processes",
+    "title": "AI Workflow Automation: Finding the Processes Worth Automating",
+    "date": "2025-11-04"
+  },
+  {
+    "id": "7",
+    "slug": "ai-qa-automation-test-generation",
+    "title": "AI-Generated Tests: Making QA Automation Actually Useful",
+    "date": "2025-10-27"
+  },
+  {
+    "id": "8",
+    "slug": "nextjs-15-performance-optimization",
+    "title": "Building Fast Next.js Applications: A Performance Checklist",
+    "date": "2025-10-20"
+  },
+  {
+    "id": "9",
+    "slug": "automated-pr-review-with-ai",
+    "title": "Automated Pull Request Review: What AI Catches and What It Misses",
+    "date": "2025-10-13"
+  },
+  {
+    "id": "10",
+    "slug": "ai-agents-software-development-lifecycle",
+    "title": "How AI Agents Are Changing the Software Development Lifecycle",
+    "date": "2025-10-05"
+  }
 ]
