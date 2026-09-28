@@ -39,6 +39,37 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
+  // Legacy → current URL mapping (Sep 2026 revamp).
+  // The repositioning deleted the SEO-services era pages, but Google still has
+  // them indexed and they hold the site's only GSC impressions — a 404 there
+  // throws away the crawl signal instead of passing it to the replacement.
+  // 301 (not Next's default 308) so every SEO tool reports them as permanent.
+  async redirects() {
+    return [
+      // Service-intent legacy URLs → the closest current offer page
+      { source: '/seo-services', destination: '/services', statusCode: 301 },
+      { source: '/blog/best-seo-company-in-dubai', destination: '/services', statusCode: 301 },
+      { source: '/blog/best-seo-services-in-dubai', destination: '/services', statusCode: 301 },
+      {
+        source: '/blog/website-design-development-services-in-dubai',
+        destination: '/services/web-development',
+        statusCode: 301,
+      },
+      {
+        source: '/blog/free-crm-software-for-small-business-dubai',
+        destination: '/services/software-development',
+        statusCode: 301,
+      },
+      // Retired marketing/SEO content → the blog index (no equivalent post)
+      { source: '/blog/digital-marketing-trends-2025', destination: '/blog', statusCode: 301 },
+      { source: '/blog/seo-best-practices', destination: '/blog', statusCode: 301 },
+      { source: '/blog/web-development-frameworks', destination: '/blog', statusCode: 301 },
+      { source: '/blog/crm-and-lead-management', destination: '/blog', statusCode: 301 },
+      { source: '/blog/top-10-digital-marketing-company-in-dubai', destination: '/blog', statusCode: 301 },
+      { source: '/blog/top-5-digital-marketing-company-in-dubai', destination: '/blog', statusCode: 301 },
+    ];
+  },
+
   // Headers for caching
   async headers() {
     return [
