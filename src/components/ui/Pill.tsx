@@ -7,11 +7,11 @@ interface PillProps {
 }
 
 const tones: Record<NonNullable<PillProps['tone']>, string> = {
-  default: 'border-line text-muted',
-  primary: 'border-primary/40 text-primary bg-primary/10',
-  secondary: 'border-secondary/40 text-secondary bg-secondary/10',
-  accent: 'border-accent/40 text-accent bg-accent/10',
-  success: 'border-success/40 text-success bg-success/10',
+  default: 'border-line bg-surface text-muted',
+  primary: 'border-primary/30 bg-primary-soft text-primary-strong',
+  secondary: 'border-secondary/30 bg-secondary-soft text-secondary',
+  accent: 'border-accent/30 bg-accent-soft text-accent',
+  success: 'border-success/30 bg-success-soft text-success',
 };
 
 /** Small capability / tech-stack tag. */

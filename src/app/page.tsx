@@ -23,7 +23,7 @@ const ContactForm = dynamic(() => import('@/components/ContactForm'));
 
 export default function Home() {
   return (
-    <main id="main" className="bg-background">
+    <main id="main" className="relative bg-background">
       {/* Server-rendered FAQ schema — raw ld+json so non-JS crawlers see it */}
       <JsonLd
         id="json-ld-faq-server"

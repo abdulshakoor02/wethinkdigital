@@ -1,47 +1,91 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   WeThinkDigital — AI & software engineering
-   Palette: deep blue-black canvas, electric blue primary, cyan secondary,
-   violet accent. Engineered, technical, high contrast.
+   WeThinkDigital — "Ember" design system
+   Warm bone canvas, near-black ink, one ember accent, dark product surfaces.
+   Replaces the previous dark-navy/electric-blue system entirely.
    ========================================================================== */
 
 :root {
-  --background: oklch(0.15 0.02 260);
-  --background-muted: oklch(0.19 0.025 262);
-  --foreground: oklch(0.97 0.005 260);
-  --surface: oklch(0.21 0.028 262);
-  --surface-elevated: oklch(0.26 0.032 263);
+  /* --- canvas & surfaces (elevation goes UP in lightness) --- */
+  --background: #f6f4ef;        /* bone — page canvas */
+  --background-muted: #efece4;  /* alternating band */
+  --surface: #ffffff;           /* raised card */
+  --surface-elevated: #f1eee6;  /* inset well */
+  --surface-sunken: #e9e5db;
 
-  --primary: oklch(0.68 0.19 255);
-  --primary-strong: oklch(0.6 0.21 258);
-  --secondary: oklch(0.79 0.14 200);
-  --accent: oklch(0.72 0.18 300);
+  /* --- ink ramp (warm neutrals, never pure grey) --- */
+  --foreground: #141310;
+  --muted: #4b4840;             /* body copy */
+  --subtle: #8b877c;            /* captions, labels */
 
-  --muted: oklch(0.72 0.02 262);
-  --line: oklch(0.33 0.028 263);
-  --line-strong: oklch(0.44 0.04 263);
-  --danger: oklch(0.68 0.19 25);
-  --success: oklch(0.76 0.16 160);
+  /* --- hairlines --- */
+  --line: #ddd8cb;
+  --line-strong: #cdc7b7;
+
+  /* --- accents (one primary, used as a SPOT not a wash) --- */
+  --primary: #d9481f;           /* ember */
+  --primary-strong: #b93a15;
+  --primary-soft: #fbe7de;
+  --secondary: #5c6b52;         /* sage — secondary signal only */
+  --secondary-soft: #e7ebe1;
+  --accent: #a9711c;            /* amber — gradient washes only, never text */
+  --accent-soft: #f7ecd8;
+
+  /* --- dark product surfaces (the "night" cards) --- */
+  --night: #131311;
+  --night-2: #1c1c1a;
+  --night-3: #26251f;
+  --night-line: rgb(255 255 255 / 0.09);
+  --night-line-2: rgb(255 255 255 / 0.14);
+  --night-text: #ffffff;
+  --night-muted: rgb(255 255 255 / 0.62);
+  --night-subtle: rgb(255 255 255 / 0.38);
+
+  /* --- status --- */
+  --success: #3f8f5f;
+  --success-soft: #eaf5ee;
+  --warning: #a9761c;
+  --warning-soft: #fdf6e7;
+  --danger: #c03724;
+
+  /* --- geometry --- */
+  --radius: 0.875rem;           /* 14px — cards */
+  --radius-sm: 0.5rem;
+  --radius-pill: 100px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-background-muted: var(--background-muted);
-  --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
-  --color-primary: var(--primary);
-  --color-primary-strong: var(--primary-strong);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
-  --color-danger: var(--danger);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-soft: var(--secondary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-night: var(--night);
+  --color-night-2: var(--night-2);
   --color-success: var(--success);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --radius-card: var(--radius);
 }
 
 * {
@@ -56,15 +100,26 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
+/* Fine grain so the warm canvas never reads as flat. Fixed + pointer-none. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+}
+
 ::selection {
   background: var(--primary);
-  color: var(--background);
+  color: #fff;
 }
 
 ::-webkit-scrollbar {
@@ -85,7 +140,7 @@ body {
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 input,
@@ -97,7 +152,7 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  color: color-mix(in oklch, var(--muted) 70%, transparent);
+  color: var(--subtle);
 }
 
 /* --------------------------------------------------------------------------
@@ -107,33 +162,102 @@ textarea::placeholder {
 .surface {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 0.6rem;
+  border-radius: var(--radius);
+}
+
+.surface-elevated {
+  background: var(--surface-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+/* Dark product surface — the signature Ember device. */
+.surface-dark {
+  background: linear-gradient(180deg, var(--night-2), var(--night));
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: var(--radius);
+  color: var(--night-text);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.06) inset,
+    0 30px 70px rgb(20 19 16 / 0.26),
+    0 6px 18px rgb(20 19 16 / 0.12);
 }
 
 .surface-hover {
-  transition: border-color 200ms ease, background-color 200ms ease, transform 200ms ease;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
 }
 .surface-hover:hover {
+  transform: translateY(-3px);
   border-color: var(--line-strong);
-  background: var(--surface-elevated);
+  box-shadow: 0 18px 40px rgb(20 19 16 / 0.09);
 }
 
-.glass {
-  background: color-mix(in oklab, var(--surface) 72%, transparent);
-  border: 1px solid var(--line);
-  border-radius: 0.6rem;
-  backdrop-filter: blur(12px);
+/* --------------------------------------------------------------------------
+   Warm gradient mesh — replaces the old navy radial glows
+   -------------------------------------------------------------------------- */
+
+.mesh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.mesh span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(46px);
+}
+.mesh .m-ember {
+  left: -12%;
+  top: -24%;
+  width: 860px;
+  height: 720px;
+  background: radial-gradient(circle at 50% 50%, rgb(217 72 31 / 0.3), rgb(217 72 31 / 0) 66%);
+}
+.mesh .m-sage {
+  right: -16%;
+  top: -8%;
+  width: 800px;
+  height: 700px;
+  background: radial-gradient(circle at 50% 50%, rgb(92 107 82 / 0.28), rgb(92 107 82 / 0) 68%);
+}
+.mesh .m-amber {
+  left: 30%;
+  top: 26%;
+  width: 680px;
+  height: 520px;
+  background: radial-gradient(circle at 50% 50%, rgb(214 168 74 / 0.3), rgb(214 168 74 / 0) 70%);
+}
+/* Fades the mesh into the page so no text ever sits on a gradient edge. */
+.mesh .m-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  border-radius: 0;
+  filter: none;
+  background: linear-gradient(
+    180deg,
+    rgb(246 244 239 / 0) 0%,
+    rgb(246 244 239 / 0.86) 58%,
+    var(--background) 100%
+  );
 }
 
-/* Subtle engineered grid backdrop */
-.grid-bg {
-  background-image:
-    linear-gradient(to right, color-mix(in oklab, var(--line) 55%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--line) 55%, transparent) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+/* Dot field — subtle texture, masked away from content */
+.dot-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  background-image: radial-gradient(rgb(20 19 16 / 0.085) 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(ellipse 62% 42% at 50% 18%, #000 6%, transparent 72%);
+  mask-image: radial-gradient(ellipse 62% 42% at 50% 18%, #000 6%, transparent 72%);
 }
 
+/* Retained name: previously a violet glow ring. Now a soft warm lift. */
 .glow {
   position: relative;
 }
@@ -142,101 +266,343 @@ textarea::placeholder {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, var(--primary), transparent 45%, var(--accent));
+  background: linear-gradient(135deg, rgb(217 72 31 / 0.35), transparent 55%, rgb(169 113 28 / 0.3));
+  opacity: 0.5;
+  pointer-events: none;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: 0.55;
-  pointer-events: none;
+  padding: 1px;
+}
+
+/* Retained name: was an engineered grid. Now a faint warm grid. */
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgb(20 19 16 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(20 19 16 / 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 35%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 35%, transparent 100%);
 }
 
 /* --------------------------------------------------------------------------
-   Typography helpers
+   Typography
    -------------------------------------------------------------------------- */
 
-.gradient-text {
-  background: linear-gradient(100deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* The signature move: Instrument Serif italic inside a sans headline.
+   Use ONLY for the 1–3 emphasised words of a heading, never a whole line. */
+.serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--primary);
 }
 
 .mono-label {
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.75rem;
-  line-height: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.16em;
+  color: var(--subtle);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.mono-label::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: var(--line-strong);
+  display: block;
+}
+
+/* Retained name. Was a two-hue blue→violet gradient; that is banned now.
+   Single-hue emphasis only — prefer .serif for headline emphasis. */
+.gradient-text {
   color: var(--primary);
 }
 
 /* --------------------------------------------------------------------------
-   Buttons
+   Buttons — pill geometry
    -------------------------------------------------------------------------- */
 
 .btn-primary,
 .btn-secondary,
-.btn-ghost {
+.btn-ghost,
+.btn-ember {
   display: inline-flex;
-  min-height: 3rem;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 0.4rem;
-  padding: 0.75rem 1.5rem;
-  font-weight: 620;
-  font-size: 0.9375rem;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  font-weight: 500;
   letter-spacing: -0.01em;
+  text-decoration: none;
   cursor: pointer;
-  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease,
-    transform 140ms ease, box-shadow 180ms ease;
+  border: 1px solid transparent;
+  transition: transform 160ms ease, background-color 180ms ease, border-color 180ms ease,
+    box-shadow 180ms ease, color 180ms ease;
+  white-space: nowrap;
 }
 
+/* Ink pill — the default primary action */
 .btn-primary {
-  background: var(--primary);
-  color: oklch(0.14 0.02 260);
-  border: 1px solid var(--primary);
+  background: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
 }
 .btn-primary:hover {
+  background: #2a2823;
+  border-color: #2a2823;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgb(20 19 16 / 0.18);
+}
+
+/* Ember pill — for the single most important action on a page */
+.btn-ember {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.btn-ember:hover {
   background: var(--primary-strong);
   border-color: var(--primary-strong);
-  box-shadow: 0 8px 28px color-mix(in oklab, var(--primary) 32%, transparent);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgb(217 72 31 / 0.28);
 }
 
 .btn-secondary {
-  border: 1px solid var(--line-strong);
   background: transparent;
   color: var(--foreground);
+  border-color: var(--line-strong);
 }
 .btn-secondary:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  border-color: var(--foreground);
+  transform: translateY(-1px);
 }
 
 .btn-ghost {
-  border: 1px solid transparent;
   background: transparent;
   color: var(--muted);
-  min-height: 2.5rem;
-  padding: 0.5rem 0.875rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
 }
 .btn-ghost:hover {
   color: var(--foreground);
 }
 
+/* On dark surfaces */
+.surface-dark .btn-secondary,
+.on-dark .btn-secondary {
+  color: #fff;
+  border-color: rgb(255 255 255 / 0.22);
+}
+.surface-dark .btn-secondary:hover,
+.on-dark .btn-secondary:hover {
+  border-color: #fff;
+}
+.surface-dark .btn-primary,
+.on-dark .btn-primary {
+  background: var(--background);
+  color: var(--foreground);
+  border-color: var(--background);
+}
+
 .btn-primary:active,
 .btn-secondary:active,
+.btn-ember:active,
 .btn-ghost:active {
   transform: translateY(1px);
 }
 
 .btn-primary:disabled,
-.btn-secondary:disabled {
-  opacity: 0.55;
+.btn-secondary:disabled,
+.btn-ember:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Status pills
+   -------------------------------------------------------------------------- */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.6875rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+}
+.pill-ok {
+  color: var(--success);
+  border-color: rgb(63 143 95 / 0.28);
+  background: var(--success-soft);
+}
+.pill-warn {
+  color: var(--warning);
+  border-color: rgb(169 118 28 / 0.28);
+  background: var(--warning-soft);
+}
+.pill-ember {
+  color: var(--primary);
+  border-color: rgb(217 72 31 / 0.28);
+  background: var(--primary-soft);
+}
+
+/* --------------------------------------------------------------------------
+   Dark product chrome — shared by the Agents dashboard and product pages
+   -------------------------------------------------------------------------- */
+
+.term-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.1rem;
+  border-bottom: 1px solid var(--night-line);
+}
+.term-dots {
+  display: flex;
+  gap: 0.375rem;
+}
+.term-dots i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: block;
+}
+.term-dots i:nth-child(1) { background: #e8664f; }
+.term-dots i:nth-child(2) { background: #e3b341; }
+.term-dots i:nth-child(3) { background: #5fae6a; }
+
+.term-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--night-subtle);
+  letter-spacing: 0.03em;
+}
+
+.term-live {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.11em;
+  color: #7fd6a0;
+  background: rgb(127 214 160 / 0.1);
+  border: 1px solid rgb(127 214 160 / 0.22);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+}
+.term-live i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7fd6a0;
+  display: block;
+  box-shadow: 0 0 0 3px rgb(127 214 160 / 0.16);
+}
+
+.term-label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--night-subtle);
+}
+
+/* Diff block — the evidence device. Use for any agent review output. */
+.diff {
+  background: rgb(255 255 255 / 0.03);
+  border: 1px solid var(--night-line);
+  border-radius: 0.625rem;
+  overflow: hidden;
+}
+.diff-head {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--night-line);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--night-subtle);
+  letter-spacing: 0.05em;
+}
+.diff-body {
+  margin: 0;
+  padding: 0.55rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  line-height: 1.8;
+  text-align: left;
+}
+.diff-body span {
+  display: block;
+  padding: 0 0.75rem;
+  white-space: pre;
+}
+.diff-ctx { color: var(--night-subtle); }
+.diff-del { color: #ff9c8a; background: rgb(255 97 97 / 0.1); }
+.diff-add { color: #86dcac; background: rgb(127 214 160 / 0.1); }
+.diff-note {
+  padding: 0.55rem 0.75rem;
+  border-top: 1px solid var(--night-line);
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--night-muted);
+}
+.diff-note b {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+/* KPI tile */
+.kpi {
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid rgb(255 255 255 / 0.075);
+  border-radius: 0.625rem;
+  padding: 0.75rem 0.8rem;
+}
+.kpi-k {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--night-subtle);
+}
+.kpi-v {
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-top: 0.5rem;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-v small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--night-subtle);
+  margin-left: 0.2rem;
+}
+.kpi-d {
+  margin-top: 0.375rem;
+  font-size: 0.69rem;
+  font-family: var(--font-mono);
+  color: #7fd6a0;
 }
 
 /* --------------------------------------------------------------------------
@@ -246,14 +612,14 @@ textarea::placeholder {
 .prose-wtd {
   color: var(--muted);
   font-size: 1.0625rem;
-  line-height: 1.85;
+  line-height: 1.78;
 }
 .prose-wtd h2 {
   color: var(--foreground);
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.035em;
-  line-height: 1.25;
+  line-height: 1.22;
   margin-top: 3.25rem;
   margin-bottom: 1.25rem;
   scroll-margin-top: 7rem;
@@ -261,28 +627,22 @@ textarea::placeholder {
 .prose-wtd h3 {
   color: var(--foreground);
   font-size: 1.3125rem;
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: -0.025em;
   margin-top: 2.25rem;
   margin-bottom: 0.875rem;
   scroll-margin-top: 7rem;
 }
-.prose-wtd p {
-  margin-top: 1.375rem;
-}
-.prose-wtd strong {
-  color: var(--foreground);
-  font-weight: 650;
-}
+.prose-wtd p { margin-top: 1.375rem; }
+.prose-wtd strong { color: var(--foreground); font-weight: 600; }
 .prose-wtd a {
-  color: var(--secondary);
+  color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: color-mix(in oklab, var(--secondary) 45%, transparent);
+  text-decoration-color: rgb(217 72 31 / 0.4);
 }
-.prose-wtd a:hover {
-  color: var(--primary);
-}
+.prose-wtd a:hover { color: var(--primary-strong); }
+
 .prose-wtd ul,
 .prose-wtd ol {
   margin-top: 1.375rem;
@@ -290,14 +650,8 @@ textarea::placeholder {
   flex-direction: column;
   gap: 0.625rem;
 }
-.prose-wtd ul {
-  list-style: none;
-  padding-left: 0;
-}
-.prose-wtd ul > li {
-  position: relative;
-  padding-left: 1.5rem;
-}
+.prose-wtd ul { list-style: none; padding-left: 0; }
+.prose-wtd ul > li { position: relative; padding-left: 1.5rem; }
 .prose-wtd ul > li::before {
   content: '';
   position: absolute;
@@ -308,14 +662,11 @@ textarea::placeholder {
   border-radius: 1px;
   background: var(--primary);
 }
-.prose-wtd ol {
-  list-style: decimal;
-  padding-left: 1.5rem;
-}
+.prose-wtd ol { list-style: decimal; padding-left: 1.5rem; }
 .prose-wtd ol > li::marker {
   color: var(--primary);
   font-variant-numeric: tabular-nums;
-  font-weight: 650;
+  font-weight: 600;
 }
 .prose-wtd blockquote {
   border-left: 2px solid var(--primary);
@@ -325,18 +676,18 @@ textarea::placeholder {
   font-size: 1.125rem;
 }
 .prose-wtd code {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.875em;
   background: var(--surface-elevated);
   border: 1px solid var(--line);
   border-radius: 0.25rem;
   padding: 0.125rem 0.375rem;
-  color: var(--secondary);
+  color: var(--primary-strong);
 }
 .prose-wtd pre {
-  background: var(--background-muted);
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
+  background: var(--night);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 0.625rem;
   padding: 1.25rem;
   margin: 2rem 0;
   overflow-x: auto;
@@ -347,7 +698,7 @@ textarea::placeholder {
   background: transparent;
   border: 0;
   padding: 0;
-  color: var(--foreground);
+  color: #e8e6e1;
   font-size: inherit;
 }
 .prose-wtd table {
@@ -355,6 +706,12 @@ textarea::placeholder {
   border-collapse: collapse;
   margin: 2rem 0;
   font-size: 0.9375rem;
+  /* Let wide tables scroll inside the article instead of squeezing columns
+     (or overflowing the page) at 390px. `display:block` on the table is the
+     standard CSS-only wrapper-free approach. */
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
 }
 .prose-wtd th,
 .prose-wtd td {
@@ -363,37 +720,52 @@ textarea::placeholder {
   text-align: left;
 }
 .prose-wtd th {
-  background: var(--surface);
+  background: var(--surface-elevated);
   color: var(--foreground);
-  font-weight: 650;
+  font-weight: 600;
 }
 .prose-wtd hr {
   border: 0;
   border-top: 1px solid var(--line);
   margin: 3rem 0;
 }
-.prose-wtd img {
-  border-radius: 0.5rem;
-  margin: 2rem 0;
-}
+.prose-wtd img { border-radius: 0.625rem; margin: 2rem 0; }
 
 /* --------------------------------------------------------------------------
-   Motion
+   Motion — one entrance, used everywhere
    -------------------------------------------------------------------------- */
 
 @keyframes wtd-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wtd-ping {
+  0% { transform: scale(0.7); opacity: 0.9; }
+  70% { transform: scale(1.9); opacity: 0; }
+  100% { opacity: 0; }
 }
 
 .animate-fade-up {
   animation: wtd-fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pulse-dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--secondary);
+  display: block;
+  flex: none;
+}
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: rgb(92 107 82 / 0.25);
+  animation: wtd-ping 2.4s ease-out infinite;
 }
 
 .fade-in {
@@ -407,9 +779,7 @@ textarea::placeholder {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+  html { scroll-behavior: auto; }
   *,
   *::before,
   *::after {

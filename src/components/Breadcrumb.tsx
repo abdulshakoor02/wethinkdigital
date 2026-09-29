@@ -18,12 +18,12 @@ interface BreadcrumbProps {
 export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      <ol className="flex flex-wrap items-center gap-2 text-sm text-muted">
+      <ol className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[0.8125rem] text-subtle">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
 
           return (
-            <li key={item.name} className="flex items-center gap-2">
+            <li key={item.name} className="flex items-center gap-2.5">
               {item.href && !isLast ? (
                 <Link href={item.href} className="transition-colors hover:text-primary">
                   {item.name}

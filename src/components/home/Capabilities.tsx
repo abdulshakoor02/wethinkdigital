@@ -1,5 +1,6 @@
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
+import CapabilityChip from '@/components/services/CapabilityChip';
 
 interface Capability {
   title: string;
@@ -45,23 +46,22 @@ export default function Capabilities() {
     <Section id="capabilities" bordered muted>
       <SectionHeading
         eyebrow="Capabilities"
-        title="What we are good at"
+        title={
+          <>
+            What we are <span className="serif">good at</span>
+          </>
+        }
         description="Six claims we are willing to be held to. Each one is a thing you can check in the code we hand over."
       />
 
-      <div className="mt-14 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-14 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
         {capabilities.map((capability, index) => (
-          <article key={capability.title} className="bg-background-muted p-7">
-            <span
-              aria-hidden="true"
-              className="font-mono text-xs tabular-nums uppercase tracking-[0.24em] text-primary"
-            >
-              {String(index + 1).padStart(2, '0')}
-            </span>
-            <h3 className="mt-4 text-lg font-semibold leading-snug tracking-[-0.025em] text-foreground">
+          <article key={capability.title} className="surface surface-hover p-6 sm:p-7">
+            <CapabilityChip index={index} />
+            <h3 className="mt-4 text-lg font-semibold tracking-[-0.025em] text-foreground">
               {capability.title}
             </h3>
-            <p className="mt-3 text-sm leading-7 text-muted">{capability.description}</p>
+            <p className="mt-2.5 text-sm leading-[1.62] text-muted">{capability.description}</p>
           </article>
         ))}
       </div>

@@ -31,50 +31,61 @@ export default function ServiceFaq({ items, idPrefix = 'faq' }: ServiceFaqProps)
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
-    <div className="divide-y divide-line border-y border-line">
-      {items.map((item, index) => {
-        const key = `${idPrefix}-${slugify(item.question, index)}`;
-        const isOpen = openId === key;
+    <div className="surface overflow-hidden">
+      <div className="divide-y divide-line">
+        {items.map((item, index) => {
+          const key = `${idPrefix}-${slugify(item.question, index)}`;
+          const isOpen = openId === key;
 
-        return (
-          <div key={key}>
-            <h3>
-              <button
-                type="button"
-                id={`${key}-trigger`}
-                aria-expanded={isOpen}
-                aria-controls={`${key}-panel`}
-                onClick={() => setOpenId(isOpen ? null : key)}
-                className="flex w-full items-start justify-between gap-6 py-6 text-left"
-              >
-                <span className="text-base font-semibold tracking-[-0.02em] text-foreground sm:text-lg">
-                  {item.question}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={[
-                    'mt-1 shrink-0 text-xl leading-none text-primary transition-transform duration-200',
-                    isOpen ? 'rotate-45' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
+          return (
+            <div key={key}>
+              <h3>
+                <button
+                  type="button"
+                  id={`${key}-trigger`}
+                  aria-expanded={isOpen}
+                  aria-controls={`${key}-panel`}
+                  onClick={() => setOpenId(isOpen ? null : key)}
+                  className="group flex w-full items-start justify-between gap-6 px-5 py-5 text-left transition-colors hover:bg-background-muted sm:px-7"
                 >
-                  +
-                </span>
-              </button>
-            </h3>
-            <div
-              id={`${key}-panel`}
-              role="region"
-              aria-labelledby={`${key}-trigger`}
-              hidden={!isOpen}
-              className="pb-7 pr-10"
-            >
-              <p className="max-w-3xl text-base leading-7 text-muted">{item.answer}</p>
+                  <span className="text-base font-semibold tracking-[-0.022em] text-foreground sm:text-[1.0625rem]">
+                    {item.question}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className={[
+                      'mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border text-primary transition-colors',
+                      isOpen
+                        ? 'border-primary bg-primary-soft'
+                        : 'border-line group-hover:border-line-strong',
+                    ].join(' ')}
+                  >
+                    <span
+                      className={[
+                        'text-base leading-none transition-transform duration-200',
+                        isOpen ? 'rotate-45' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
+                      +
+                    </span>
+                  </span>
+                </button>
+              </h3>
+              <div
+                id={`${key}-panel`}
+                role="region"
+                aria-labelledby={`${key}-trigger`}
+                hidden={!isOpen}
+                className="px-5 pb-6 sm:px-7"
+              >
+                <p className="max-w-3xl text-base leading-[1.66] text-muted">{item.answer}</p>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
-import Pill from '@/components/ui/Pill';
 
 interface StackGroup {
   name: string;
@@ -67,24 +66,26 @@ export default function TechStack() {
     <Section id="stack" bordered muted>
       <SectionHeading
         eyebrow="Stack"
-        title="What we build with"
+        title={
+          <>
+            What we <span className="serif">build with</span>
+          </>
+        }
         description="Chosen per project against your constraints and what your team can maintain after we hand over — never because something is new."
       />
 
-      <dl className="mt-14 space-y-px overflow-hidden rounded-lg border border-line bg-line">
+      <dl className="mt-14 border-y border-line">
         {groups.map((group) => (
           <div
             key={group.name}
-            className="grid gap-4 bg-background-muted p-7 sm:grid-cols-[13rem_1fr] sm:gap-8"
+            className="grid gap-4 border-b border-line py-7 last:border-b-0 sm:grid-cols-[13rem_1fr] sm:gap-8"
           >
-            <dt className="font-mono text-xs uppercase tracking-[0.24em] text-primary sm:pt-1.5">
-              {group.name}
-            </dt>
+            <dt className="mono-label sm:pt-1">{group.name}</dt>
             <dd>
               <ul className="flex flex-wrap gap-2">
                 {group.items.map((item) => (
                   <li key={item}>
-                    <Pill>{item}</Pill>
+                    <span className="pill">{item}</span>
                   </li>
                 ))}
               </ul>

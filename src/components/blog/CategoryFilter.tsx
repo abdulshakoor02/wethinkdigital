@@ -30,7 +30,7 @@ export default function CategoryFilter({ posts, categories }: CategoryFilterProp
       <div
         role="group"
         aria-label="Filter notes by category"
-        className="flex flex-wrap gap-2 border-y border-line py-5"
+        className="flex flex-wrap items-center gap-2 border-t border-line pt-8"
       >
         {filters.map((filter) => {
           const selected = filter === active;
@@ -43,14 +43,12 @@ export default function CategoryFilter({ posts, categories }: CategoryFilterProp
               onClick={() => setActive(filter)}
               aria-pressed={selected}
               className={[
-                'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium tracking-tight transition-colors',
-                selected
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-line text-muted hover:border-line-strong hover:text-foreground',
+                'pill cursor-pointer transition-transform',
+                selected ? 'pill-ember' : 'hover:-translate-y-px',
               ].join(' ')}
             >
               {filter}
-              <span className="font-mono text-[0.6875rem] tabular-nums opacity-70">{count}</span>
+              <span className="tabular-nums opacity-60">{count}</span>
             </button>
           );
         })}

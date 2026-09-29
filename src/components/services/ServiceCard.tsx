@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import type { ServiceDetail } from '@/data/services';
-import Pill from '@/components/ui/Pill';
 
 interface ServiceCardProps {
   service: ServiceDetail;
@@ -10,6 +9,8 @@ interface ServiceCardProps {
   featured?: boolean;
   /** Heading level, so the card fits the surrounding document outline. */
   headingLevel?: 'h2' | 'h3';
+  /** Grid placement when the card sits inside the home bento. */
+  className?: string;
 }
 
 export default function ServiceCard({
@@ -17,50 +18,53 @@ export default function ServiceCard({
   index,
   featured = false,
   headingLevel: Heading = 'h3',
+  className = '',
 }: ServiceCardProps) {
   return (
     <Link
       href={service.href}
       className={[
-        'surface surface-hover group relative flex flex-col overflow-hidden',
-        featured ? 'glow p-8 sm:p-10' : 'p-7',
-      ].join(' ')}
+        'surface surface-hover group relative flex h-full flex-col overflow-hidden',
+        featured ? 'glow p-7 sm:p-9' : 'p-6',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
-      {featured ? (
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-30" aria-hidden="true" />
-      ) : null}
-
-      <div className="relative flex items-start justify-between gap-6">
-        <div>
-          <span className="font-mono text-xs tabular-nums uppercase tracking-[0.24em] text-primary">
-            {String(index).padStart(2, '0')}
-          </span>
-          <Heading
-            className={[
-              'mt-4 font-bold tracking-[-0.035em] text-foreground group-hover:text-primary',
-              featured ? 'text-2xl sm:text-4xl' : 'text-xl',
-            ].join(' ')}
-          >
-            {service.name}
-          </Heading>
-        </div>
-        {featured ? <Pill tone="primary">Where most teams start</Pill> : null}
+      <div className="flex items-start justify-between gap-5">
+        <span className="font-mono text-[11px] tabular-nums uppercase tracking-[0.18em] text-subtle">
+          {String(index).padStart(2, '0')}
+        </span>
+        {featured ? <span className="pill pill-ember">Where most teams start</span> : null}
       </div>
+
+      <Heading
+        className={[
+          'font-semibold text-foreground transition-colors group-hover:text-primary',
+          featured
+            ? 'mt-6 text-2xl tracking-[-0.035em] sm:text-3xl'
+            : 'mt-5 text-lg tracking-[-0.025em] sm:text-xl',
+        ].join(' ')}
+      >
+        {service.name}
+      </Heading>
 
       <p
         className={[
-          'relative mt-4 leading-7 text-muted',
-          featured ? 'max-w-2xl text-base sm:text-lg sm:leading-8' : 'text-sm',
+          'text-muted',
+          featured
+            ? 'mt-4 max-w-2xl text-[1.0625rem] leading-[1.66]'
+            : 'mt-2.5 text-sm leading-[1.62]',
         ].join(' ')}
       >
         {featured ? service.summary : service.tagline}
       </p>
 
       {featured ? (
-        <ul className="relative mt-7 flex flex-wrap gap-2">
+        <ul className="mt-7 flex flex-wrap gap-2">
           {service.stack.slice(0, 6).map((tech) => (
             <li key={tech}>
-              <Pill>{tech}</Pill>
+              <span className="pill">{tech}</span>
             </li>
           ))}
         </ul>
@@ -68,7 +72,7 @@ export default function ServiceCard({
 
       <span
         aria-hidden="true"
-        className="relative mt-auto pt-7 font-mono text-xs uppercase tracking-[0.18em] text-muted transition-colors group-hover:text-primary"
+        className="mt-auto pt-7 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle transition-colors group-hover:text-primary"
       >
         Explore {service.name} →
       </span>

@@ -10,6 +10,11 @@ interface TableOfContentsProps {
 /**
  * Sticky contents rail with scroll spy. Desktop only — on narrow screens the
  * headings are close enough together that a rail costs more than it gives.
+ *
+ * `self-start` is load-bearing: the rail is a grid item, and a stretched grid
+ * item would be as tall as the whole article, which leaves `position: sticky`
+ * no room to travel. It keeps the rail at its content height so it tracks the
+ * reader down the column.
  */
 export default function TableOfContents({ entries }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>(entries[0]?.id ?? '');
@@ -46,9 +51,9 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
   if (entries.length < 3) return null;
 
   return (
-    <nav aria-label="On this page" className="sticky top-28 hidden lg:block">
-      <p className="mono-label mb-4">On this page</p>
-      <ol className="space-y-1 border-l border-line">
+    <nav aria-label="On this page" className="sticky top-28 hidden self-start lg:block">
+      <p className="mono-label mb-5">On this page</p>
+      <ol className="border-l border-line">
         {entries.map((entry) => {
           const active = entry.id === activeId;
           return (
@@ -57,10 +62,10 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
                 href={`#${entry.id}`}
                 aria-current={active ? 'true' : undefined}
                 className={[
-                  '-ml-px block border-l py-1.5 pl-4 text-sm leading-6 transition-colors',
+                  '-ml-px block border-l py-1.5 pl-4 text-[0.8125rem] leading-6 transition-colors',
                   active
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted hover:border-line-strong hover:text-foreground',
+                    ? 'border-primary font-medium text-foreground'
+                    : 'border-transparent text-subtle hover:border-line-strong hover:text-foreground',
                 ].join(' ')}
               >
                 {entry.text}

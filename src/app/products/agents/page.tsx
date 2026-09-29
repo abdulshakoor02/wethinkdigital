@@ -71,8 +71,8 @@ export default function AgentsPage() {
         eyebrow={product.heroEyebrow}
         title={
           <>
-            An autonomous software delivery team that{' '}
-            <span className="gradient-text">plugs into your backlog</span>
+            An autonomous software delivery team that plugs into{' '}
+            <span className="serif">your backlog</span>
           </>
         }
         description={product.heroDescription}
@@ -96,7 +96,11 @@ export default function AgentsPage() {
       <Section id="agents" bordered muted>
         <SectionHeading
           eyebrow="The team"
-          title="Three specialised agents, one backlog"
+          title={
+            <>
+              Three specialised agents, <span className="serif">one backlog</span>
+            </>
+          }
           description="Implementation, testing and review are different jobs with different failure modes. Splitting them across three agents means no agent ever signs off its own work."
         />
         <Reveal className="mt-14">
@@ -110,7 +114,11 @@ export default function AgentsPage() {
       <Section id="how-it-works">
         <SectionHeading
           eyebrow="How it works"
-          title="From work item to merge"
+          title={
+            <>
+              From work item <span className="serif">to merge</span>
+            </>
+          }
           description="One pass through the pipeline. Each stage hands something concrete to the next, and the last stage is a person."
         />
         <Reveal className="mt-14">
@@ -122,8 +130,8 @@ export default function AgentsPage() {
         </Reveal>
 
         <Reveal className="mt-14" delay={0.05}>
-          <div className="surface flex flex-col gap-4 p-7 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-            <p className="max-w-2xl text-sm leading-7 text-muted">
+          <div className="surface flex flex-col gap-5 p-7 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+            <p className="max-w-2xl text-sm leading-[1.65] text-muted">
               If the QA agent finds a defect, the branch goes back to the SDE agent rather than
               forward to review. A broken implementation costs you a loop inside the pipeline, not a
               rejected pull request on your team&rsquo;s desk.
@@ -150,13 +158,13 @@ export default function AgentsPage() {
           title="It joins your setup. You do not rebuild around it."
           description="Adopting Agents should not require a migration, a new tracker or a change of process. It attaches to the four things you already have."
         />
-        <div className="mt-14 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
+        <div className="mt-14 grid gap-3.5 sm:grid-cols-2">
           {fitPoints.map((point) => (
-            <div key={point.title} className="bg-surface p-7 sm:p-8">
-              <h3 className="text-lg font-bold tracking-[-0.03em] text-foreground">
+            <div key={point.title} className="surface surface-hover p-7 sm:p-8">
+              <h3 className="text-lg font-semibold tracking-[-0.025em] text-foreground">
                 {point.title}
               </h3>
-              <p className="mt-3 text-sm leading-7 text-muted">{point.description}</p>
+              <p className="mt-3 text-sm leading-[1.65] text-muted">{point.description}</p>
             </div>
           ))}
         </div>
@@ -182,7 +190,11 @@ export default function AgentsPage() {
       <Section bordered muted>
         <SectionHeading
           eyebrow="Who it is for"
-          title="Teams where throughput is the constraint"
+          title={
+            <>
+              Teams where <span className="serif">throughput</span> is the constraint
+            </>
+          }
           description="Agents earns its place when the bottleneck is volume of routine work, not shortage of ideas."
         />
         <div className="mt-14">
@@ -201,7 +213,10 @@ export default function AgentsPage() {
             description={
               <>
                 Still unsure whether it fits your stack?{' '}
-                <Link href="/contact" className="text-secondary underline underline-offset-4">
+                <Link
+                  href="/contact"
+                  className="text-primary underline decoration-primary/40 underline-offset-4"
+                >
                   Send us the details
                 </Link>{' '}
                 and we will give you a straight answer.

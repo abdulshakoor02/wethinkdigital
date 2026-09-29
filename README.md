@@ -40,6 +40,25 @@ npx tsc --noEmit     # type check
 Copy `.env.example` to `.env.local` and fill in the SMTP values used by
 `src/app/api/contact/route.ts`.
 
+### Gotcha: don't mix `build` and `dev` in the same `.next`
+
+Running `npm run build` and then `npm run dev` (or the reverse) without clearing
+`.next` leaves production and dev artifacts side by side. In that state the dev
+server can serve a **stale prerendered shell** while the browser receives fresh
+client chunks — which surfaces as a confusing React **hydration mismatch** in a
+component you did not touch.
+
+If you see a hydration error after switching modes:
+
+```bash
+# stop every dev/prod server first, then:
+rm -rf .next
+npm run dev
+```
+
+Also avoid running two servers against the same `.next` at once — the headless
+verification runs in this repo's history are the usual source of that.
+
 ## Structure
 
 ```

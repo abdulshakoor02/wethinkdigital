@@ -7,6 +7,11 @@ const message = 'Hi — I would like to talk about a project.';
  * Floating WhatsApp entry point. A plain anchor, so no client JS is needed.
  * Sits above the mobile safe area and is nudged up on small screens so it does
  * not cover the footer / contact CTA.
+ *
+ * Colour: the container uses the ink token rather than WhatsApp's #25D366.
+ * On the Ember bone canvas the brand green was the loudest element on the page
+ * and fought the warm palette; the glyph alone still reads unmistakably as
+ * WhatsApp. Swap `bg-foreground` back to `bg-[#25D366]` if brand colour wins.
  */
 export default function WhatsAppButton() {
   const href = `${siteConfig.whatsapp}?text=${encodeURIComponent(message)}`;
@@ -17,7 +22,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with WeThinkDigital on WhatsApp"
-      className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-40 inline-flex min-h-12 min-w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-colors hover:bg-[#1ebe5d] sm:bottom-6 sm:right-6 sm:min-h-14 sm:min-w-14"
+      className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-40 inline-flex min-h-12 min-w-12 items-center justify-center rounded-full bg-foreground text-background shadow-[0_8px_24px_rgb(20_19_16/0.22)] transition-transform hover:-translate-y-0.5 hover:bg-primary sm:bottom-6 sm:right-6 sm:min-h-14 sm:min-w-14"
     >
       <FaWhatsapp className="text-2xl sm:text-3xl" aria-hidden="true" />
     </a>

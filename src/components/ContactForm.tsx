@@ -38,7 +38,7 @@ const budgets = [
 ];
 
 const inputClass =
-  'w-full rounded-md border border-line bg-background px-4 py-3 text-foreground transition-colors placeholder:text-muted/60 focus:border-primary aria-[invalid=true]:border-danger';
+  'w-full rounded-[var(--radius-sm)] border border-line bg-surface px-4 py-3 text-foreground transition-colors placeholder:text-subtle focus:border-primary aria-[invalid=true]:border-danger';
 const labelClass = 'mb-2 block text-sm font-medium text-foreground';
 
 interface ContactFormProps {
@@ -126,7 +126,7 @@ export default function ContactForm({ variant = 'section' }: ContactFormProps) {
   };
 
   const form = (
-    <div className="surface p-6 sm:p-9">
+    <div className="surface p-6 sm:p-8">
       {/* Polite live region — announced without interrupting the user. */}
       <p
         role="status"
@@ -134,7 +134,7 @@ export default function ContactForm({ variant = 'section' }: ContactFormProps) {
         className={
           status === 'idle'
             ? 'sr-only'
-            : `mb-6 rounded-md border-l-2 px-4 py-3 text-sm leading-6 text-foreground ${
+            : `mb-6 rounded-[var(--radius-sm)] border-l-2 px-4 py-3 text-sm leading-6 text-foreground ${
                 status === 'success' ? 'border-success bg-success/10' : 'border-danger bg-danger/10'
               }`
         }
@@ -337,17 +337,19 @@ export default function ContactForm({ variant = 'section' }: ContactFormProps) {
         <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
           <div>
             <p className="mono-label mb-5">Start a project</p>
-            <h2 className="text-3xl font-bold leading-[1.1] tracking-[-0.045em] text-foreground sm:text-5xl">
-              Tell us what you are trying to build.
+            <h2 className="text-3xl font-semibold leading-[1.08] tracking-[-0.04em] text-foreground sm:text-5xl">
+              Tell us what you are <span className="serif">trying to build</span>.
             </h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-muted">
+            <p className="mt-6 max-w-xl text-[1.05rem] leading-[1.66] text-muted sm:text-[1.0625rem]">
               Send the problem, the constraints and the deadline. You will get a technical read on
               the approach, a shape for the team, and an honest view of what is achievable.
             </p>
 
             <dl className="mt-12 divide-y divide-line border-y border-line">
               <div className="py-5">
-                <dt className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Email</dt>
+                <dt className="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-subtle">
+                  Email
+                </dt>
                 <dd className="mt-2">
                   <a href={`mailto:${siteConfig.email}`} className="text-foreground hover:text-primary">
                     {siteConfig.email}
@@ -355,7 +357,9 @@ export default function ContactForm({ variant = 'section' }: ContactFormProps) {
                 </dd>
               </div>
               <div className="py-5">
-                <dt className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Phone</dt>
+                <dt className="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-subtle">
+                  Phone
+                </dt>
                 <dd className="mt-2">
                   <a href={siteConfig.phoneHref} className="text-foreground hover:text-primary">
                     {siteConfig.phone}
@@ -363,7 +367,9 @@ export default function ContactForm({ variant = 'section' }: ContactFormProps) {
                 </dd>
               </div>
               <div className="py-5">
-                <dt className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Based in</dt>
+                <dt className="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-subtle">
+                  Based in
+                </dt>
                 <dd className="mt-2 text-foreground">Dubai, UAE — working with teams worldwide</dd>
               </div>
             </dl>

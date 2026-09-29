@@ -19,13 +19,13 @@ export default function ResumeComparison() {
       {/* ---------------------------------------------------------------- */}
       <figure className="flex flex-col">
         <figcaption className="mb-4 flex items-center gap-3">
-          <span className="inline-flex items-center rounded-full border border-danger/40 bg-danger/10 px-3 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-danger">
+          <span className="inline-flex items-center rounded-full border border-danger/25 bg-danger/[0.06] px-3 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-danger">
             Before
           </span>
           <span className="text-sm text-muted">Cramped, inconsistent, hard to scan</span>
         </figcaption>
 
-        <div className="surface flex-1 p-6 sm:p-7" aria-hidden="true">
+        <div className="surface-elevated flex-1 p-6 sm:p-7" aria-hidden="true">
           <div className="space-y-1">
             <p className="text-[0.9375rem] font-bold text-foreground">ALEX MORGAN</p>
             <p className="text-[0.625rem] leading-4 text-muted">
@@ -73,10 +73,7 @@ export default function ResumeComparison() {
             'Contact line overloaded',
             'Skills dumped in one block',
           ].map((flag) => (
-            <li
-              key={flag}
-              className="inline-flex items-center rounded-full border border-line px-3 py-1 text-xs text-muted"
-            >
+            <li key={flag} className="pill">
               {flag}
             </li>
           ))}
@@ -88,7 +85,7 @@ export default function ResumeComparison() {
       {/* ---------------------------------------------------------------- */}
       <figure className="flex flex-col">
         <figcaption className="mb-4 flex items-center gap-3">
-          <span className="inline-flex items-center rounded-full border border-success/40 bg-success/10 px-3 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-success">
+          <span className="inline-flex items-center rounded-full border border-success/30 bg-success-soft px-3 py-1 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-success">
             After
           </span>
           <span className="text-sm text-muted">Structured, consistent, scannable</span>
@@ -177,10 +174,7 @@ export default function ResumeComparison() {
             'Clear hierarchy',
             'Parses cleanly',
           ].map((flag) => (
-            <li
-              key={flag}
-              className="inline-flex items-center rounded-full border border-success/40 bg-success/10 px-3 py-1 text-xs text-success"
-            >
+            <li key={flag} className="pill pill-ok">
               {flag}
             </li>
           ))}

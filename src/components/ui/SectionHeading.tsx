@@ -10,6 +10,11 @@ interface SectionHeadingProps {
   className?: string;
 }
 
+const headingClass = {
+  h1: 'text-[2.5rem] font-semibold leading-[1.06] tracking-[-0.045em] text-foreground sm:text-6xl lg:text-[4.4rem]',
+  h2: 'text-3xl font-semibold leading-[1.08] tracking-[-0.04em] text-foreground sm:text-5xl',
+} as const;
+
 export default function SectionHeading({
   eyebrow,
   title,
@@ -30,19 +35,11 @@ export default function SectionHeading({
         .join(' ')}
     >
       {eyebrow ? <p className="mono-label mb-5">{eyebrow}</p> : null}
-      <Tag
-        className={
-          Tag === 'h1'
-            ? 'text-4xl font-bold leading-[1.05] tracking-[-0.05em] text-foreground sm:text-6xl'
-            : 'text-3xl font-bold leading-[1.1] tracking-[-0.045em] text-foreground sm:text-5xl'
-        }
-      >
-        {title}
-      </Tag>
+      <Tag className={headingClass[Tag]}>{title}</Tag>
       {description ? (
         <p
           className={[
-            'mt-6 text-lg leading-8 text-muted',
+            'mt-6 text-[1.05rem] leading-[1.66] text-muted sm:text-[1.0625rem]',
             isCenter ? 'mx-auto max-w-2xl' : 'max-w-2xl',
           ].join(' ')}
         >

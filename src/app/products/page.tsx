@@ -52,15 +52,24 @@ export default function ProductsPage() {
       />
 
       <section className="relative overflow-hidden pt-32 pb-16 sm:pb-20">
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-60" aria-hidden="true" />
+        <div className="mesh" aria-hidden="true">
+          <span className="m-ember" />
+          <span className="m-sage" />
+          <span className="m-amber" />
+          <span className="m-fade" />
+        </div>
+        <div className="dot-field" aria-hidden="true" />
         <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
-          <div className="animate-fade-up">
-            <SectionHeading
-              as="h1"
-              eyebrow="Products"
-              title="Products we build and run"
-              description="We are an engineering company, so we ship our own software as well as our clients'. Two applications are live today: one that does the mechanical half of software delivery, and one that redesigns the document your career is judged on."
-            />
+          <div className="animate-fade-up max-w-3xl">
+            <p className="mono-label mb-5">Products</p>
+            <h1 className="text-[2.5rem] font-semibold leading-[1.06] tracking-[-0.045em] text-foreground sm:text-6xl lg:text-[4.4rem]">
+              Products we <span className="serif">build and run</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-[1.05rem] leading-[1.66] text-muted sm:text-[1.0625rem]">
+              We are an engineering company, so we ship our own software as well as our
+              clients&apos;. Two applications are live today: one that does the mechanical half of
+              software delivery, and one that redesigns the document your career is judged on.
+            </p>
           </div>
         </div>
       </section>
@@ -101,8 +110,8 @@ export default function ProductsPage() {
               body: 'If you want something like this inside your own product, that is our services work.',
             },
           ].map((item) => (
-            <div key={item.title} className="surface p-7">
-              <h3 className="text-base font-bold tracking-[-0.02em] text-foreground">
+            <div key={item.title} className="surface surface-hover p-7 sm:p-8">
+              <h3 className="text-lg font-semibold tracking-[-0.025em] text-foreground">
                 {item.title}
               </h3>
               <p className="mt-3 text-sm leading-7 text-muted">{item.body}</p>

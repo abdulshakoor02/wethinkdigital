@@ -18,7 +18,13 @@ interface CTAProps {
   secondaryExternal?: boolean;
 }
 
-/** Closing call-to-action band. Reused at the bottom of every inner page. */
+/**
+ * Closing call-to-action band. Reused at the bottom of every inner page.
+ *
+ * Ember treats dark as an accent object rather than the page canvas, so the
+ * band is a single `.surface-dark` card on the muted bone section — the same
+ * device the reference uses for its closing block.
+ */
 export default function CTA({
   eyebrow = 'Next step',
   title = 'Tell us what you are trying to build.',
@@ -32,37 +38,36 @@ export default function CTA({
 }: CTAProps) {
   return (
     <Section bordered muted>
-      <div className="surface glow relative overflow-hidden p-8 sm:p-14">
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" aria-hidden="true" />
-        <div className="relative max-w-3xl">
-          <p className="mono-label mb-5">{eyebrow}</p>
-          <h2 className="text-3xl font-bold leading-[1.1] tracking-[-0.045em] text-foreground sm:text-5xl">
-            {title}
-          </h2>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">{description}</p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            {primaryExternal ? (
-              <a href={primaryHref} target="_blank" rel="noopener noreferrer" className="btn-primary">
-                {primaryLabel}
-                <span aria-hidden="true">↗</span>
-              </a>
-            ) : (
-              <Link href={primaryHref} className="btn-primary">
-                {primaryLabel}
-              </Link>
-            )}
+      <div className="surface-dark overflow-hidden px-7 py-12 text-center sm:px-14 sm:py-16">
+        <p className="mono-label mb-5">{eyebrow}</p>
+        <h2 className="mx-auto max-w-2xl text-3xl font-semibold leading-[1.08] tracking-[-0.04em] text-white sm:text-5xl">
+          {title}
+        </h2>
+        <p className="mx-auto mt-6 max-w-2xl text-[1.05rem] leading-[1.66] text-white/60 sm:text-[1.0625rem]">
+          {description}
+        </p>
+        <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+          {primaryExternal ? (
+            <a href={primaryHref} target="_blank" rel="noopener noreferrer" className="btn-primary">
+              {primaryLabel}
+              <span aria-hidden="true">↗</span>
+            </a>
+          ) : (
+            <Link href={primaryHref} className="btn-primary">
+              {primaryLabel}
+            </Link>
+          )}
 
-            {secondaryExternal ? (
-              <a href={secondaryHref} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                {secondaryLabel}
-                <span aria-hidden="true">↗</span>
-              </a>
-            ) : (
-              <Link href={secondaryHref} className="btn-secondary">
-                {secondaryLabel}
-              </Link>
-            )}
-          </div>
+          {secondaryExternal ? (
+            <a href={secondaryHref} target="_blank" rel="noopener noreferrer" className="btn-secondary">
+              {secondaryLabel}
+              <span aria-hidden="true">↗</span>
+            </a>
+          ) : (
+            <Link href={secondaryHref} className="btn-secondary">
+              {secondaryLabel}
+            </Link>
+          )}
         </div>
       </div>
     </Section>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter_Tight, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import JsonLd from '@/components/JsonLd';
 import { organizationSchema, websiteSchema, professionalServiceSchema } from './schema';
@@ -9,18 +9,28 @@ import Navigation from '@/components/Navigation';
 import { siteConfig } from '@/lib/site';
 import { buildMetadata } from '@/lib/seo';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const interTight = Inter_Tight({
+  variable: '--font-inter-tight',
   subsets: ['latin'],
   display: 'swap',
-  preload: true,
+  weight: ['400', '500', '600', '700'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+/** Used only for the italic emphasis phrase inside a headline (`.serif`). */
+const instrumentSerif = Instrument_Serif({
+  variable: '--font-instrument-serif',
   subsets: ['latin'],
   display: 'swap',
-  preload: false, // Only preload critical fonts
+  weight: '400',
+  style: ['normal', 'italic'],
+  preload: false,
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
+  subsets: ['latin'],
+  display: 'swap',
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -46,11 +56,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * Inlined first-paint styles. Mirrors the dark canvas tokens in globals.css so
- * the page never flashes white before the stylesheet resolves.
+ * Inlined first-paint styles. Mirrors the warm bone canvas tokens in globals.css
+ * so the page never flashes the old dark palette before the stylesheet resolves.
  */
 const criticalCss = `
-:root{--background:oklch(0.15 0.02 260);--foreground:oklch(0.97 0.005 260);--primary:oklch(0.68 0.19 255);--line:oklch(0.33 0.028 263)}
+:root{--background:#f6f4ef;--foreground:#141310;--primary:#d9481f;--line:#ddd8cb}
 html{background:var(--background)}
 body{background:var(--background);color:var(--foreground);margin:0;overflow-x:hidden}
 `;
@@ -100,10 +110,12 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${interTight.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} antialiased`}
+      >
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-md focus:bg-primary focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-background focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-full focus:bg-foreground focus:px-5 focus:py-3 focus:text-sm focus:font-medium focus:text-background focus:shadow-lg"
         >
           Skip to content
         </a>

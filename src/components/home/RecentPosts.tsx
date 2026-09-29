@@ -13,10 +13,10 @@ export default function RecentPosts() {
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div className="max-w-2xl">
           <p className="mono-label mb-5">Insights</p>
-          <h2 className="text-3xl font-bold leading-[1.1] tracking-[-0.045em] text-foreground sm:text-5xl">
-            Engineering notes
+          <h2 className="text-3xl font-semibold leading-[1.08] tracking-[-0.04em] text-foreground sm:text-5xl">
+            Engineering <span className="serif">notes</span>
           </h2>
-          <p className="mt-6 text-lg leading-8 text-muted">
+          <p className="mt-6 text-[1.05rem] leading-[1.66] text-muted sm:text-[1.0625rem]">
             How we build AI agents, retrieval systems and production software — written by the
             engineers doing the work.
           </p>

@@ -15,7 +15,11 @@ export default function FAQ() {
         <div>
           <SectionHeading
             eyebrow="FAQ"
-            title="How we engage"
+            title={
+              <>
+                How <span className="serif">we engage</span>
+              </>
+            }
             description="How projects are scoped, who owns the output, and what happens after launch."
           />
           <Link href="/contact" className="btn-secondary mt-9">

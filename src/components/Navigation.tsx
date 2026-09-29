@@ -21,6 +21,33 @@ export default function Navigation() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const servicesRef = useRef<HTMLDivElement>(null);
+  const openTimer = useRef<number | null>(null);
+
+  /**
+   * The trigger sits between "Products" and "Process", so a pointer travelling
+   * across the nav to the CTA would otherwise flash the menu open. A short
+   * delay on open (cancelable) keeps that from happening; closing stays instant
+   * once the pointer actually leaves the group.
+   */
+  const openServices = useCallback(() => {
+    if (openTimer.current !== null) window.clearTimeout(openTimer.current);
+    openTimer.current = window.setTimeout(() => setIsServicesOpen(true), 90);
+  }, []);
+
+  const closeServices = useCallback(() => {
+    if (openTimer.current !== null) {
+      window.clearTimeout(openTimer.current);
+      openTimer.current = null;
+    }
+    setIsServicesOpen(false);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (openTimer.current !== null) window.clearTimeout(openTimer.current);
+    },
+    [],
+  );
 
   // Solid chrome once scrolled; always solid off the home page.
   useEffect(() => {
@@ -73,9 +100,9 @@ export default function Navigation() {
   /** Close the dropdown when focus leaves the whole services group. */
   const onServicesBlur = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-      setIsServicesOpen(false);
+      closeServices();
     }
-  }, []);
+  }, [closeServices]);
 
   const solid = isScrolled || !isHome || isMobileOpen;
   const linkItems = siteConfig.nav.filter((item) => item.name !== 'Services');
@@ -83,14 +110,24 @@ export default function Navigation() {
   return (
     <nav
       aria-label="Primary"
-      className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
-        solid ? 'border-line bg-background/85 backdrop-blur' : 'border-transparent bg-transparent'
+      className={`fixed inset-x-0 top-0 z-50 border-b bg-background/80 backdrop-blur transition-colors duration-300 ${
+        solid ? 'border-line' : 'border-transparent'
       }`}
     >
       <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
         <div className="flex h-20 items-center justify-between gap-6">
-          <Link href="/" className="text-xl font-bold tracking-[-0.04em] text-foreground">
-            WeThink<span className="text-primary">Digital</span>
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 text-[1.09rem] font-semibold tracking-[-0.03em] text-foreground"
+          >
+            {/* Italic serif monogram — the brand mark, not the `.serif` emphasis device. */}
+            <span
+              aria-hidden="true"
+              className="grid h-[26px] w-[26px] flex-none place-items-center rounded-[7px] bg-foreground font-serif text-[1rem] italic leading-none text-background"
+            >
+              W
+            </span>
+            WeThinkDigital
           </Link>
 
           {/* Desktop */}
@@ -99,8 +136,8 @@ export default function Navigation() {
               ref={servicesRef}
               className="relative"
               onBlur={onServicesBlur}
-              onMouseEnter={() => setIsServicesOpen(true)}
-              onMouseLeave={() => setIsServicesOpen(false)}
+              onMouseEnter={openServices}
+              onMouseLeave={closeServices}
             >
               <button
                 type="button"
@@ -126,15 +163,15 @@ export default function Navigation() {
               {isServicesOpen && (
                 <div
                   id="services-menu"
-                  className="glass absolute left-0 top-full z-50 w-[22rem] overflow-hidden p-2"
+                  className="absolute left-0 top-full z-50 w-[22rem] overflow-hidden rounded-[14px] border border-line-strong bg-surface p-2 shadow-[0_26px_58px_-14px_rgb(20_19_16/0.26),0_6px_16px_-6px_rgb(20_19_16/0.13)]"
                 >
                   <ul>
                     {siteConfig.services.map((service) => (
                       <li key={service.href}>
                         <Link
                           href={service.href}
-                          onClick={() => setIsServicesOpen(false)}
-                          className="block rounded-md px-3 py-3 transition-colors hover:bg-surface-elevated"
+                          onClick={closeServices}
+                          className="block rounded-[10px] px-3 py-3 transition-colors hover:bg-surface-elevated"
                         >
                           <span className="block text-sm font-semibold tracking-tight text-foreground">
                             {service.name}
@@ -160,7 +197,7 @@ export default function Navigation() {
               </Link>
             ))}
 
-            <Link href="/contact" className="btn-primary min-h-11 px-5 py-2 text-sm">
+            <Link href="/contact" className="btn-primary">
               Start a project
             </Link>
           </div>
@@ -169,7 +206,7 @@ export default function Navigation() {
           <button
             type="button"
             onClick={() => setIsMobileOpen((open) => !open)}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-line text-foreground md:hidden"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-line-strong text-foreground transition-colors hover:border-foreground md:hidden"
             aria-expanded={isMobileOpen}
             aria-controls="mobile-menu"
             aria-label={isMobileOpen ? 'Close navigation menu' : 'Open navigation menu'}

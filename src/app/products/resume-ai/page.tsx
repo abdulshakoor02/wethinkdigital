@@ -79,7 +79,7 @@ export default function ResumeAiPage() {
         eyebrow={product.heroEyebrow}
         title={
           <>
-            Your resume, <span className="gradient-text">redesigned by AI</span>
+            Your resume, <span className="serif">redesigned by AI</span>
           </>
         }
         description={product.heroDescription}
@@ -94,13 +94,10 @@ export default function ResumeAiPage() {
           'Clean output that parses correctly',
         ]}
       >
-        <div className="surface glow relative overflow-hidden p-7 sm:p-8">
-          <div className="pointer-events-none absolute inset-0 grid-bg opacity-30" aria-hidden="true" />
+        <div className="surface relative overflow-hidden p-7 sm:p-8">
           <div className="relative">
-            <p className="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-primary">
-              What changes
-            </p>
-            <ul className="mt-5 flex flex-col gap-4">
+            <p className="mono-label">What changes</p>
+            <ul className="mt-6 flex flex-col gap-4">
               {[
                 ['Structure', 'Buried → leading with the point'],
                 ['Formatting', 'Mixed styles → one consistent system'],
@@ -108,10 +105,10 @@ export default function ResumeAiPage() {
                 ['Parsing', 'Fragile layout → clean text flow'],
               ].map(([label, change]) => (
                 <li key={label} className="border-b border-line pb-4 last:border-0 last:pb-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+                  <p className="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-subtle">
                     {label}
                   </p>
-                  <p className="mt-1.5 text-sm leading-6 text-foreground">{change}</p>
+                  <p className="mt-1.5 text-sm leading-[1.6] text-foreground">{change}</p>
                 </li>
               ))}
             </ul>
@@ -125,7 +122,11 @@ export default function ResumeAiPage() {
       <Section bordered muted>
         <SectionHeading
           eyebrow="Before → after"
-          title="Same career. Read properly this time."
+          title={
+            <>
+              Same career. <span className="serif">Read properly</span> this time.
+            </>
+          }
           description="An illustrative comparison of what changes: not the facts, but the structure, the formatting and the way the work is described."
         />
         <Reveal className="mt-14">
@@ -143,14 +144,20 @@ export default function ResumeAiPage() {
       <Section id="what-it-fixes">
         <SectionHeading
           eyebrow="What it fixes"
-          title="The six things that hold most resumes back"
+          title={
+            <>
+              The six things that hold <span className="serif">most resumes</span> back
+            </>
+          }
           description="None of them are about your experience. All of them are about how that experience is presented."
         />
-        <div className="mt-14 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-14 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
           {fixes.map((fix) => (
-            <div key={fix.title} className="bg-surface p-7 sm:p-8">
-              <h3 className="text-lg font-bold tracking-[-0.03em] text-foreground">{fix.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-muted">{fix.description}</p>
+            <div key={fix.title} className="surface surface-hover p-7 sm:p-8">
+              <h3 className="text-lg font-semibold tracking-[-0.025em] text-foreground">
+                {fix.title}
+              </h3>
+              <p className="mt-3 text-sm leading-[1.65] text-muted">{fix.description}</p>
             </div>
           ))}
         </div>
@@ -169,11 +176,11 @@ export default function ResumeAiPage() {
           {product.workflow.map((step) => (
             <li key={step.step} className="surface surface-hover relative overflow-hidden p-7 sm:p-8">
               <span className="absolute inset-x-0 top-0 h-px bg-primary" aria-hidden="true" />
-              <p className="font-mono text-xs tracking-[0.2em] text-primary">{step.step}</p>
-              <h3 className="mt-4 text-xl font-bold tracking-[-0.03em] text-foreground">
+              <p className="font-mono text-[0.6875rem] tracking-[0.14em] text-primary">{step.step}</p>
+              <h3 className="mt-4 text-lg font-semibold tracking-[-0.025em] text-foreground sm:text-xl">
                 {step.title}
               </h3>
-              <p className="mt-3 text-sm leading-7 text-muted">{step.description}</p>
+              <p className="mt-3 text-sm leading-[1.65] text-muted">{step.description}</p>
             </li>
           ))}
         </ol>
@@ -199,7 +206,11 @@ export default function ResumeAiPage() {
       <Section bordered muted>
         <SectionHeading
           eyebrow="Who it is for"
-          title="Anyone whose resume undersells them"
+          title={
+            <>
+              Anyone whose resume <span className="serif">undersells them</span>
+            </>
+          }
           description="Strong experience presented badly loses to average experience presented well. This closes that gap."
         />
         <div className="mt-14">
@@ -218,7 +229,10 @@ export default function ResumeAiPage() {
             description={
               <>
                 Anything else you want to check first?{' '}
-                <Link href="/contact" className="text-secondary underline underline-offset-4">
+                <Link
+                  href="/contact"
+                  className="text-primary underline decoration-primary/40 underline-offset-4"
+                >
                   Ask us directly
                 </Link>
                 .

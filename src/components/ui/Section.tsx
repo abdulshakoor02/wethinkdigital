@@ -24,6 +24,8 @@ export default function Section({
     <section
       id={id}
       className={[
+        // Clears the fixed 5rem nav when an anchor is followed.
+        'relative scroll-mt-24',
         compact ? 'py-16 sm:py-20' : 'py-24 sm:py-32',
         bordered ? 'border-y border-line' : '',
         muted ? 'bg-background-muted' : 'bg-background',

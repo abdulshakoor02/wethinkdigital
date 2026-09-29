@@ -120,19 +120,19 @@ export default async function BlogPostPage({ params }: PageProps) {
         <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
           <Breadcrumb items={crumbs} />
 
-          <header className="mt-10 max-w-3xl border-b border-line pb-10">
-            <span className="inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium tracking-tight text-primary">
-              {post.category}
-            </span>
+          <header className="mt-8 max-w-3xl border-b border-line pb-10">
+            <span className="pill pill-ember">{post.category}</span>
 
-            <h1 className="mt-6 text-3xl font-bold leading-[1.1] tracking-[-0.045em] text-foreground sm:text-5xl">
+            <h1 className="mt-6 text-[2.5rem] font-semibold leading-[1.08] tracking-[-0.045em] text-foreground sm:text-5xl lg:text-[3.5rem]">
               {post.title}
             </h1>
 
-            <p className="mt-6 text-lg leading-8 text-muted">{post.excerpt}</p>
+            <p className="mt-6 text-[1.05rem] leading-[1.66] text-muted sm:text-[1.0625rem]">
+              {post.excerpt}
+            </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted">
-              <span className="text-foreground">{post.author}</span>
+            <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.8125rem] text-subtle">
+              <span className="font-medium text-foreground">{post.author}</span>
               <span aria-hidden="true" className="text-line-strong">
                 /
               </span>
@@ -161,10 +161,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
               <div className="mt-14 flex flex-wrap gap-2 border-t border-line pt-8">
                 {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center rounded-full border border-line px-3 py-1 text-xs font-medium tracking-tight text-muted"
-                  >
+                  <span key={tag} className="pill">
                     {tag}
                   </span>
                 ))}
@@ -172,7 +169,9 @@ export default async function BlogPostPage({ params }: PageProps) {
 
               <aside className="surface mt-10 p-7 sm:p-8">
                 <p className="mono-label mb-4">Written by</p>
-                <p className="text-lg font-bold tracking-[-0.025em] text-foreground">{post.author}</p>
+                <p className="text-lg font-semibold tracking-[-0.025em] text-foreground">
+                  {post.author}
+                </p>
                 <p className="mt-3 text-[0.9375rem] leading-7 text-muted">
                   We build AI automation, agent systems, custom software and modern web
                   applications. These notes come out of production work, not from a content

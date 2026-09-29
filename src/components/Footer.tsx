@@ -17,10 +17,19 @@ export default function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           {/* Brand */}
           <div>
-            <Link href="/" className="text-2xl font-bold tracking-[-0.04em] text-foreground">
-              WeThink<span className="text-primary">Digital</span>
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 text-[1.09rem] font-semibold tracking-[-0.03em] text-foreground"
+            >
+              <span
+                aria-hidden="true"
+                className="grid h-[26px] w-[26px] flex-none place-items-center rounded-[7px] bg-foreground font-serif text-[1rem] italic leading-none text-background"
+              >
+                W
+              </span>
+              WeThinkDigital
             </Link>
-            <p className="mt-5 max-w-sm leading-7 text-muted">
+            <p className="mt-5 max-w-sm text-[0.9375rem] leading-[1.65] text-muted">
               An AI and software engineering company. We build AI automation, autonomous agent
               systems, custom software and modern web applications for teams that need to move
               faster.

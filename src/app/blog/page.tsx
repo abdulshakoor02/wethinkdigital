@@ -77,25 +77,28 @@ export default function BlogIndexPage() {
       <main className="pb-24 pt-32 sm:pb-32">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
           <header className="max-w-3xl">
-            <p className="mono-label mb-5">Writing</p>
-            <h1 className="text-4xl font-bold leading-[1.05] tracking-[-0.05em] text-foreground sm:text-6xl">
-              Engineering notes
+            <p className="mono-label mb-6">Writing</p>
+            <h1 className="text-[2.5rem] font-semibold leading-[1.06] tracking-[-0.045em] text-foreground sm:text-6xl lg:text-[4.4rem]">
+              Engineering <span className="serif">notes</span>
             </h1>
-            <p className="mt-6 text-lg leading-8 text-muted">
+            <p className="mt-7 text-[1.05rem] leading-[1.66] text-muted sm:text-[1.0625rem]">
               What we have learned building AI agents, retrieval systems, automation pipelines and
               production software. Specifics over abstractions — including the parts that did not
               work.
             </p>
-            <p className="mt-6 text-[0.9375rem] leading-7 text-muted">
+            <p className="mt-4 text-[0.9375rem] leading-7 text-muted">
               If a note raises a question about your own stack,{' '}
-              <Link href="/contact" className="font-semibold text-secondary hover:text-primary">
+              <Link
+                href="/contact"
+                className="font-medium text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:text-primary-strong hover:decoration-primary"
+              >
                 tell us what you are building
               </Link>
               .
             </p>
           </header>
 
-          <div className="mt-14">
+          <div className="mt-16">
             <CategoryFilter posts={summaries} categories={categories} />
           </div>
         </div>
