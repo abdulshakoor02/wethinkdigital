@@ -218,3 +218,234 @@ The repo ESLint config previously failed to load because `eslint.config.mjs` imp
 export). The Lead's `npm install` resolved this; `npx eslint` now runs repo-wide. Noted
 only because it predates this revamp and would resurface on a clean install with a
 mismatched `eslint-config-next`.
+
+---
+
+# Ember restyle — regression audit
+
+Owner: `ember-seo`. Scope: prove the technical discoverability layer survived the
+dark→light "Ember" inversion, and restyle `src/app/not-found.tsx`. Nothing below is new
+discoverability work — no route, no metadata field and no schema node was added.
+
+**Headline: PASS on all eight sweep items. No blocking violation found.** One optional
+wording finding (`ranking` in `src/data/posts.ts`) was reported to the Lead rather than
+edited, since it sits in another owner's write scope. One temporary scratch route
+(`src/app/products/render-check/`) was spotted mid-audit, flagged, and has since been
+deleted by its owner — re-verified.
+
+All eight sweeps were re-run **after every Ember writer had stopped** (last writer edit
+00:44; final sweep 00:54–00:56) so the numbers below describe the post-restyle tree, not a
+mid-flight snapshot.
+
+## Method
+
+`<h1>` counts come from a script that (a) strips block and line comments before counting —
+several files mention `<h1>` in prose, which inflates a naive count — (b) resolves local
+`@/…` imports that are actually used as JSX tags, transitively, and (c) counts both literal
+`<h1>` and `as="h1"` passed to `SectionHeading`. JSON-LD was enumerated by scanning every
+`<JsonLd>` tag in each route's transitive import graph and resolving each payload to its
+top-level `@type` (nested nodes such as `Question`, `Answer`, `ListItem` and the
+`BlogPosting` items inside a `Blog` do not count as top-level). `buildMetadata` call sites
+were read individually, including the `generateMetadata` and ternary branches.
+
+## Result table
+
+| # | Check | Result |
+| --- | --- | --- |
+| 1 | Every page still exports metadata via `buildMetadata()` → canonical | **PASS** (13/13) |
+| 2 | Exactly one `<h1>` per route, never zero | **PASS** (12/12 routes + 404) |
+| 3 | No duplicated top-level JSON-LD `@type` per page | **PASS** (12/12 routes) |
+| 4 | All JSON-LD blocks still present | **PASS** |
+| 5 | `FAQPage` on home exactly once; `components/home/FAQ.tsx` emits none | **PASS** |
+| 6 | Sitemap emits 21 URLs (11 static + 10 posts), no duplicates | **PASS** |
+| 7 | `robots.ts` keeps 13 rules; `public/robots.txt` absent | **PASS** |
+| 8 | No hardcoded site URL outside the allowed files | **PASS** |
+| 9 | Banned-word sweep over `src/` and `public/` | **PASS** (1 flagged technical use) |
+| 10 | `public/llms.txt` still accurate | **PASS** — no change needed |
+| 11 | `npx tsc --noEmit` repo-wide / `npx eslint` on the owned files | **PASS** (0 errors, exit 0) |
+
+## 1. Metadata and canonicals — 13/13
+
+All 12 `page.tsx` files still resolve a canonical through `buildMetadata()`, plus
+`not-found.tsx`. Verified after the restyle landed:
+
+| Route | Canonical source |
+| --- | --- |
+| `/` | `src/app/layout.tsx` — `buildMetadata({ path: '/' })` (+ `metadataBase`). The home page itself has no local export **by design**; this is the one documented exception, not a gap. |
+| `/services`, `/products`, `/blog`, `/contact` | Local `export const metadata` with a literal `path` |
+| `/services/*` (×4) | `service ? buildMetadata({ path: service.href, … }) : {}` — data-driven |
+| `/products/*` (×2) | `buildMetadata({ path: product.href, … })`, `product.href` from `siteConfig.apps.*.href` |
+| `/blog/[slug]` | `generateMetadata` — found: `path: '/blog/<slug>'`; missing: `path: '/blog'` + `noIndex` |
+| 404 | `buildMetadata({ path: '/404', noIndex: true })` — unchanged from HEAD |
+
+The four service pages use a ternary with an `: {}` fallback. That is pre-existing, and
+`getService()` resolves all four slugs from `src/data/services.ts`, so the canonical branch
+is always the one that ships; the fallback only exists to satisfy the type. Not a
+regression. No `page.tsx` is a client component (checked for `'use client'` in all 12), so
+no page can silently lose its metadata export.
+
+`src/lib/seo.ts` is **byte-identical to HEAD** (`git diff --quiet` clean) — `buildMetadata`'s
+signature and behaviour are untouched, as required.
+
+## 2. Heading structure — 12/12 routes at exactly one `<h1>`
+
+| Route | h1 owner |
+| --- | --- |
+| `/` | `src/components/Hero.tsx` (1 literal) |
+| `/services` | `src/app/services/page.tsx` |
+| `/services/*` (×4) | `src/components/services/ServicePageTemplate.tsx` (1 literal, shared) |
+| `/products` | `src/app/products/page.tsx` — `SectionHeading as="h1"` |
+| `/products/*` (×2) | `src/components/products/ProductHero.tsx` (1 literal, shared) |
+| `/blog` | `src/app/blog/page.tsx` |
+| `/blog/[slug]` | `src/app/blog/[slug]/page.tsx` |
+| `/contact` | `src/app/contact/page.tsx` |
+| 404 | `src/app/not-found.tsx` (1 literal) |
+
+**Comment trap confirmed and defeated.** `src/components/Hero.tsx` and
+`src/components/products/ProductHero.tsx` each contain two textual occurrences of `<h1>`
+but render exactly one — the other is a doc comment ("the `<h1>` text and every other
+device…", "Owns the single `<h1>`"). A naive `grep -c "<h1"` reports 2 for both and would
+fail the check spuriously. Nothing renders zero.
+
+## 3. Structured data — no duplicated top-level `@type`
+
+Every route also carries the three global nodes from `src/app/layout.tsx`
+(`Organization`, `WebSite`, `ProfessionalService`); page-level additions verified as:
+
+| Route | Page-level top-level nodes | Duplicates |
+| --- | --- | --- |
+| `/` | `FAQPage` | none |
+| `/services` | `ItemList`, `BreadcrumbList` | none |
+| `/services/*` (×4) | `Service`, `FAQPage`, `BreadcrumbList` | none |
+| `/products` | `ItemList`, `BreadcrumbList` | none |
+| `/products/*` (×2) | `SoftwareApplication`, `FAQPage`, `BreadcrumbList` | none |
+| `/blog` | `Blog`, `ItemList` | none |
+| `/blog/[slug]` | `BlogPosting`, `BreadcrumbList` | none |
+| `/contact` | none (global nodes only) | none |
+| 404 | none | none |
+
+`BlogPosting` on `/blog` is nested inside `Blog.blogPost`, and the `Organization` nodes in
+the blog files are nested `author` / `publisher` values inside `BlogPosting` — neither is a
+second top-level node, which is valid.
+
+**`FAQPage` on the home page is emitted exactly once**, unconditionally, server-side, from
+a single `<JsonLd id="json-ld-faq-server">` in `src/app/page.tsx` using `faqData`.
+`src/components/home/FAQ.tsx` renders the same list with **no** JSON-LD and no schema
+import — its doc comment still states that the page owns the node. `home/FAQ.tsx`,
+`ServicesOverview`, `Process`, `TechStack`, `RecentPosts` and `ProductsShowcase` were all
+scanned for `<JsonLd>` and contain none, so no home section duplicated the FAQ node during
+the restyle. `src/components/home/FAQ.tsx` was restyled (`<span className="serif">` on the
+heading) without touching that contract.
+
+## 4. JSON-LD inventory — nothing lost
+
+| Node type | Where it is emitted | Status |
+| --- | --- | --- |
+| `Service` | `serviceSchema.buildServiceSchema()` on all 4 service pages | present |
+| `FAQPage` | home + 4 service pages + 2 product pages (7 nodes, one per page) | present |
+| `BreadcrumbList` | services index, 4 service pages, products index, 2 product pages, `/blog/[slug]` | present |
+| `SoftwareApplication` | `productSchema.softwareApplicationSchema()` on both product pages | present |
+| `BlogPosting` | `/blog/[slug]` (top-level) and nested in `/blog`'s `Blog.blogPost` | present |
+| `Organization` / `WebSite` / `ProfessionalService` | `src/app/layout.tsx` | present |
+| `Blog` / `ItemList` | `/blog`; `ItemList` also on `/services` and `/products` | present |
+
+All builders are unchanged (`src/app/schema.tsx`, `src/components/products/schema.ts`,
+`src/components/services/serviceSchema.ts` are byte-identical to HEAD), so the `@id` graph
+still resolves through `siteConfig.url` exactly as documented in §3.
+
+## 5. Sitemap, robots and shadowing artifacts
+
+- `sitemap.ts` still emits **exactly 21 URLs: 11 static + 10 blog posts**, with no
+  duplicates and nothing missing. Re-read from the current file: 11 `staticRoutes` entries,
+  and `src/data/posts.json` still holds the same 10 slugs verified in §8.
+- `robots.ts` still returns **13 rules** — the `*` rule plus the 12 named AI answer-engine
+  crawlers — with `sitemap: absoluteUrl('/sitemap.xml')` and `host: siteConfig.url`.
+- `public/robots.txt` is **still absent**, and so are `public/sitemap.xml`,
+  `public/sitemap-0.xml` and `next-sitemap.config.js`. `package.json` still has no
+  `postbuild` script, so no static file can shadow the generated routes again.
+
+## 6. Hardcoded site URLs
+
+`grep -rn "wethinkdigital\.solutions" src/ public/` returns hits in exactly two files:
+`src/lib/site.ts` (the definition) and `public/llms.txt` (a static text file that cannot
+import). `src/app/schema.tsx` and the two JSON-LD builders construct every `@id` from
+`siteConfig.url`, so they contain no literal at all. No page or component hardcodes the
+origin.
+
+## 7. Banned-word sweep
+
+```
+grep -rniE "\bseo\b|search engine optimi|digital marketing|\bppc\b|social media marketing|\
+link building|keyword research|google business profile|growth audit|\brankings?\b|\bserp\b|\
+content marketing|email marketing|dubai domination|roi calculator" src public
+```
+
+Zero user-facing hits. The 18 remaining matches are all the `@/lib/seo` **module specifier**
+(a file path, not copy) and are excluded per the brief.
+
+**One flagged item, not a violation — reported, not edited.** `src/data/posts.ts` lines
+653, 672 and 688 (owned by `content-eng`) use the word *ranking* in its
+information-retrieval sense, inside the production-RAG article: "pre-ranking", "spend real
+computation ranking only those fifty", "Post-filtering after ranking is also wrong". This is
+retrieval-reranking vocabulary, not marketing rankings, and the article is otherwise
+unambiguously engineering-led. It is strictly inside the contract's `rankings` token, so
+the Lead should decide: keep it (technically correct, matches `reranking` used throughout
+the same post) or swap to "scoring" / "ordering" if a literal substring check must pass.
+No other positioning term appears anywhere in `src/` or `public/`.
+
+## 8. `public/llms.txt`
+
+Reviewed line by line against `src/lib/site.ts`, the sitemap routes and the 10 published
+posts. It still matches the site: the same four services, both products with their real
+app URLs (`agents.wethinkdigital.solutions`, `resume.wethinkdigital.solutions`), `/blog` and
+`/contact`, the HQ/contact/language line, and the note that pricing, timelines and client
+metrics are unpublished. The blog description names only topics the 10 live posts cover.
+No deleted route is referenced. **No contradiction found — the file was left unchanged**
+(29 lines, as committed).
+
+## 9. `src/app/not-found.tsx` — restyled, content untouched
+
+| | Before | After |
+| --- | --- | --- |
+| Canvas | `grid-bg` section on the page background | `bg-background` (bone) with the Ember `.mesh` warm gradient + `.m-fade` |
+| `h1` | `text-4xl … sm:text-5xl lg:text-6xl font-bold` | `text-[2.5rem] sm:text-6xl lg:text-[4.4rem] font-semibold tracking-[-0.045em] leading-[1.06]`, with `<span className="serif">isn&apos;t here</span>` — one serif phrase, 2 words |
+| Lede | `text-lg` | `text-[1.05rem] leading-[1.66] text-muted sm:text-[1.0625rem]` |
+| Section label | hand-rolled uppercase `h2` | `.mono-label` on the same `h2` |
+| Link cards | `.surface` + `rounded-xl border border-line` + `block` | `.surface surface-hover` + `flex flex-col` (`.surface` already owns border + 14px radius) |
+| Grid | `gap-4` | `gap-3.5` (Ember bento rhythm) |
+| Buttons | `.btn-primary` / `.btn-secondary` | unchanged — both are pills now via `globals.css` |
+
+Unchanged by design: the metadata export (canonical `/404`, `noIndex: true`), the copy, the
+`pt-32` top padding, `id="main"`, the 404 eyebrow and **all five destinations** — Home,
+Services, Products, Blog, Contact. `git diff` confirms the metadata block and every
+user-facing string are byte-identical to HEAD; the only additions are the presentational
+classNames and one explanatory comment. Exactly one `<h1>`.
+
+## Flagged for the Lead (other owners' files — not edited)
+
+1. **`src/app/products/render-check/page.tsx` — RESOLVED.** A temporary screenshot harness
+   appeared during the restyle (`/** TEMPORARY screenshot harness — deleted before
+   hand-off. */`). It was a real, reachable route with no `<h1>` and no metadata export, and
+   correctly absent from the sitemap. It was flagged mid-audit and its owner has since
+   deleted the whole `src/app/products/render-check/` directory; the route list is back to
+   exactly the 12 documented pages. Re-verified after deletion.
+2. **`ranking` in `src/data/posts.ts`** — see §7 above. Optional wording change only.
+3. **`src/app/layout.tsx:63` raw hex in the critical-CSS block** — the inline `:root{…}`
+   that mirrors the bone/ink/ember tokens for first paint. It trips a literal
+   `#1[0-9a-f]{5}` grep, but the values *are* the Ember tokens (`#f6f4ef`, `#141310`,
+   `#d9481f`, `#ddd8cb`) and the duplication is deliberate (no flash of the old dark
+   palette before the stylesheet resolves). No blue or navy value survives anywhere in
+   `src/`. Recommend keeping; noted so the Lead's final grep is not a surprise.
+   (The only other hex hits in `src/` are a comment in `WhatsAppButton.tsx` explaining why
+   WhatsApp green is *not* used, plus PR/issue numbers like `#812` that merely look like
+   hex.)
+
+## Verification commands run
+
+- `npx tsc --noEmit` → **0 errors repo-wide**.
+- `npx eslint src/app/not-found.tsx src/app/schema.tsx src/app/sitemap.ts src/app/robots.ts src/components/JsonLd.tsx src/lib/seo.ts` → **exit 0**.
+- `grep -rn "oklch\|#0[0-9a-f]\{5\}\|#1[0-9a-f]\{5\}"` over the owned files → no matches.
+- `git diff --stat` over my scope → only `src/app/not-found.tsx` changed (23 insertions,
+  13 deletions); `seo.ts`, `schema.tsx`, `sitemap.ts`, `robots.ts` and `JsonLd.tsx` are
+  byte-identical to HEAD.
+- `npm run build` was **not** run — the Lead owns the integration build.

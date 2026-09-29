@@ -55,9 +55,18 @@ award badges. Where a metric is illustrative, frame it as a capability, not a cl
 | `/contact` | core-shell | Real page, not just an anchor |
 | `/not-found` | seo-eng | |
 
-**Deleted routes** (Lead already removed them): `/seo-services`, and the six SEO/marketing
-blog posts. They return 404 — that is intentional and approved by the client. Do **not**
-add redirects for them.
+**Deleted routes** (Lead already removed them): `/seo-services`, and the ten SEO/marketing
+blog posts. The pages themselves are gone, but the URLs are **not** dead — `next.config.ts`
+carries a `redirects()` block that 301s them to the closest current page:
+
+- service-intent URLs (`/seo-services`, `best-seo-*-dubai`, `website-design-*-dubai`,
+  `free-crm-*-dubai`) → `/services`, `/services/web-development` or
+  `/services/software-development`
+- retired marketing content → `/blog`
+
+Rationale: those URLs still hold the site's only search-console impressions, so a 404
+throws the crawl signal away instead of passing it on. **If you delete or rename a route
+in future, add or update its redirect here rather than letting it 404.**
 
 ---
 
