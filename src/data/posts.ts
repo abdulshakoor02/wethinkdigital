@@ -9,6 +9,297 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '11',
+    slug: 'free-website-and-landing-page-design',
+    title: "Free Website and Landing Page Design: What Is Actually Free",
+    excerpt: "We design and build your site at no cost and host it free for three months. Here is the honest cost over three years, and where a free build is the wrong choice.",
+    content: `
+<h2>What "free" means here, and what it actually costs</h2>
+
+<p>Start with the question every buyer should ask: if the build is free, where does the money come from, and what will this cost me a year from now?</p>
+
+<p>Here is the whole arrangement. <strong>We design and build your website or landing page at no charge.</strong> In return — a condition, not a suggestion — you host it with us. Hosting is free for three months, then <strong>AED 50 per month</strong>. The domain you pay for yourself: it is registered in your name, you own it, and it is not part of the offer.</p>
+
+<p>That is the entire deal: no second invoice, no free domain — a domain is not ours to give away. One recurring cost, AED 50 a month, from month four.</p>
+
+<blockquote>Free design and build. Your domain, bought and owned by you. Our hosting, free for three months and AED 50 a month after that.</blockquote>
+
+<h3>The first year in numbers</h3>
+
+<p>Three months free, then nine at AED 50: <strong>AED 450</strong> of hosting in year one. A .com domain costs roughly AED 40 to 60 a year from a registrar, and that price moves, so check it yourself. First-year cash cost is therefore about <strong>AED 490 to 510</strong>; from year two, AED 600 plus renewal.</p>
+
+<p>AED 50 a month is not nothing, but it is a small recurring cost instead of a large one, and it pays for something specific: a site somebody else keeps online. The full terms sit on our <a href="/offers">offers page</a>.</p>
+
+<h2>The three-year comparison, honestly</h2>
+
+<p>The useful comparison is not "free versus a large invoice" but what you spend over the life of the site, your own hours included. Most small businesses choose between three routes: someone builds it, you build it on a subscription platform, or you pay a freelancer.</p>
+
+<p>The figures below are <strong>illustrative</strong> — typical list prices at the time of writing, rounded. They vary by plan and country, and a freelancer's quote could easily be half or double. Check current pricing before you decide, ours included.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Route</th>
+      <th>Build</th>
+      <th>Hosting or subscription, 3 years</th>
+      <th>Domain, 3 years</th>
+      <th>Indicative 3-year total</th>
+      <th>The real risk</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Built by us</td>
+      <td>AED 0</td>
+      <td>AED 1,650 — free for 3 months, then AED 50 a month</td>
+      <td>About AED 120–180, paid by you</td>
+      <td>About AED 1,770–1,830</td>
+      <td>You host with us, so moving away later means moving the site.</td>
+    </tr>
+    <tr>
+      <td>Single-page builder (Carrd and similar)</td>
+      <td>AED 0, plus your time</td>
+      <td>Roughly AED 210–540 for a paid single-page plan</td>
+      <td>About AED 120–180</td>
+      <td>About AED 330–720</td>
+      <td>One page, limited structure, and you are the designer.</td>
+    </tr>
+    <tr>
+      <td>Full site builder (Squarespace, Wix and similar)</td>
+      <td>AED 0, plus 15–40 hours of your time</td>
+      <td>Roughly AED 1,050–2,700 for a paid plan</td>
+      <td>About AED 120–180</td>
+      <td>About AED 1,170–2,880</td>
+      <td>You rent the platform. Stop paying and the site disappears.</td>
+    </tr>
+    <tr>
+      <td>Cheap freelancer</td>
+      <td>AED 1,500–6,000</td>
+      <td>AED 0–1,800, where hosting is billed separately at all</td>
+      <td>About AED 120–180</td>
+      <td>About AED 1,620–7,800</td>
+      <td>Continuity. When they stop replying, the credentials go with them.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Two things worth saying out loud. The cheapest route is the single-page builder, and for one page with a form on it that is a legitimate choice: if your time is free, Carrd will cost less than we will. Ours is not the smallest number here — it is the most predictable, and the only one where somebody else is on the hook when the form breaks on a Friday night.</p>
+
+<h3>The cost the table cannot show</h3>
+
+<p>Subscription builders are priced as though your time were free. Writing the words, fighting a template, resizing images, discovering the mobile view looks nothing like the desktop preview: put a value on those evenings and the gap between DIY and having it built is thinner than the price suggests. Freelancers have the opposite problem: priced properly, then the relationship ends.</p>
+
+<h2>Why we can build it for nothing</h2>
+
+<p>We are not being generous. In an agency the margin sits in the build; with us it sits in the hosting, which is why we give the build away and ask you to host with us. Our team already builds web applications, so a landing page is a day or two of work for people we employ anyway. The cost to us is low; the value is a customer who stays.</p>
+
+<p>There is a second reason, less flattering to us. Nobody buys a website from a company they have never heard of, and quoting a build fee to every stranger would cost more in chasing that first yes than the build is worth. Free removes the risk from your side; hosting puts it back on ours — if the site is slow, broken or ignored, you leave in month four and we have spent the engineering for nothing.</p>
+
+<p>Sometimes a free build grows into something bigger — an internal tool, an automation, a product — which tends to happen when a relationship starts with delivered work rather than a proposal. What the offer does not include, because implying otherwise would be dishonest: the domain, the words, the photographs, logo design, unlimited revisions, or anyone to promote the site after launch. We design and build it; everything else is yours to bring, or separate work, and we will say which.</p>
+
+<blockquote>We are buying the first few months of a working relationship with a couple of days of engineering time. It is a trade, not a favour, and you should know its terms before you say yes.</blockquote>
+
+<h2>What a landing page actually needs to convert</h2>
+
+<p>"Convert" is a cold word for "somebody does the thing you wanted". Most pages fail for boring, fixable reasons.</p>
+
+<h3>One offer, one action</h3>
+
+<p>A landing page exists to make a single action obvious. The common failure is four calls to action — book a call, download the brochure, follow us, read the blog — and no signal about which matters. Choose one. Every section either supports it or answers an objection; anything else is decoration.</p>
+
+<h3>The first screen has one job</h3>
+
+<p>Say what you sell and who it is for, in the first line, without cleverness. "Accounting for contractors who hate paperwork" beats "Empowering your financial future", because the second could belong to anyone and so belongs to no one. Then one sentence on what changes for the customer, then one piece of proof: a real screenshot, a real photograph, a client logo you have permission to use. If you have no proof yet, say what you will do and by when. Never invent any.</p>
+
+<h3>Speed is a design decision, not a later fix</h3>
+
+<p>Every heavy element is paid for by the person on a mid-range phone. A lighter hero image and CSS animation will feel faster than a cleverer page that weighs more — our own home page hero is plain CSS for that reason. Aim for text on screen within a second over 4G, the largest image under roughly 200KB, and 2.5 seconds to the largest visible element as the line not to cross. Those are targets, not promises.</p>
+
+<h3>Mobile is the default, not the fallback</h3>
+
+<p>Design the narrow screen first: tap targets of at least 44 pixels, no interaction that depends on hovering, the right keyboard for email and phone fields, a phone number that dials when tapped, nothing below 16 pixels. Then test on a real phone, not a resized browser window: that is where layout bugs hide.</p>
+
+<h3>A form nobody answers is worse than no form</h3>
+
+<p>Ask for as little as you can: a name, one way to reach them, one open field. Every extra field costs submissions, and demanding a budget on first contact costs more than it is worth. Decide what happens after somebody submits before you launch — if the notification lands in an inbox nobody opens, the page is decoration. One person, one inbox, a reply inside a working day.</p>
+
+<h2>When a free build is the wrong choice</h2>
+
+<p>We turn work down, and this is one we turn down regularly. If you recognise yourself below, a free landing page is not what you need — saying so early saves us both a wasted month.</p>
+
+<h3>Real e-commerce</h3>
+
+<p>A shop is not a page. Product variants, stock, tax, shipping rates, returns and refunds are software with genuine failure modes, each a project in its own right. You want a platform built for it, not a page with a checkout bolted on.</p>
+
+<h3>Heavy integrations</h3>
+
+<p>Booking with live availability, your CRM or finance system, single sign-on, payments, multi-language content: each is defined engineering with its own testing and support burden — reasonable in a paid project, not in a free build with no budget for the week a third-party API changes its mind.</p>
+
+<h3>You already have a site and a design system</h3>
+
+<p>If your current site works and is simply out of date in places, starting again throws away the parts that were fine. You need maintenance and targeted improvement on the existing codebase, which is <a href="/services/web-development">paid web development work</a> we will quote for.</p>
+
+<h3>You need a publishing platform, not a page</h3>
+
+<p>If several people must publish and edit pages every week, you need a content management system with roles and review. A landing page is not that, and pretending otherwise produces a support queue.</p>
+
+<h3>You cannot give feedback on a schedule</h3>
+
+<p>The build is free, so our only cost control is time. When a project takes eight weeks because comments arrive in dribs and drabs and nobody owns the decision, the offer stops working. We would rather decline.</p>
+
+<h2>What you need to bring</h2>
+
+<p>The build is free. These are not, and they are not optional. Every stalled free project came to rest on one.</p>
+
+<ul>
+  <li><strong>The domain.</strong> Buy it in your own name and keep the registrar login. Tell us where it lives and we will tell you what to point at us.</li>
+  <li><strong>The words.</strong> What you sell, who buys it, what it costs, why somebody picks you over the alternative. We do not write your copy — nobody outside your business can do that well.</li>
+  <li><strong>Images you have the right to use.</strong> Photographs of real work, real premises, real people beat stock every time, and phone photographs are fine. If you have nothing, we will use licensed placeholders.</li>
+  <li><strong>One decision maker.</strong> Not a committee. Pick the person who can approve a headline without consulting three colleagues, then let them approve it.</li>
+  <li><strong>Feedback in one round.</strong> Read the page, collect the comments, send them together. Ten small messages over three weeks is the biggest cause of slow free builds.</li>
+  <li><strong>An inbox somebody checks.</strong> Name the address enquiries go to before launch, not after the first submission vanishes.</li>
+</ul>
+
+<h2>How to get one</h2>
+
+<p>Email <a href="mailto:info@wethinkdigital.solutions">info@wethinkdigital.solutions</a> with four things: what you sell, who buys it, whether you already have a domain, and one site you like and why. That is enough for us to say whether this is a fit, and what we would build. Prefer a form? Use the <a href="/contact">contact page</a>. Want to see how we think first? Read a few of our <a href="/blog">engineering notes</a>.</p>
+
+<p>If it is a fit, we design and build the site at no charge, you keep the domain you bought, hosting is free for three months, and after that it is AED 50 a month. If it is not, we will tell you what you actually need, even when that is a platform we do not sell. Either answer beats a sales call.</p>
+    `,
+    date: '2026-09-30',
+    author: 'WeThinkDigital Engineering',
+    readTime: '9 min read',
+    category: 'Web Development',
+    tags: ["free website","landing page design","web development","hosting","small business"],
+    metaTitle: "Free Website Design & Landing Pages — What Is Actually Free",
+    metaDescription: "We design and build your website or landing page at no cost. Hosting is free for 3 months, then AED 50 per month. Here is the honest cost over three years.",
+    keywords: ["free website design","free landing page design","free website build","free website with hosting","website design cost","landing page design"],
+  },
+  {
+    id: '12',
+    slug: 'free-crm-software-unlimited-users',
+    title: "Free CRM Software With Unlimited Users and Contacts",
+    excerpt: "Most free CRMs cap seats or records, which is exactly what breaks a CRM. Here is why coverage matters, and what our free-forever tier does and does not include.",
+    content: `
+<h2>Almost every free CRM caps the thing that makes a CRM work</h2>
+
+<p>A free CRM tier is not a gift. It is the top of a funnel — a reasonable way to sell software, but you should read it as one. The restrictions come in four shapes: a ceiling on users, a ceiling on stored records, features that exist only on the next tier up, and a definition of "free" that quietly ends at a term boundary.</p>
+
+<p>The seat cap is the one teams notice, because somebody has to decide who gets a login. The record cap does the most damage, because it negotiates against the reason you wanted a CRM. Feature gating is the easiest to miss: reporting, permissions, audit history and workflow automation commonly sit above the free line. A time limit is straightforward: free for a while, then read-only, or converted to a smaller plan without announcement.</p>
+
+<p>We are not going to quote specific limits. Vendors re-cut their free tiers regularly, sometimes without much fanfare, and a number that was accurate last year is worse than none at all: it looks like evidence and it is out of date. Check the current terms on the vendor's own pricing page, and read the limits rather than the headline. "Free" tells you about price, not fit — and the only question that matters is whether the limit lands on something your team depends on.</p>
+
+<h2>Why a per-seat cap quietly kills a CRM</h2>
+
+<p>A CRM is not a personal productivity tool. It is a shared record, and its value comes from being the one place a customer exists completely.</p>
+
+<p>Now put a seat cap on it. Eleven people touch customers — sales, support, accounts, the founder — and you have three logins. What happens next takes about a fortnight.</p>
+
+<ul>
+  <li><strong>The eight without a login keep working as before.</strong> Spreadsheets, shared inboxes, private notes, memory — nothing about their behaviour changed, because nothing about their tools did.</li>
+  <li><strong>The three with a login stop trusting what they see.</strong> Their view is partial by construction, so they keep a private record alongside the official one; the CRM becomes a summary rather than the source.</li>
+  <li><strong>Someone shares a login.</strong> The obvious workaround is worse than it looks: activity history credits one person's work to another, and a wrong audit trail is more dangerous than none, because people rely on it.</li>
+  <li><strong>Seat allocation becomes political.</strong> Logins go to seniority rather than to the people who speak to customers.</li>
+</ul>
+
+<p>You end up with the cost and ceremony of a CRM and the fragmentation of not having one: ask what was promised to a customer last month and nobody can answer without opening three other applications.</p>
+
+<p>The point is structural, not moral. A CRM holding a fraction of the customer conversation is one nobody trusts, and an untrusted CRM gets abandoned — usually without a decision, just a drift back to the spreadsheet. Coverage is the feature; dashboards, forecasting and automated summaries are downstream of the record being complete.</p>
+
+<h3>Why a record cap is worse than it looks</h3>
+
+<p>A ceiling on contacts prices your growth. The deeper damage is what it teaches people to do: when records are scarce, teams delete old ones to make room, keep the overflow in a spreadsheet, and skip the contacts that feel marginal — the supplier, the referral partner, the prospect who went cold eighteen months ago. The CRM becomes an archive of customers who already mattered, which is a list you could have written from memory. The records you need a system for are the ones nobody knows are important yet.</p>
+
+<blockquote>Free tiers rarely fail on capability. They fail on coverage — a record is only as trustworthy as the number of people allowed to write to it.</blockquote>
+
+<h2>What a CRM actually has to do</h2>
+
+<p>Strip away the feature matrix and four things decide whether a CRM works. Everything else is a refinement of them.</p>
+
+<ol>
+  <li><strong>One record per customer.</strong> One organisation, one owner, one place the relationship lives. The test: two colleagues search for the same customer and land on the same record, not two near-identical ones.</li>
+  <li><strong>A pipeline whose stages mean something.</strong> A stage is a claim about what has already happened, not a hope about what might. Each needs a definition you could argue about and win — what must be true before a record moves — and few enough stages to hold in your head. Five to seven, not twenty.</li>
+  <li><strong>Activity history in one place.</strong> Calls, emails, meetings, notes, proposals, the decision to discount. The test: if the account owner goes on holiday, can a colleague pick the relationship up without asking them a single question?</li>
+  <li><strong>A follow-up that does not depend on memory.</strong> Every open record carries a next action and a date — not a status, not a colour. The test: on Monday morning there is a list of what is due, and it is short enough to read in one sitting.</li>
+</ol>
+
+<p>Notice what is not on that list: reporting, forecasting, lead scoring, dashboards. Those are useful once the foundations are true and decorative before. Most CRM failures are not feature failures at all — they are coverage and discipline failures wearing a feature costume.</p>
+
+<p>There is a layer above this where the manual work hides: reminders someone has to type, tasks someone has to reassign, updates copied between systems. That layer is automatable once the record underneath it is sound, and it is the part we work on in <a href="/services/ai-automation">AI automation</a>.</p>
+
+<h2>Our CRM, honestly described</h2>
+
+<p>We built a CRM and we run it ourselves. It is free, permanently, with no cap on contacts and no cap on users. Not a trial with a clock on it, not a free plan that expires, not a tier that stops making sense at eleven people.</p>
+
+<p>Access is by request rather than instant signup. There is no self-serve URL to click: we set each account up with the team that asked for it. That is a deliberate trade, and the honest part of this offer.</p>
+
+<h3>What you get, and what not to expect</h3>
+
+<p>You get the product described above, with unlimited users and unlimited contacts, at no cost, without a card and without a licence review. You also get us: we built it, we run it, and the people who answer your email are the people who can change it — there is no support portal in between.</p>
+
+<p>What you should not expect is a commercial agreement dressed up as a free product. Specifically:</p>
+
+<ul>
+  <li><strong>No enterprise service-level agreement.</strong> We will not publish a response time we cannot guarantee, and there is no contractual uptime commitment behind this. If you need a signed guarantee, this is not the tool for that requirement.</li>
+  <li><strong>No bespoke development inside the free tier.</strong> If you need custom objects, a specific integration or a workflow that does not exist yet, that is a project rather than a support request — exactly the kind our <a href="/services/software-development">software development practice</a> takes on, quoted separately.</li>
+  <li><strong>Not every feature of a large commercial suite on day one.</strong> This is a CRM built by an engineering team that uses it, and it does the four things above properly. If something you need is missing, tell us.</li>
+</ul>
+
+<p>"Forever" here means the terms do not move underneath you: no clock, no cap, no upgrade path you are being nudged along. It does not mean we have solved every CRM problem, or that the product will never change. It means the price is not a lever.</p>
+
+<h2>Moving off spreadsheets without stalling the week</h2>
+
+<p>Most spreadsheet migrations do not fail; they half-finish, and the team runs both systems forever. The sequence that avoids that takes about a fortnight of part-time work.</p>
+
+<pre><code>What the spreadsheet column usually is    What it should become
+--------------------------------------    ----------------------------------------
+"Company" - free text, many variants      One organisation record, one owner
+"Contact" - a name and an email           A contact linked to that organisation
+"Status" - whatever each person typed     A pipeline stage with a written rule
+"Notes" - a year of prose                 Dated activity records, oldest first
+"Next step" - frequently empty            A next action and a due date, always set
+Any row with no owner                     Decide the owner before anything moves</code></pre>
+
+<ol>
+  <li><strong>Start with one team and one pipeline.</strong> Not the whole company, not every process — one group of people who already talk to each other, one journey from first contact to paid.</li>
+  <li><strong>Write the stage definitions before you touch the data.</strong> One sentence each, agreed out loud, including what disqualifies a record. Teams skip this, and it decides whether the pipeline is ever believed.</li>
+  <li><strong>Decide what identifies a customer.</strong> Company name plus domain, or company name plus billing entity. Pick one rule and apply it everywhere; retrofitting identity rules onto a full database is miserable.</li>
+  <li><strong>Move the sheet in, then deduplicate on purpose.</strong> Expect duplicates and settle the merge rule in advance — oldest record wins, or the one with activity attached.</li>
+  <li><strong>Put a next action on every open record.</strong> All of them, in one sitting. A pipeline without next actions is a report; a pipeline with them runs the business.</li>
+  <li><strong>Run in parallel for one week with the sheet read-only.</strong> Read-only is the important word: a sheet that is still editable is still the real system, and everyone knows it.</li>
+  <li><strong>Retire the sheet, then watch for workarounds.</strong> The moment of truth is not the migration; it is the first person who cannot find what they need and reaches for a new spreadsheet. Fix that cause, not the symptom.</li>
+  <li><strong>Review at thirty days and delete fields.</strong> Whatever nobody fills in or filters on is noise; a CRM that asks for eighteen fields gets four filled in badly.</li>
+</ol>
+
+<h2>Who should not use it</h2>
+
+<p>It is cheaper for both of us if this part is clear before you move any data.</p>
+
+<ul>
+  <li><strong>Teams whose CRM is really a custom application.</strong> If you need deeply custom objects, elaborate permission models, or a data model that does not resemble customers, organisations, deals and activities, you are describing a software project — and bending a general CRM into that shape costs more than building the right thing.</li>
+  <li><strong>Regulated workflows that require specific certifications.</strong> If your compliance team needs particular certifications or a written data-residency arrangement, raise it in the first email. We would rather tell you we do not fit than have you find out mid-migration.</li>
+  <li><strong>Teams that need procurement paperwork.</strong> A free product is not automatically an easy one to buy. If your process expects a signed agreement, a purchase order and a security review, say so early and check whether it is workable.</li>
+  <li><strong>Teams that need a large integration marketplace.</strong> If the CRM has to be the hub for twenty other systems using off-the-shelf connectors, verify your integrations first. Coverage of the customer record is the strength here; catalogue breadth is not.</li>
+</ul>
+
+<p>The pattern is the one this article opened with: unlimited users and unlimited contacts, not unlimited everything.</p>
+
+<h2>How to get access</h2>
+
+<p>Email <a href="mailto:info@wethinkdigital.solutions">info@wethinkdigital.solutions</a> with two or three lines: roughly how many people touch customers, what you use today, and the first thing you would want to move. We will set the account up and help you get the first pipeline into it — usually the difference between a CRM that sticks and one that becomes another abandoned tab.</p>
+
+<p>If you would like the wider picture first, our <a href="/offers">current offers</a> are the shortest route to what we do and how we work, and the <a href="/contact">contact page</a> covers everything else.</p>
+    `,
+    date: '2026-09-29',
+    author: 'WeThinkDigital Engineering',
+    readTime: '8 min read',
+    category: 'Software Development',
+    tags: ["free crm","crm software","unlimited users","sales pipeline","small business"],
+    metaTitle: "Free CRM Software With Unlimited Users and Contacts",
+    metaDescription: "A free CRM with unlimited users, unlimited contacts and no expiry. Not a trial. Here is what it does, what it does not, and how to get access.",
+    keywords: ["free crm software","free crm with unlimited users","free crm unlimited contacts","free crm forever","crm software free","free crm for small business"],
+  },
+  {
     id: '1',
     slug: 'ai-code-review-best-practices',
     title: 'Code Review in the Age of AI-Generated Code',

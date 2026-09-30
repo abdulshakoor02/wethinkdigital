@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { siteConfig } from '@/lib/site';
 
 const companyLinks = [
+  { name: 'Offers', href: '/offers' },
   { name: 'Process', href: '/#process' },
   { name: 'Blog', href: '/blog' },
   { name: 'Contact', href: '/contact' },

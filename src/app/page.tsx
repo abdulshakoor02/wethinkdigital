@@ -4,6 +4,7 @@ import LazySection from '@/components/LazySection';
 import JsonLd from '@/components/JsonLd';
 import ServicesOverview from '@/components/home/ServicesOverview';
 import ProductsShowcase from '@/components/home/ProductsShowcase';
+import OffersPromo from '@/components/home/OffersPromo';
 import Capabilities from '@/components/home/Capabilities';
 import Process from '@/components/home/Process';
 import TechStack from '@/components/home/TechStack';
@@ -49,6 +50,10 @@ export default function Home() {
 
       <LazySection intrinsicHeight="42rem">
         <ProductsShowcase />
+      </LazySection>
+
+      <LazySection intrinsicHeight="34rem">
+        <OffersPromo />
       </LazySection>
 
       <LazySection intrinsicHeight="36rem">

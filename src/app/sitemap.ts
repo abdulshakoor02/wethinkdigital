@@ -68,6 +68,7 @@ const staticRoutes: {
   { path: '/products', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/products/agents', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/products/resume-ai', changeFrequency: 'monthly', priority: 0.9 },
+  { path: '/offers', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/blog', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/contact', changeFrequency: 'yearly', priority: 0.6 },
 ];
