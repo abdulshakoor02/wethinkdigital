@@ -46,6 +46,21 @@ const nextConfig: NextConfig = {
   // 301 (not Next's default 308) so every SEO tool reports them as permanent.
   async redirects() {
     return [
+      // Canonical host consolidation. siteConfig.url, every page's canonical tag
+      // (buildMetadata → alternates.canonical), sitemap.xml and robots.txt all
+      // declare www as the canonical host — but the apex was never redirected, so
+      // it served a full 200 copy of the whole site. Two hostnames serving identical
+      // pages are two indexed URL sets, and signals earned by one don't transfer to
+      // the other: GSC shows the same homepage at avg position 4.8 on the apex and
+      // 46.6 on www. This is a hint Google was free to overrule, and did.
+      // Keep the apex host-match EXACT (no catch-all) so www cannot match its own
+      // redirect and loop.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'wethinkdigital\\.solutions' }],
+        destination: 'https://www.wethinkdigital.solutions/:path*',
+        statusCode: 301,
+      },
       // Service-intent legacy URLs → the closest current offer page
       { source: '/seo-services', destination: '/services', statusCode: 301 },
       { source: '/blog/best-seo-company-in-dubai', destination: '/services', statusCode: 301 },
