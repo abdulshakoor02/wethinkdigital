@@ -10,7 +10,7 @@ export const siteConfig = {
   tagline: 'AI systems and software that ship.',
   description:
     'WeThinkDigital is an AI and software engineering company. We build AI automation, autonomous agent systems, custom software and modern web applications for teams that need to move faster.',
-  email: 'hello@wethinkdigital.solutions',
+  email: 'info@wethinkdigital.solutions',
   phone: '+971 58 929 3060',
   phoneHref: 'tel:+971589293060',
   whatsapp: 'https://wa.me/971589293060',
