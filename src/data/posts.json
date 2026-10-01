@@ -1,5 +1,11 @@
 [
   {
+    "id": "13",
+    "slug": "llm-eval-gates-in-ci",
+    "title": "Eval Gates in CI: Catching LLM Quality Regressions Before They Ship",
+    "date": "2026-10-01"
+  },
+  {
     "id": "11",
     "slug": "free-website-and-landing-page-design",
     "title": "Free Website and Landing Page Design: What Is Actually Free",

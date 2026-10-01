@@ -9,6 +9,173 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '13',
+    slug: 'llm-eval-gates-in-ci',
+    title: 'Eval Gates in CI: Catching LLM Quality Regressions Before They Ship',
+    excerpt:
+      'A non-deterministic system graded by a non-deterministic judge produces a check that either blocks every merge or is ignored. How we build eval gates that survive: deterministic checks as the gate, a measured noise floor, critical slices that block on a single case, and a judge kept advisory.',
+    content: `<p>The first version of an eval gate is a number. The second version is a threshold. The third version is a file nobody looks at, and the route between them is predictable: a change that had nothing to do with the suite went red, someone re-ran the job, it went green, and from that moment the check was advice rather than a gate.</p>
+
+<p>We have built this wrong before. What follows is the version that survived contact with our own team, and the reasoning for each decision — because almost none of these decisions are about models. They are about failure modes.</p>
+
+<h2>Why a test-shaped gate fails on a stochastic system</h2>
+
+<p>A CI check is a promise of determinism. The same commit gives the same result, so a red build means the code is wrong, and that contract is the only reason people act on red. Unit tests can hold that promise because code is deterministic. A model at non-zero temperature is not, and neither is a language model grading another language model's output.</p>
+
+<p>Put a stochastic system behind a deterministic gate and you get one of two failure modes, depending on which way you lean. Set the bar strictly and one flipped case out of thirty fails an unrelated merge; the first fix anyone reaches for is the re-run button, and if the second run is green the check has taught the team that red sometimes means nothing. That lesson does not come back — the check is now ignorable, and rewriting thresholds later will not restore its authority. Set the bar loosely and the gate passes changes it should have caught, which is worse, because a passing gate reads as evidence.</p>
+
+<p>The way out is not to pretend the system is deterministic. It is to separate the part of the work that can be graded exactly from the part that cannot, and to treat the remainder as a measurement with an error bar instead of a verdict.</p>
+
+<h2>Separate the gate from the signal</h2>
+
+<p>More of the safety surface than teams expect can be graded by code, exactly, on every run. That set is the gate. Everything else is a quality score, and a quality score should inform a human decision rather than turn a merge red on its own.</p>
+
+<table>
+  <thead>
+    <tr><th>Check</th><th>Role</th><th>Cost per case</th><th>What it catches</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Schema and format validity</td><td>Gate</td><td>None</td><td>Output a downstream service cannot parse</td></tr>
+    <tr><td>Required fields, types and ranges</td><td>Gate</td><td>None</td><td>Missing or impossible values that pass a format check</td></tr>
+    <tr><td>Refusal and boundary detection</td><td>Gate</td><td>None</td><td>An answer produced where the system should have declined</td></tr>
+    <tr><td>Cited identifiers exist in retrieved context</td><td>Gate</td><td>None</td><td>Fabricated sources and claims with no support</td></tr>
+    <tr><td>Tool-call arguments match the tool schema</td><td>Gate</td><td>None</td><td>Arity, type and enum errors the runtime would reject</td></tr>
+    <tr><td>Token, latency and step ceilings</td><td>Gate</td><td>None</td><td>Cost and latency drift no quality metric shows</td></tr>
+    <tr><td>Open-ended quality rubric</td><td>Advisory</td><td>One or more model calls</td><td>Tone, completeness and style — real quality no assertion expresses</td></tr>
+  </tbody>
+</table>
+
+<p>The distribution is the point. The left column is free, exact and reproducible; the bottom row is a measurement. Write the deterministic checks first and notice how much of your genuine risk surface they already cover. If a downstream service parses the model's output, validity is not a metric, it is a contract: it holds or it does not. If the system is meant to decline when there is nothing to ground an answer on, that is detectable by code in most cases. Tool arguments are schema-shaped by definition, and a citation identifier either exists in the context you sent or it was invented.</p>
+
+<p>What is left for a judge is real but narrower than it looks: the cases where there is no single right answer and quality is a judgement. Keep that number advisory until it has been calibrated against human labels, because an unvalidated judge is a second stochastic system with its own biases, and putting it in the blocking path gives you two unreliable things instead of one.</p>
+
+<h3>Slice the suite, and mark some slices critical</h3>
+
+<p>One pass rate over the whole suite hides where the loss happened and lets a large easy slice dilute a small important one. Slice by capability — extraction, tool selection, refusal, long-context summarisation, whatever the feature actually does — and mark the slices where a regression is not survivable.</p>
+
+<p>Critical slices block on a single case, with no statistics involved. If one case moved from pass to fail in a slice covering output validity, a safety boundary or a permission boundary, you do not need a significance test to know what to do. The asymmetry is the argument: blocking a good change costs a conversation, and shipping a bad one across a permission boundary costs an incident. Where the boundary is a retrieval concern rather than a prompt concern, the failure mode is worse than a bad answer, which is why we treat it as a gate rather than a metric in <a href="/blog/building-production-rag-systems">our RAG note</a>.</p>
+
+<p>Everything outside those slices is a statistical question, and that is the harder engineering.</p>
+
+<h2>Measure the noise floor instead of choosing a tolerance</h2>
+
+<p>Almost every broken eval gate has a hand-picked tolerance inside it: a drop past this number blocks, a drop under it does not. That number is usually chosen by taste and it is wrong in both directions at once — too tight for a suite of twenty cases, where ordinary variance moves the result more than the threshold, and too loose for the behaviour that changed in a handful of cases and matters most.</p>
+
+<p>Measure the spread instead. Take the version you currently trust, run the suite against it repeatedly without changing anything, and record how much the result moves on its own. That movement is the run-to-run variation of an unchanged system — its noise floor — and it is what a candidate result should be compared against. A result inside the floor is not a regression; it is the system being what it is, and a gate that calls it a regression is the gate that gets ignored.</p>
+
+<p>Three details separate a baseline that fires from one that quietly misleads:</p>
+
+<ul>
+  <li><strong>Compare against the interval, not the point.</strong> A single baseline number has no error bar, so any fluctuation becomes a drop. Store the spread from the repeated baseline runs and ask whether the candidate falls outside it.</li>
+  <li><strong>The baseline carries its identity.</strong> Model identifier and version, decoding parameters, judge model and rubric version, dataset revision, grader revision. Change any one of those and the baseline is stale, and a stale baseline is worse than none because it produces confident verdicts about a system you are no longer running.</li>
+  <li><strong>Store per-case results, not just the aggregate.</strong> You cannot run a paired comparison, or read a failure list at three in the morning, from a single float.</li>
+</ul>
+
+<h3>Report reliability, not best-of</h3>
+
+<p>A pass rate computed from one sample per case answers a question nobody asked. The one that matters is whether the same case passes every time, because a behaviour that works most of the time is a behaviour that is wrong some of the time — and a suite that samples once per case will report it as working, whichever way the sample fell.</p>
+
+<p>Sample each case more than once and report consistency next to accuracy: how often the same input produces the same pass, and how often it produces the same output at all. Consistency is usually the less comfortable number and the one that predicts what users will experience. It also changes how a result should be read, because the same aggregate score can describe a suite where every case was decided the same way and a suite where every case sat on a knife edge — two systems with nothing in common in production.</p>
+
+<p>Sampling costs money, which is what makes the slicing decision load-bearing again: sample heavily on the small critical slices, once on the broad ones. The aggregate alone will not tell you the difference between a real improvement and a model that got luckier.</p>
+
+<h2>Read the result as transitions, not averages</h2>
+
+<p>The most useful statistic in an eval gate is not the mean. It is the list of cases that changed direction. A run that gained five cases and lost five has a flat average and two findings, one of which is a regression worth fixing before it reaches anyone.</p>
+
+<p>Compare case by case against the baseline and separate pass-to-fail transitions from fail-to-pass ones, then ask whether the change is asymmetric beyond what chance would produce. That paired comparison is the actual question, and it needs far less data than comparing two independent averages, because the cases are the same cases and most of them did not move.</p>
+
+<p>When there are too few transitions for that test to conclude anything, do not round the answer to green. An underpowered suite should say that it is underpowered — that verdict is a work item, not a failure:</p>
+
+<pre><code>type Verdict = 'pass' | 'regression' | 'inconclusive' | 'infra';
+
+interface Slice {
+  name: string;
+  critical: boolean;
+  cases: CaseResult[];
+}
+
+function decide(slices: Slice[], baseline: Baseline, alpha = 0.05): Verdict {
+  // A provider timeout is not a quality verdict, in either direction.
+  if (slices.flatMap((s) =&gt; s.cases).some((c) =&gt; c.error !== null)) return 'infra';
+
+  for (const slice of slices) {
+    const flips = slice.cases.filter((c) =&gt; c.baselinePassed &amp;&amp; !c.passed);
+    // Critical slices do not get a vote. One break blocks the merge.
+    if (slice.critical &amp;&amp; flips.length &gt; 0) return 'regression';
+  }
+
+  const paired = pairedTransitionTest(slices); // pass -&gt; fail vs fail -&gt; pass
+  if (paired.pValue &lt; alpha) return 'regression';
+
+  // Inside the baseline's own measured variation: not a signal.
+  if (paired.delta &lt;= baseline.noiseBand) return 'pass';
+
+  // Looks real, and the sample cannot support the claim either way.
+  return 'inconclusive';
+}</code></pre>
+
+<table>
+  <thead>
+    <tr><th>Verdict</th><th>Exit</th><th>What it means</th><th>What to do</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Critical break</td><td>1</td><td>A gated slice moved from pass to fail</td><td>Block the merge; no statistics required</td></tr>
+    <tr><td>Significant drop</td><td>1</td><td>Pass-to-fail transitions outnumber the reverse beyond chance</td><td>Block and read the transition list, not the mean</td></tr>
+    <tr><td>Within noise</td><td>0</td><td>The change sits inside the baseline's own variation</td><td>Merge, keep the run recorded</td></tr>
+    <tr><td>Inconclusive</td><td>2</td><td>A drop may be real but the sample cannot say</td><td>Merge with a note, then add cases or repeats</td></tr>
+    <tr><td>Infrastructure</td><td>3</td><td>Provider errors, timeouts, rate limits</td><td>Re-run; never record it as a pass or a quality verdict</td></tr>
+  </tbody>
+</table>
+
+<p>Two things about that table are deliberate. The inconclusive verdict exists so that an underpowered result is neither a release blocker nor a silent pass; it is recorded, merged with a note, and paid off by growing the suite. And infrastructure failures carry their own exit code for the same reason in the other direction: counting a provider timeout as a pass hides real regressions, while counting it as a failure makes the gate flaky and destroys whatever authority it had. Separate the two, and re-run.</p>
+
+<h2>The judge is an instrument, not an oracle</h2>
+
+<p>If a model grades the output, it deserves the treatment you would give any measurement device you intend to make decisions with: calibrated, pinned, and understood in its biases.</p>
+
+<ul>
+  <li><strong>Calibrate against human labels before trusting it.</strong> Grade a sample by hand and compare. Where the judge disagrees with your reviewers on the cases you care about, its score is a fact about the judge, not about the system.</li>
+  <li><strong>Average out position.</strong> Judges prefer whichever option they see first. Grade each pair in both orders and average the two: a constant position preference cancels, and a real difference survives.</li>
+  <li><strong>Expect a length bias.</strong> Judges reward longer answers, so a change that pads responses without improving them will often score higher. That is how a quality gate ends up rewarding verbosity — and how a prompt change that helped the metric hurt the product.</li>
+  <li><strong>Pin the judge and version the rubric.</strong> A judge model updated behind an endpoint moves your scores for reasons that have nothing to do with your change. The judge is part of the environment the numbers came from, so its version belongs in the baseline identity alongside the model and decoding parameters.</li>
+  <li><strong>Never gate on the judge alone.</strong> Where a check can express the requirement exactly, the check should own it. The judge covers what no assertion expresses, and it stays the number a human reads.</li>
+</ul>
+
+<h2>The cost and the clock</h2>
+
+<p>An eval run is a batch inference workload competing with production for the same budget. Cases multiplied by samples multiplied by judges is the bill, and the clock matters as much as the money: a suite that takes forty minutes blocks every merge, so it gets skipped, and a skipped gate is not a gate.</p>
+
+<p>Two habits keep this workable. Cache generations keyed on model, prompt version, decoding parameters and case identity, so re-scoring with a new grader does not re-run inference — most eval iteration is grading, not generating, and paying for generation twice is pure waste. And tier the suites by what they must catch: deterministic checks plus a small recorded-replay suite on every pull request, the larger judged suite on the main branch or nightly, and anything that depends on live third-party services outside the merge path entirely.</p>
+
+<p>That last split is a real limitation, not a scheduling convenience. A mocked tool always returns, always on the first attempt, always in the shape it was wired for. So a mocked suite is structurally blind to tool-selection errors, retries, partial failures and rate limits — the failures that dominate the post-incident write-up. The honest arrangement is a ladder: mocked evals for prompt-level assertions, a recorded real trace for the interaction, a scheduled live smoke suite for the integrations. Treating the cheap rung as the test of record for the whole system is how a team ends up with a green gate and an incident board that disagrees with it.</p>
+
+<h2>The dataset is the new specification, and it can be overfitted</h2>
+
+<p>Once the gate exists, the suite becomes the thing being optimised, and that carries its own failure mode: prompt changes tuned case by case against the same set of examples produce a prompt that is excellent at those examples and no longer predictive of anything else.</p>
+
+<p>Three habits hold that off. Keep a held-out slice you never tune against and look at only when promoting. Grow the suite from real failures — one case per incident, with the failing trace recorded as the input — so it tracks the distribution you actually serve rather than the one you imagined on the day you wrote it. And watch the gap between suite results and production outcomes: when the suite stays green and behaviour in production does not follow, the suite is measuring the wrong thing, and adding cases on the current taxonomy will not repair that.</p>
+
+<p>Expect the first version of any suite to grade the wrong things. Criteria are discovered by looking at real failures rather than designed up front, which is the opposite of how unit test suites are usually written and the reason eval work stays iterative in a way that ordinary testing does not.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Order the work by cost and certainty. Deterministic checks first, because they are free, exact, and catch more than most teams expect. Critical slices next, because one broken boundary outweighs a hundred graded opinions. Then the noise floor and the paired comparison, so the statistics describe your system rather than your preferences. The judge last: calibrated against human labels, pinned, and advisory.</p>
+
+<p>None of this is exotic. It is ordinary engineering applied to one unreliable component — contracts where you can have them, measurement where you cannot, and a decision that keeps "not proven" distinct from "proven bad". A gate that collapses all of it into a single number and a single threshold is the version that gets ignored, and an ignored gate is worse than no gate at all, because it costs the upkeep of a suite while providing the comfort of a green check.</p>
+
+<p>If you are building this harness for a system already in production, or working out why an existing gate keeps going red for no reason, that is the shape of our <a href="/services/ai-engineering">AI engineering work</a> — <a href="/contact">tell us what the gate is supposed to catch</a> and we will start there. Two related notes: <a href="/blog/building-production-rag-systems">building RAG systems that work in production</a> covers the retrieval-side measurements a quality gate depends on, and <a href="/blog/llm-cost-optimization-strategies">controlling LLM cost and latency</a> covers the budget levers that make a sampling-heavy eval affordable.</p>`,
+    date: '2026-10-01',
+    author: 'WeThinkDigital Engineering',
+    readTime: '10 min read',
+    category: 'AI Engineering',
+    tags: ['LLM evaluation', 'CI gates', 'LLM as judge', 'regression testing', 'AI engineering'],
+    metaTitle: 'Eval Gates in CI for LLM Features: Noise, Judges and Critical Slices',
+    metaDescription:
+      'How to build an LLM evaluation gate people trust: deterministic checks as the gate, an advisory judge, a measured noise floor, paired regression statistics and critical slices.',
+    keywords: ['LLM evaluation in CI', 'eval gate', 'LLM regression testing', 'LLM as judge validation', 'noise floor baseline', 'agent evaluation harness', 'prompt regression testing', 'non-deterministic CI checks'],
+  },
+  {
     id: '11',
     slug: 'free-website-and-landing-page-design',
     title: "Free Website and Landing Page Design: What Is Actually Free",
