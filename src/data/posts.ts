@@ -9,6 +9,180 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '14',
+    slug: 'durable-agent-workflows-retries-compensation',
+    title: 'Durable Agent Workflows: Retries, Idempotency and Compensation',
+    excerpt:
+      'A worker restarts mid-run and the invoice posts twice. Durability is not the model\u2019s problem — it is the gap between doing an effect and recording it, and the three contracts that close it.',
+    content: `<p>A run stops at step four of seven. The document was parsed, a record was created in the CRM, an invoice was posted to the accounting system — and then a deploy restarted the worker and the run went quiet. Nothing is corrupt. Nothing is obviously wrong. The only question is what happens next, and the answer was decided months ago, when somebody wrote the first three steps without asking what happens if they run twice.</p>
+
+<p>Restart the run from the beginning and it posts the invoice a second time. Resume it at step four with no memory of the first three and it creates a duplicate CRM record. Leave it failed and a human finishes it by hand, every time, which is fine until it happens forty times a week.</p>
+
+<p>Conversations about reliable agents usually turn into conversations about the model. The model is rarely what broke here. <strong>A multi-step workflow is a distributed system with a non-deterministic component inside it, and it fails the way distributed systems fail</strong> — a process dies in the gap between doing something and recording that it was done. Durability is the set of contracts that close that gap, and none of them are about intelligence.</p>
+
+<h2>At-least-once is the only delivery guarantee you actually get</h2>
+
+<p>Start with the fact no framework can remove. A worker can complete an effect — send the request, charge the card, write the row — and then die before it reports success. The platform cannot know whether the effect happened, so it has exactly one honest option: run the step again. That is at-least-once execution, and it is what you are building against whether or not you have thought about it.</p>
+
+<p>Exactly-once <em>delivery</em> is not on offer. What is achievable is once-or-more-than-once execution with a single observable result: the effect may be attempted twice, and the world must end up as if it happened once. Every technique below exists to move a system from "probably once" to that property.</p>
+
+<blockquote>The durable part of a workflow is not the code surviving a crash. It is the effect surviving being run twice.</blockquote>
+
+<h2>Keep the decisions deterministic and the effects journaled</h2>
+
+<p>Durable execution engines — Temporal, Restate, DBOS, the cloud equivalents — get their durability from a journal: an append-only log of events recording that a step was scheduled, what it returned, that a timer fired, that a signal arrived. When a worker resumes a run, it re-executes the orchestration function from the top and substitutes recorded results for anything that already completed. That is what lets the workflow file read like an ordinary function that somehow survives a crash in the middle of itself.</p>
+
+<p>The price is a determinism contract. Given the same history, the orchestration code must make the same decisions. Anything that could differ between two runs of the same code — reading the clock, generating a random value, calling a model, hitting an API — has to be pushed out into a step whose result is journaled. Reading the time then returns the recorded time on replay, and calling the model returns the recorded completion rather than paying for it again. Engines differ in ergonomics here; the constraint is shared.</p>
+
+<p>For an agent system this split is the whole design. The part that decides <em>which</em> step runs next is control flow and belongs in the deterministic workflow. The model call that produces the decision is non-deterministic, expensive and occasionally side-effecting, so it belongs in a step. Wire that backwards and a routine restart re-invokes the model for every stage the run had already completed — paying twice for work you already own, and getting a different answer the second time, which is a bug that looks like a personality change.</p>
+
+<h2>Idempotency is what makes a retry safe</h2>
+
+<p>Because any step can run more than once, every step that touches the outside world must produce one result whether it executes once or five times. There are two ways to get there and only one of them is dependable.</p>
+
+<ol>
+  <li><strong>Make the operation naturally idempotent.</strong> "Set status to cancelled" is safe to repeat; "decrement the counter" is not. Where a side effect can be expressed as a desired end state rather than a delta, express it that way.</li>
+  <li><strong>Give the operation a stable key and dedupe on it.</strong> Derive the key from the run and the step — run identifier plus step name — never a fresh identifier per attempt, or a retry looks like new work. The receiving side records the key with its result; a duplicate arrives as the same key and returns the stored result instead of acting again.</li>
+</ol>
+
+<p>What decides whether this works is the ordering between writing the key and performing the effect. Write the key first and a crash in between leaves a key claiming work that never happened. Write it last and a crash in between leaves the effect done and unrecorded — the exact duplicate you were trying to prevent. The only ordering that holds is to reserve the key and change the state in one local transaction and let a unique constraint be the arbiter, rather than checking first and inserting second.</p>
+
+<pre><code>async function postInvoice(runId: string, invoice: Invoice) {
+  // Stable across every attempt of this step, so a retry carries the
+  // same identity as the original call.
+  const key = 'invoice:' + runId;
+
+  try {
+    // Reserving the key is the guard. A concurrent or repeated attempt
+    // hits the unique constraint instead of a read-then-write race.
+    await db.idempotency.reserve(key);
+  } catch (err) {
+    if (isUniqueViolation(err)) return await db.idempotency.get(key);
+    throw err;
+  }
+
+  // The downstream accepts the same key, so even if this call succeeded
+  // and we died before recording it, the second attempt is a no-op there.
+  const posted = await accounting.post(invoice, { idempotencyKey: key });
+  await db.idempotency.complete(key, posted.id);
+  return posted;
+}</code></pre>
+
+<p>That code is honest about the hard case rather than hiding it. A crash between reserving the key and completing it leaves an in-flight record, and the retry has to re-drive the effect with the same downstream key — which works only if the downstream honours it — or hand the record to a reconciler that resolves it out of band. Against a third-party API that does not accept idempotency keys, you need your own dedupe table in front of it, because the guarantee has to live somewhere and it will not live on their side.</p>
+
+<p>Where an effect has to leave your database entirely — publishing an event, notifying a service — write the intent in the same transaction as the business change and let a relay deliver it afterwards. This is the outbox pattern, and the failure it exists to prevent is specific: the commit succeeded, the publish failed, and nobody noticed for a week.</p>
+
+<h2>Classify an error before you retry it</h2>
+
+<p>Retries are where a localised failure becomes an outage. A dependency starts timing out, every caller retries three times, and the load on the failing service triples exactly when it needed to shed some. Three decisions contain that.</p>
+
+<h3>Retry transient errors, never permanent ones</h3>
+
+<p>The classification that matters is not how bad the error looks but whether a second attempt could plausibly produce a different outcome — and, separately, whether a second attempt is safe.</p>
+
+<table>
+  <thead>
+    <tr><th>Failure</th><th>Retry?</th><th>What the retry must be safe against</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Network error, connection refused — the request never reached the server</td><td>Yes</td><td>Nothing; the effect cannot have happened</td></tr>
+    <tr><td>429, 503, 408 — the server answered, under load</td><td>Yes, with backoff</td><td>A duplicate: the request may have been processed before the response failed</td></tr>
+    <tr><td>Timeout or 500 — ambiguous</td><td>Only with an idempotency key</td><td>Re-execution of something that already happened</td></tr>
+    <tr><td>400, 401, 403, 404, 422 — client errors</td><td>No</td><td>Nothing; a second attempt fails identically and burns the budget</td></tr>
+    <tr><td>Model output that violates the schema or the contract</td><td>Not the same way</td><td>Repeating a prompt that failed for a reason the prompt cannot fix</td></tr>
+  </tbody>
+</table>
+
+<p>That last row is the one agent systems get wrong, because it looks like a retry and is not. A contract violation is a quality problem, not a transport problem. Re-sending an identical prompt to a non-deterministic model is a lottery, and it fails for the same reason often enough to be a waste the rest of the time. Feeding the specific validation error back — this field is missing, this reference does not appear in the supplied passages — is the retry that works. It also deserves a different budget from a rate limit: five attempts at a prompt that cannot satisfy the contract is five model calls spent proving it.</p>
+
+<pre><code>type Decision = 'retry' | 'retry-with-idempotency' | 'no-retry' | 'escalate';
+
+function classify(err: unknown): Decision {
+  // The request never left: safe to repeat unconditionally.
+  if (isNetworkError(err) || isConnectionRefused(err)) return 'retry';
+
+  const status = httpStatusOf(err);
+  if (status === 429 || status === 503 || status === 408) return 'retry-with-idempotency';
+  // Ambiguous: the server may have processed it before it died.
+  if (status === 500 || isTimeout(err)) return 'retry-with-idempotency';
+  // Client errors are stable; volume spent here is volume wasted.
+  if (status &amp;&amp; status &gt;= 400 &amp;&amp; status &lt; 500) return 'no-retry';
+  // A broken answer is a quality failure: repair the prompt, do not re-roll it.
+  if (isContractViolation(err)) return 'escalate';
+  return 'no-retry';
+}</code></pre>
+
+<h3>Back off with jitter, and cap the total</h3>
+
+<p>Exponential backoff alone is not enough, because every client that failed at the same moment backs off to the same schedule and retries in unison the instant the dependency recovers. Randomising the delay — full jitter across the interval — spreads those attempts out. Then cap the attempt count, and cap total retry volume as well: three attempts per request is a per-request limit, not a system limit, and if the retry rate triples under failure you have converted a partial outage into a complete one. A retry budget expressed as a fraction of normal traffic keeps the amplification bounded even while the dependency stays down.</p>
+
+<p>Exhausted retries need a destination. A permanently failing record should land in a quarantine you can inspect and replay, carrying its input, the error, the attempt count and the run identifier — not vanish, and not block the queue behind it. And a workflow should be able to tell "the thing this step targets is gone" from "this step could not be reached", because the first triggers compensation and the second is simply a wait.</p>
+
+<h2>Compensation is not rollback</h2>
+
+<p>If step five fails after step three has already changed something outside your system, step three cannot be un-run. There is no rollback spanning an email provider, a payment processor and your own database. What exists instead is compensation: a new forward action that produces a state equivalent to having undone the original — a refund rather than a deleted charge, a credit note rather than a recalled invoice, a correction message rather than an unsent email.</p>
+
+<blockquote>A rollback restores the past. A compensation negotiates with it. Any effect visible outside your system can only be compensated, never rolled back, and the design has to start from that.</blockquote>
+
+<p>The mechanics that decide whether it holds:</p>
+
+<ul>
+  <li><strong>Register the compensation before the forward step runs.</strong> Register it after and a crash in the gap leaves an effect with no undo path. Registering first means the compensation must cope with being called when its step never completed at all — a deliberate no-op in that case, and tested that way.</li>
+  <li><strong>Run compensations in reverse order</strong>, most recent first, because later steps can depend on state earlier ones created.</li>
+  <li><strong>Make the compensation idempotent as well.</strong> It is retried like everything else, and a refund issued twice is a further refund.</li>
+  <li><strong>Decide per step whether it needs one at all.</strong> A notification is usually better followed by a correction than compensated; a reservation needs releasing; a posted invoice needs a credit. Every forward step should have an explicit answer, and "none, it is a notification" is valid only when it is written down.</li>
+  <li><strong>Assume compensation can fail.</strong> That is the state that needs an alert and a human, not a retry loop that conceals it. A run that committed effects it could not undo is the one thing that must never fail quietly.</li>
+</ul>
+
+<p>It is worth designing to avoid the need. Where a reservation can be held and confirmed in one reversible commit, or a change staged behind an approval, that beats inventing a compensation for an effect you did not have to take. Compensation is the mechanism for the effects you cannot avoid, not a general licence to act early and tidy up afterwards.</p>
+
+<h2>The deploy is the other way a run dies</h2>
+
+<p>Here is the constraint that surprises teams most, because it is invisible until the first bad deploy. The journal is only meaningful relative to the code that wrote it. Replay compares the calls your code issues now against the history recorded then, and that comparison assumes the code has not changed shape.</p>
+
+<p>Insert, rename or reorder a step that an in-flight run has already passed and the replay diverges — a hard non-determinism error in the best case, and a silently mismatched result in the case you will not notice. Add a step <em>after</em> an in-flight run's checkpoint and nothing breaks: the new step simply becomes a new event when the run arrives. Add an optional field to a payload and nothing breaks. Change the parameters of a call already recorded, or the duration of a timer already set, and it breaks.</p>
+
+<p>Three mechanisms exist and they are not exclusive. Pin a run to the deployment version that started it, and exempt it from the problem for its lifetime. Gate the changed branch on the run's own recorded provenance rather than a value read today — a version marker in the history, not a config lookup. Or run the new logic under a new workflow name and let the old one drain before you retire it. None of them escape the underlying rule: an in-flight run is coupled to the code that produced its history, and the longer it runs, the more deploys it has to survive.</p>
+
+<p>Agent workflows are the awkward case, because the interesting ones wait. A run parked on a human approval for three days has to survive every deploy in those three days, so a change that would be a one-line edit in a request handler becomes a migration for the runs already sitting on it. Plan for the wait to be long and version accordingly.</p>
+
+<h2>Bound the run, or it will bound you</h2>
+
+<p>Durability makes a run survive; it does not make it end. The failure modes on the other side of that are mundane and expensive.</p>
+
+<ul>
+  <li><strong>Every step gets a timeout.</strong> A step with no deadline can wait indefinitely, and an indefinitely waiting step holds whatever it holds while paging nobody. A timeout converts "stuck" into "failed", which is a state you can act on.</li>
+  <li><strong>Long steps report progress.</strong> A heartbeat distinguishes a slow step from a dead one, so the system retries what is actually gone instead of duplicating work that is still running.</li>
+  <li><strong>A wait has an expiry and a default.</strong> An approval that never arrives must resolve to something — escalate, expire, or fail into compensation. A workflow that waits forever for a human is a workflow that will still be waiting at the end of the quarter.</li>
+  <li><strong>Agent loops get explicit ceilings</strong>: a maximum step count, a token budget, a wall-clock deadline. This is the same discipline as bounded delegation, and we set out why unbounded supervision is the pattern that never terminates in our note on <a href="/blog/multi-agent-orchestration-patterns">multi-agent orchestration patterns</a>.</li>
+</ul>
+
+<h2>You cannot test durability on the happy path</h2>
+
+<p>None of the code paths above run when everything works. They run when a process dies between the effect and the acknowledgement, which is precisely the scenario a normal test suite never produces.</p>
+
+<p>So produce it deliberately. Kill the worker between performing an effect and recording it, in a test, and assert that exactly one effect exists afterwards — then repeat that for every step that touches the outside world. Force a compensation to fire when its forward step never ran, and check it is a genuine no-op rather than a second piece of damage. Fail a step with a permanent error and a transient one and confirm they route to different places. These tests are slow and awkward, which is why they are usually missing, and they are the only ones that exercise the code that actually runs on a bad night.</p>
+
+<p>The same reasoning applies to what you record. A run identifier threaded through every step, with the attempt count, the failure classification and every compensation invocation attached to it, is what turns "the workflow did something strange" into a five-minute question. Without it, the only description of the failure is the one somebody typed from memory. Much of that plumbing is the audit log and replay path from our note on <a href="/blog/ai-workflow-automation-business-processes">finding the processes worth automating</a>, and it is the part that gets cut first when a pilot is rushed.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Order the work by what breaks first. Keep control flow deterministic and push every effect and model call into a journaled step, so a restart does not re-run the expensive or non-deterministic parts. Put a stable idempotency key on every effect before you need it, and let a unique constraint — not a tidy read-then-write — be what enforces it. Classify errors into retry, retry-with-a-key, and never, with jittered backoff and a total retry budget rather than a per-request attempt count. Then compensation for the effects genuinely visible to the outside world: registered before the forward step, idempotent, and reconciled when it fails.</p>
+
+<p>Only after that is it worth arguing about the model. A stronger model makes a workflow's decisions better; it does nothing for a workflow that posts the same invoice twice because a worker restarted. The reliability people notice is almost always in the plumbing — idempotent effects, bounded retries, compensations that run, and runs that survive being interrupted.</p>
+
+<p>If you are building one of these and the retry path has never been exercised on purpose, that is the conversation to start with — <a href="/contact">tell us where the run currently stops</a>. It is the shape of most of our <a href="/services/ai-engineering">AI engineering work</a>, and the same contracts sit under <a href="/products/agents">our agent platform</a>, where long-running delivery work has to survive exactly this kind of interruption. Two related notes: <a href="/blog/multi-agent-orchestration-patterns">multi-agent orchestration patterns</a> covers where to draw the agent boundaries in the first place, and <a href="/blog/llm-cost-optimization-strategies">controlling LLM cost and latency</a> covers the ceilings that keep a retry storm from becoming a bill.</p>`,
+    date: '2026-10-05',
+    author: 'WeThinkDigital Engineering',
+    readTime: '10 min read',
+    category: 'AI Engineering',
+    tags: ['durable execution', 'agent workflows', 'idempotency', 'compensation', 'retries'],
+    metaTitle: 'Durable Agent Workflows: Retries, Idempotency and Compensation',
+    metaDescription:
+      'How to make multi-step agent runs survive crashes: deterministic control flow with journaled steps, idempotency keys on every effect, error classification with backoff and retry budgets, and compensating actions that undo visible work.',
+    keywords: ['durable execution', 'agent workflow reliability', 'idempotency keys', 'saga pattern compensation', 'retry budget', 'at-least-once delivery', 'workflow versioning', 'multi-step agent workflows'],
+  },
+  {
     id: '13',
     slug: 'llm-eval-gates-in-ci',
     title: 'Eval Gates in CI: Catching LLM Quality Regressions Before They Ship',

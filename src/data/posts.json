@@ -1,5 +1,11 @@
 [
   {
+    "id": "14",
+    "slug": "durable-agent-workflows-retries-compensation",
+    "title": "Durable Agent Workflows: Retries, Idempotency and Compensation",
+    "date": "2026-10-05"
+  },
+  {
     "id": "13",
     "slug": "llm-eval-gates-in-ci",
     "title": "Eval Gates in CI: Catching LLM Quality Regressions Before They Ship",
