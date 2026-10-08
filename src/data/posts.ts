@@ -9,6 +9,190 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '15',
+    slug: 'flaky-end-to-end-tests',
+    title: 'Flaky End-to-End Tests: Isolation, Determinism and Quarantine',
+    excerpt:
+      'A test that fails one run in four and passes on re-run is usually a defect with a working alarm. Retries hide the evidence, quarantine files it \u2014 and the classification decides which fix you actually need.',
+    content: `<p>There is a checkout test in a suite that fails about one run in four, and has done for months. It fails on CI, passes on the retry, and everyone has learned the ritual: the build goes red, somebody hits re-run, the second attempt is green, the pull request merges. The test has been called flaky so many times that the word has stopped meaning anything. Last week an order was charged twice in production \u2014 a race the test had been reporting, in the only way a failing test can report something, for months.</p>
+
+<p>The test was never flaky in any useful sense. It was intermittently correct, which is the most valuable thing a test can be and the exact category teams are trained to stop reading. This note is about the difference between those two descriptions, and about the two mechanisms that decide which one your team ends up believing: retries, and quarantine.</p>
+
+<h2>A flake is a pass and a fail on the same code</h2>
+
+<p>Start with a definition that removes the ambiguity. A test is flaky when it produces different results against <strong>identical code</strong> \u2014 same commit, same source, both a pass and a fail in the record. That is not an opinion about the test; it is a fact you can measure, and it means the suite is being decided by something other than the thing under test.</p>
+
+<p>There are exactly two places that something can live, and telling them apart is the whole job:</p>
+
+<ul>
+  <li><strong>The nondeterminism is in the test or the environment.</strong> A snapshot read where an assertion was needed, data two parallel workers share, an unmocked third-party script, a clock that crosses midnight, a runner under memory pressure. The product is fine; the measurement is not.</li>
+  <li><strong>The nondeterminism is in the product.</strong> A genuine race \u2014 a double submit, an optimistic UI that reports success the server never confirmed, a read that can happen before the write it depends on. The test is doing its job, badly, and the defect ships.</li>
+</ul>
+
+<p>A green retry cannot distinguish those two. It does not know which one it just suppressed, and it never will, because the evidence it would need was the failing run \u2014 the trace, the network log, the DOM snapshot at the moment of failure \u2014 and the retry overwrites it with a passing one.</p>
+
+<blockquote>A retry answers one question: can this test ever pass? It never answers the question you need: is the thing underneath it broken?</blockquote>
+
+<h2>Retries convert a finding into a green checkmark</h2>
+
+<p>Retries are not useless; they are a tool that got promoted into a policy. Set to absorb genuine infrastructure blips \u2014 a runner that lost its network for two hundred milliseconds \u2014 they are reasonable. Set globally and left there, they become the mechanism by which a suite reports success while measuring something broken.</p>
+
+<p>The arithmetic is unforgiving. Take a test that fails one run in four. With two retries, three attempts, the build goes red only when all three attempts fail, which is about 1.6% of runs. The suite reports green on 98% of runs of a defect that a quarter of your users would hit on their first attempt. Nothing has been stabilised. The failure has been moved to a place the pipeline does not look.</p>
+
+<p>Two habits keep retries honest rather than corrosive. Cap them, and make the cap explicit, because an unbounded retry is a suite that cannot fail. And <strong>keep a retry-passed test as its own outcome rather than folding it into "passed"</strong>. Playwright already draws this line for you: a test that fails and then passes on retry is reported as <code>flaky</code>, which is neither a pass nor a fail, and a report you can filter on. The failure is not in the runner. It is in the pipeline that reads a flaky count of zero and prints a green tick.</p>
+
+<p>So the first change is not a threshold or a tool. It is that a flake becomes a named work item, and the question asked about it is which of the two categories above it belongs to \u2014 not whether re-running it works. It does. That is the problem.</p>
+
+<h2>Classify first, then fix</h2>
+
+<p>Trying to fix a flake without classifying it is how teams add a wait, remove a wait, add it back, and eventually quarantine the test with no more understanding than when they started. There are a small number of root causes, and each leaves a different signature in the record. Read the signature first \u2014 the trace of the failing attempt, not the passing one.</p>
+
+<table>
+  <thead>
+    <tr><th>Signature</th><th>What it usually is</th><th>Where the fix belongs</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Intermittent timeout on an action; the element was present in the trace</td><td>The assertion read a snapshot instead of polling, or an async call was never awaited</td><td>Test: web-first assertions, and lint for floating promises</td></tr>
+    <tr><td>Passes alone, fails in the full suite or at higher parallelism</td><td>Shared state \u2014 a user, a row, a file, a stub server two workers both own</td><td>Test: per-test data, a real reset boundary, isolated authentication</td></tr>
+    <tr><td>Fails only on CI, never locally, worse under load</td><td>Runner contention. The test is not slow; the machine is</td><td>Infrastructure and budget: fewer workers per runner, sane timeouts</td></tr>
+    <tr><td>Fails on a schedule: midnight, month end, a timezone boundary</td><td>The test is reading the real clock or the real locale</td><td>Test: freeze time, pin timezone and locale</td></tr>
+    <tr><td>Fails when a third party is slow or rate-limits</td><td>An unmocked external dependency donating its uptime to your pipeline</td><td>Stub at the network layer, or quarantine it and label it as external</td></tr>
+    <tr><td>Fails on a double submit, a duplicate row, a lost update</td><td>Not a test problem. A product race the test is correctly catching</td><td>Product: this is the one you wanted to find</td></tr>
+  </tbody>
+</table>
+
+<p>Two rows are the ones teams get wrong for a long time. The last one is a defect and belongs on the bug board, not in the test backlog. The environment row is more insidious, because "passes locally, fails on CI" gets diagnosed as flakiness by default \u2014 and a test failing because the runner ran out of memory is not a test problem at all. Making the suite lighter or the runner bigger is a legitimate fix, and treating it as a test issue spends a week in the wrong repository.</p>
+
+<h3>What auto-waiting covers, and what it does not</h3>
+
+<p>Modern browser runners removed an entire category of flake by waiting before acting. Before a click, Playwright checks that the element is attached to the DOM, visible, stable across frames, enabled, and actually receiving pointer events. None of that needs a sleep, and the old habit of pausing for a fixed two seconds is a guess that is sometimes too short and always too long.</p>
+
+<p>The boundary is sharp, and most remaining timing flake sits just past it. Auto-waiting understands <em>actionability</em>. It has no idea about your application's semantics \u2014 that a dashboard painted skeleton rows before real ones, that a list re-sorts after it renders, that a button enables itself before the request that validates the input has returned. In those cases the element is genuinely ready to be clicked and the application is not ready to be clicked. The fix is to assert the outcome a user would see, and let the assertion poll until reality matches, rather than asserting on whichever intermediate state happens to exist right now.</p>
+
+<p>That distinction explains the flake that is never fixed by adding a wait:</p>
+
+<pre><code>// Reads the DOM once, at this instant, and compares. If the UI has not
+// updated yet the assertion fails, even though it would pass 100ms later.
+const status = await page.getByTestId('status').textContent();
+expect(status).toBe('Paid');
+
+// Polls the same locator until the condition holds or the timeout expires.
+await expect(page.getByTestId('status')).toHaveText('Paid');</code></pre>
+
+<p>Assertions that poll are the difference, and the pattern extends past element state. <code>locator.count()</code> and <code>locator.all()</code> return a snapshot rather than a live view, so a loop over a list that is still loading iterates the wrong number of items \u2014 wait for the expected count first, then iterate. Where a value settles over time rather than a single element's state, retry the whole check instead of the individual read.</p>
+
+<h3>Register the listener before the action</h3>
+
+<p>The other timing defect is order, not duration. Waiting for a response after triggering the request is a race you lose whenever the server is fast:</p>
+
+<pre><code>// The response can arrive before anything is listening for it,
+// and the wait never resolves.
+await page.getByRole('button', { name: 'Place order' }).click();
+const response = await page.waitForResponse((r) =&gt; r.url().includes('/api/orders'));
+
+// Listen first, then act. The promise captures the response whatever the timing.
+const responsePromise = page.waitForResponse((r) =&gt; r.url().includes('/api/orders'));
+await page.getByRole('button', { name: 'Place order' }).click();
+const response = await responsePromise;
+expect(response.status()).toBe(201);</code></pre>
+
+<p>The same rule covers stubbing: register the route handler before the navigation that triggers the request it is meant to serve. This class of bug is invisible on a slow local backend and appears on fast CI runners \u2014 exactly backwards from the intuition that a faster environment should be more reliable.</p>
+
+<h2>Isolation is a property of the suite, not of the test</h2>
+
+<p>The shared-state flake is the one that survives every timing fix, because it is not a timing problem. The diagnostic is specific and worth memorising: <strong>run the suspect test alone and it passes; run the suite and it fails.</strong> That is not a slow test. That is a test whose inputs were changed by another test \u2014 a user whose data the neighbouring worker just mutated, records from a previous run still sitting in the table, an assertion that assumes "the newest item is mine".</p>
+
+<p>Parallelism makes it worse in a straight line: the more workers you add to keep the suite fast, the more collisions between tests that each assumed they were alone. Three habits remove most of it.</p>
+
+<ul>
+  <li><strong>Every test creates what it needs.</strong> Not "a user exists", but this test's user, named after the test, carrying the data the assertions expect. A shared seed fixture is the most common source of order dependence in a browser suite.</li>
+  <li><strong>Reset at a real boundary.</strong> Before each test, reset through the API or a transaction, not through the UI. UI setup makes the test's start state depend on the application being healthy, so when the app is broken the failure lands in setup and reads like an infrastructure error.</li>
+  <li><strong>Reuse authentication, not state.</strong> Load a pre-authenticated session rather than logging in through the form on every test. The login flow is slow, identical for every test, and not what any of them are testing.</li>
+</ul>
+
+<p>There is a temptation to see an order-dependent failure as proof of a concurrency defect in the product, and occasionally that is exactly right \u2014 but only after you have ruled out the suite sharing the database row, the file, or the stub. Isolation first, then ask whether the collision is in your tests or in your transaction handling.</p>
+
+<h2>Remove the inputs you did not choose</h2>
+
+<p>Two more sources of nondeterminism have nothing to do with timing and are cheaper to remove than to investigate, so remove them before they cost you a day of hunting something that will not reproduce.</p>
+
+<p><strong>Time.</strong> Any assertion that depends on the current date, the day of the week, or the local timezone will eventually fail \u2014 once, on a month boundary, at midnight, over a leap day \u2014 which is precisely the shape of a flake that never reproduces. Freeze the clock in the browser and drive it forward deliberately: a five-minute session timeout becomes a test that runs in milliseconds and fails on time rather than on luck. Pin the timezone and locale of the run as well, so a machine in another region cannot change the answer.</p>
+
+<p><strong>Randomness and version drift.</strong> Seed every random source a test depends on. Pin the browser and runner versions, because a suite that runs on whatever image happens to be current this month is a suite whose results cannot be compared across weeks \u2014 and an engine version change produces exactly the "it passed yesterday" signature that gets filed as flake.</p>
+
+<p>One policy does more than any of that: <strong>treat a fixed sleep as a banned pattern, not a discouraged one.</strong> A rule that says "avoid sleeps" leaves room for the case where this one is genuinely needed, and the case is almost never the case. A ban removes the argument outright, and a lint rule that fails on un-awaited async calls removes the other half before it can be committed.</p>
+
+<h2>Quarantine is not a quieter retry</h2>
+
+<p>You now have a test you cannot fix today and cannot let hold the merge queue. The instinct is a bigger retry count. The right mechanism is a quarantine lane, and the difference between the two is the only thing that matters here: <strong>a retry hides the evidence; a quarantine files it.</strong></p>
+
+<p>Take the test out of the blocking suite and put it somewhere it still runs on every commit, still reports, and does not gate the merge. It keeps producing the failing run \u2014 the trace, the classification, the frequency \u2014 which is the data you need to fix it. A retry produces the opposite: a green run that replaces the red one.</p>
+
+<p>Four properties separate a quarantine that works from one that becomes a graveyard, and every failed quarantine process is missing at least one of them.</p>
+
+<ol>
+  <li><strong>The quarantined test still runs.</strong> A skipped test is deleted with extra ceremony and a nicer feeling. It must execute on every run and its result must be recorded, or the coverage has been thrown away without anyone admitting it.</li>
+  <li><strong>Entry comes from history, never from one red run.</strong> A test that failed once had a bad day. A test with both a pass and a fail recorded against the same commit is flaky by definition, and that is a machine's judgement rather than a tired engineer's.</li>
+  <li><strong>Every entry has an owner, a ticket and a date.</strong> Enforce it in CI \u2014 an entry added without a ticket reference should fail a check of its own. A quarantine with no clock is a retry wearing a different name; the date is what turns "we will get to it" into somebody's work item.</li>
+  <li><strong>Exit requires evidence.</strong> A test returns to the blocking lane when it has passed a deliberate run of consecutive attempts, not when it happens to be green today.</li>
+</ol>
+
+<p>The lane itself is ordinary pipeline configuration \u2014 two projects, one gating and one reporting, with retries disabled in both so a failure in either lane is honest:</p>
+
+<pre><code>// playwright.config.ts
+export default defineConfig({
+  projects: [
+    {
+      name: 'blocking',      // Gates the merge. A red run stops the pull request.
+      testIgnore: '**/*.quarantine.spec.ts',
+      retries: 0,            // A retry here would recreate what we are removing.
+    },
+    {
+      name: 'quarantine',    // Runs and reports on every commit. Does not gate.
+      testMatch: '**/*.quarantine.spec.ts',
+      retries: 0,
+    },
+  ],
+});</code></pre>
+
+<p>Turning retries to zero inside the quarantine lane is not an oversight. A retry there would smooth over the exact failure the test was moved to study, one level down. Let it be red, and read the pattern.</p>
+
+<p>Two guardrails stop the lane becoming a permanent hole in the suite. Track the number of quarantined tests as a reliability metric in its own right, and treat growth as a signal \u2014 flakiness is outrunning the team's ability to fix it, which is a capacity fact worth acting on rather than a testing detail. And cap the lane, weighted by what the tests protect: five quarantined checkout tests are a bigger blind spot than forty tooltip assertions, and a flat count cannot tell the difference. When the weighted cap is hit, stop admitting entries until the backlog shrinks.</p>
+
+<p>Deletion is a legitimate exit, and saying so out loud is what keeps the process honest. A test that duplicates coverage one level down, or guards something nobody would notice breaking, is worth less than the runtime and the attention it costs. Removing it deliberately is a decision. Leaving it quarantined forever is also a decision \u2014 just one nobody made.</p>
+
+<h2>Defend the gate, or you have not built one</h2>
+
+<p>Every mechanism above rests on the blocking lane being real, and the one configuration error that silently reverses all of it is a branch-protection rule that does not list the blocking lane as required. A gate that is not required is a report.</p>
+
+<p>So verify the separation the way you would verify anything with a consequence: open two deliberately broken pull requests. Break a test in the blocking lane and confirm the merge is refused. Break one in the quarantine lane and confirm the merge is allowed. That pair of runs is the contract, it takes ten minutes, and it is worth repeating whenever branch protection changes \u2014 because a single mislisted check is invisible until the day it matters.</p>
+
+<p>The end state is a suite trusted at zero retries. Not because retries are evil, but because a suite you have to retry is a suite whose red and green both mean less than they should, and once engineers learn that red sometimes means nothing, they stop reading. That is the failure that actually costs you: not the flaky test, but the pipeline nobody believes. We described the same collapse from the other direction in our note on <a href="/blog/llm-eval-gates-in-ci">eval gates that lose their authority</a>, and it is the same mechanism \u2014 a check that reports unreliably is worse than no check, because it charges the upkeep and returns false confidence.</p>
+
+<h2>The suite has to stay fast enough to be run</h2>
+
+<p>One structural point sits under all of the above. A browser suite is the most expensive way to check a behaviour, and its cost is runtime \u2014 so a suite that takes forty minutes gets skipped, or sharded until nobody waits for it, and a skipped gate is not a gate. The end-to-end layer earns its place on the flows where being wrong costs money: checkout, payments, authentication, the one mutation that cannot be taken back. Everything below that belongs in unit and integration tests that run in seconds and fail deterministically.</p>
+
+<p>That is the same rule we apply to coverage in client work \u2014 aim it at risk rather than at a percentage, with a small set of end-to-end tests over the flows that would hurt and the volume of checking pushed down a level where it is cheap and exact. A browser suite budget and a flake programme are the same budget: every test you move out of the browser is a flake you will never have to classify.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Order the work by what the evidence supports, not by what is easiest. Stop folding retry-passed runs into the pass count, and record a flake as its own outcome with a name attached. For each one, read the signature before touching anything: timing, isolation, environment, a clock, or a genuine race in the product. Fix the first four where they live, and move the fifth to the bug board \u2014 the test has already done its job.</p>
+
+<p>Then remove the inputs you did not choose \u2014 freeze time, pin versions, seed randomness, ban the fixed sleep \u2014 and isolate the data so every test owns what it asserts on. Take whatever remains off the merge gate into a lane that still runs, with an owner, a ticket, a deadline, and evidence required to come back. And prove the gate with two deliberately broken pull requests, because the separation between blocking and reporting is what all of it depends on.</p>
+
+<p>None of this is exotic, and none of it is about the model or the framework. It is the ordinary discipline of a measurement you intend to act on: know what varies, control it where you can, and keep the failures you cannot yet explain somewhere a person is still looking at them. If your suite has a test everyone re-runs without reading, <a href="/contact">tell us what it is doing</a> \u2014 cleaning that up is routine work on the delivery pipelines we build, and it starts in the same place as our <a href="/services/software-development">platform and systems engineering</a>. Two related notes: <a href="/blog/ai-qa-automation-test-generation">generated tests and the coverage that catches nothing</a> covers the same trust problem from the unit-test side, and <a href="/blog/ai-code-review-best-practices">reviewing AI-generated code</a> is where the banned-sleep policy and the isolation rules get enforced, because a flake nobody notices at review time is a flake somebody else spends a day on later.</p>`,
+    date: '2026-10-08',
+    author: 'WeThinkDigital Engineering',
+    readTime: '9 min read',
+    category: 'Engineering Practice',
+    tags: ['end-to-end testing', 'Playwright', 'flaky tests', 'test isolation', 'CI reliability'],
+    metaTitle: 'Flaky End-to-End Tests: Why Retries Hide Real Bugs',
+    metaDescription:
+      'A test that fails one run in four and passes on re-run is a finding, not noise. How to classify end-to-end flake, remove the nondeterminism you control, and quarantine the rest without deleting the signal.',
+    keywords: ['flaky tests', 'Playwright flaky tests', 'end-to-end test reliability', 'test quarantine', 'test isolation', 'deterministic browser tests', 'CI test reliability'],
+  },
+  {
     id: '14',
     slug: 'durable-agent-workflows-retries-compensation',
     title: 'Durable Agent Workflows: Retries, Idempotency and Compensation',

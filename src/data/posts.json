@@ -1,5 +1,11 @@
 [
   {
+    "id": "15",
+    "slug": "flaky-end-to-end-tests",
+    "title": "Flaky End-to-End Tests: Isolation, Determinism and Quarantine",
+    "date": "2026-10-08"
+  },
+  {
     "id": "14",
     "slug": "durable-agent-workflows-retries-compensation",
     "title": "Durable Agent Workflows: Retries, Idempotency and Compensation",
