@@ -1,5 +1,11 @@
 [
   {
+    "id": "16",
+    "slug": "agent-step-budgets",
+    "title": "Agent Step Budgets: Stopping a Run Without Losing the Work",
+    "date": "2026-10-12"
+  },
+  {
     "id": "15",
     "slug": "flaky-end-to-end-tests",
     "title": "Flaky End-to-End Tests: Isolation, Determinism and Quarantine",

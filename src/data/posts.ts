@@ -9,6 +9,193 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '16',
+    slug: 'agent-step-budgets',
+    title: 'Agent Step Budgets: Stopping a Run Without Losing the Work',
+    excerpt:
+      'A cap that raises an exception throws away everything the run learned; a cap reported as success hides the gap. Where the step counter belongs, how to see a loop before it reaches the ceiling, and what a truncated run owes the caller.',
+    content: `<p>An overnight agent was given a backlog item that should have taken twenty minutes. It ran for ninety. Most of that was the same failing test read for the eleventh time, with two edits alternating back and forth — a fix applied, reverted, applied again. The agent was not confused about the goal and nothing was broken. It had no ceiling, so it did what an unbounded control loop always does: it kept going until something external stopped it, and the thing that stopped it was the invoice.</p>
+
+<p>A step budget is the least interesting feature in an agent system and the one that decides whether a bad night costs a day or a month. The idea is trivial — count the work, stop at a number — and the stopping is where nearly every implementation goes wrong, in one of two directions. Either the cap raises an exception and discards everything the run learned, or it returns a half-finished answer that reads exactly like a finished one. Both are avoidable, and the fixes are in the harness, not in the prompt.</p>
+
+<h2>The default ceiling is somebody else's number</h2>
+
+<p>Every agent runtime ships an opinion about how long a loop may run, and the opinions do not agree.</p>
+
+<ul>
+  <li><strong>LangGraph</strong> bounds graph steps with <code>recursion_limit</code>, default <code>25</code>, and exceeding it raises <code>GraphRecursionError: Recursion limit of 25 reached without hitting a stop condition</code>.</li>
+  <li><strong>OpenAI's Agents SDK</strong> bounds model invocations with <code>max_turns</code>, default <code>10</code>, and raises <code>MaxTurnsExceeded</code> when the loop outruns it. Passing <code>max_turns=None</code> removes the bound entirely.</li>
+  <li><strong>Claude's Agent SDK</strong> reports <code>max_turns</code> with no limit by default, alongside a separate dollar budget, and returns a result message tagged <code>error_max_turns</code> or <code>error_max_budget_usd</code> when either is hit — with no result payload on the turn limit.</li>
+</ul>
+
+<p>Read those three side by side and the useful conclusion is not \"use the framework default\". It is that the ceiling in your system is currently an artefact of the library you picked: ten turns, twenty-five turns, or none. Ten turns is a sensible default for a tool-calling assistant a person is watching, and wrong for a migration that genuinely needs sixty. <em>No limit</em> is defensible for an interactive session a human drives and indefensible for a job that starts at 2am on a queue nobody is reading.</p>
+
+<p>The second conclusion is about the shape of the stop. All three runtimes surface it as a distinguishable outcome rather than a silent exit, which is good design and still not enough — because the loop is not the thing that has value. The work is. A cap that unwinds through an exception takes the transcript with it: a run that spent its full allowance and produced three verified findings and a half-completed worksheet returns nothing usable to the caller, and the queue item starts again from zero. Unless the run state is checkpointed, the ceiling and the absence of durability fail in exactly the same place (that gap, and the contracts that close it, is the subject of <a href=\"/blog/durable-agent-workflows-retries-compensation\">our note on durable agent workflows</a>).</p>
+
+<h2>A budget is several resources, and they run out at different times</h2>
+
+<p>One number is never enough, because the resource that runs out first depends on what the task is doing. A loop that makes fast, cheap, cached calls can run for an hour without spending anything that looks alarming. A loop of three enormous calls can cost what three hundred small ones do. A task can be perfectly bounded in turns and still never finish because it is waiting.</p>
+
+<table>
+  <thead>
+    <tr><th>Resource</th><th>What it actually protects</th><th>What slips through when it is the only cap</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Model turns (steps)</td><td>Reasoning loops and latency</td><td>A loop of short, cheap calls keeps its turn count honest and still burns an hour</td></tr>
+    <tr><td>Tool calls, per run and per tool</td><td>A call retried with the same broken arguments; blast radius</td><td>A hundred cheap writes are nothing in tokens and irreversible in effect</td></tr>
+    <tr><td>Tokens in and out</td><td>A transcript that grows until every turn is expensive</td><td>A short loop over a huge context spends the allowance doing no new work</td></tr>
+    <tr><td>Wall clock</td><td>Stalled dependencies, queues that never drain</td><td>A tight loop of tiny calls finishes in seconds and takes the month with it</td></tr>
+    <tr><td>Money</td><td>The invoice</td><td>Barely related to loop count: cost is a function of context size and model choice</td></tr>
+    <tr><td>Irreversible effects — sends, payments, deletes, deploys</td><td>The one category that should be a small number</td><td>Counted as calls rather than effects, so a retry pair looks like two harmless turns</td></tr>
+  </tbody>
+</table>
+
+<p>Build them in that order, because the first is the only one you can reason about offline. The turn bound is deterministic, cheap to enforce and trivially testable. Tool-call bounds come next, per tool rather than per run, since a task that reads forty files is normal and a task that writes forty records is not. Irreversible effects are counted by effect class and often gated by an approval instead of a number. Cost and clock sit behind those as backstops rather than as the primary control, because they fire late: by the time a dollar budget trips, the run has been unproductive for a while.</p>
+
+<h2>The counter belongs in the loop, not in the prompt</h2>
+
+<p>Two policies in the system prompt — <em>you have at most ten steps</em>, <em>stop when you are close to the limit</em> — are advice, not bounds. A model does not maintain a reliable count of its own turns; it sees the number you placed in the context window and nothing else, and it cannot check your loop variable. So the run that ends at step fourteen with two confident paragraphs about how it respected the limit is not misbehaving. It was asked to enforce something it had no instrument for.</p>
+
+<p>The bound belongs in the harness, as data, checked before the next call rather than after it — checking afterwards lets the run overshoot by one turn, and the expensive turn is always the one that overshoots. If you want the model to plan against the budget, inject the remaining allowance as a computed value at the start of each turn and let it spend that number, rather than asking it to do the arithmetic.</p>
+
+<p>The second thing the harness owns is a reservation. Keep one turn back, permanently, for writing down what exists. Without it, an agent that hits the ceiling mid-analysis returns whatever fragment happened to be in its last message; with it, the same run ends with the artifacts it produced, the items it never reached, and where the budget went.</p>
+
+<pre><code>interface Budget {
+  maxTurns: number;      // the primary bound: deterministic and cheap to enforce
+  maxToolCalls: number;  // counted separately from turns, per tool
+  maxCostUsd: number;    // backstop, not the main control
+  deadline: number;      // epoch ms — catches stalls, not loops
+  // counters, persisted with the run so a restart cannot reset them
+  turns: number;
+  toolCalls: number;
+  costUsd: number;
+}
+
+const WRAP_UP_RESERVE = 1; // the last turn is always spent recording state
+
+function spent(b: Budget, now: number): boolean {
+  return (
+    b.turns &gt;= b.maxTurns ||
+    b.toolCalls &gt;= b.maxToolCalls ||
+    b.costUsd &gt;= b.maxCostUsd ||
+    now &gt;= b.deadline
+  );
+}
+
+while (true) {
+  // Checked before the call that would spend the turn, never after.
+  if (budget.turns &gt;= budget.maxTurns - WRAP_UP_RESERVE) {
+    return {
+      status: 'stopped_by_budget',       // a terminal state, not an exception
+      artifacts: collectArtifacts(transcript),
+      remaining: openItemsFrom(plan, transcript),
+      spent: { turns: budget.turns, toolCalls: budget.toolCalls },
+    };
+  }
+
+  // Any other limit reached: this turn stops planning and starts writing.
+  const instructions = spent(budget, Date.now()) ? wrapUpInstructions(budget) : taskInstructions;
+  const reply = await model(transcript, instructions);
+  budget.turns += 1;
+  // ... execute tool calls, debit budget.toolCalls and budget.costUsd
+}</code></pre>
+
+<h2>Loops have signatures, and the cheap ones are detectable</h2>
+
+<p>A budget is a backstop that fires after the damage. Long before the cap, a stuck loop is already announcing itself in ways that need no model to detect, only a comparison against the last few steps.</p>
+
+<ul>
+  <li><strong>Identical call, identical arguments, repeated.</strong> The strongest signal. Either the earlier result did not make it into the context the model is reasoning over, or the tool returned an error the model cannot act on, and it is retrying the same shape hoping for a different answer.</li>
+  <li><strong>Oscillation.</strong> Fix A, test fails, fix B, test fails, fix A. The state is changing but the outcome is not, and no amount of extra turns resolves it because the model lacks a fact the run never produced.</li>
+  <li><strong>A revisited state.</strong> The plan, the scratchpad or the working set hashes to something already seen. In a deterministic workflow this is a cycle; in an agent it is the same thing wearing prose.</li>
+  <li><strong>A progress-free stretch.</strong> A number of consecutive turns that add no artifact, change no state and read no new source. This is the general form of the three above, and it is the one that catches loops nobody anticipated.</li>
+</ul>
+
+<p>The blunt version of detection is a fingerprint of the tool call, answered rather than blocked:</p>
+
+<pre><code>// Fingerprint what was asked for, not how it was phrased: key order must not matter.
+const seen = new Map&lt;string, { count: number; result: unknown }&gt;();
+
+const key = call.name + ':' + stableStringify(call.args);
+const entry = seen.get(key);
+
+if (entry &amp;&amp; entry.count &gt;= 2) {
+  // Do not execute a third time. Return what we already know, and say why.
+  transcript.push(
+    toolResult(call.id, {
+      status: 'duplicate_call',
+      note: 'Identical call already made. Same arguments return the same result.',
+      result: entry.result,
+    }),
+  );
+  continue;
+}
+
+const result = entry ? entry.result : await run(call);
+seen.set(key, { count: (entry?.count ?? 0) + 1, result });
+transcript.push(toolResult(call.id, result));</code></pre>
+
+<p>Two details make the difference between a detector that helps and one that sabotages runs. The first is that a repeat is answered with information instead of an error: the model gets the cached result plus a note saying the call was already made, which is usually all it needed, and the loop ends in one turn instead of at the cap. Failing the call hard would convert a recoverable stall into a failed run.</p>
+
+<p>The second is that a repeat is not automatically a defect. Re-reading a file after editing it is correct behaviour, and polling a job that has not finished is correct behaviour — which is why the counter is scoped to <em>the same call, twice in a row, with no successful write in between</em>, and why polling belongs inside a tool with its own bounded wait rather than inside the agent loop. The line between a legitimate repeat and a stuck loop is what changed in between, and that is a fact the harness has and the model does not.</p>
+
+<h2>Most expensive turns are a tool problem</h2>
+
+<p>When a run's step count roughly doubles for the same task class, the cause is nearly always a tool interface that changed shape, not a model that got worse. Three failures account for most of it, and all three are fixed where the tool is defined:</p>
+
+<ul>
+  <li><strong>An error the model cannot act on.</strong> A stack trace or a bare \"400\" in the context costs two or three turns and leaves the model reasoning about a failure it cannot address. A typed error — <code>invalid_arguments</code>, with the field name and what was expected — is fixed in one turn, because the correction is visible.</li>
+  <li><strong>An unbounded tool result.</strong> A forty-thousand-token response is not just expensive once; it is re-sent on every subsequent turn, so a single oversized read makes every later step more costly than the last. Cap the payload, paginate, and return a reference the model can follow if it needs more.</li>
+  <li><strong>Repeated reads of the same thing.</strong> Memoise idempotent reads within a run, the same way an effect gets an idempotency key. Inside one run, the value has not changed because you asked a second time.</li>
+</ul>
+
+<h2>Running out of budget is an outcome, not an exception</h2>
+
+<p>A run has three terminal states, and the damage comes from collapsing them into two: it completed, it stopped because it ran out of allowance, or it failed. The middle state is the one that needs to exist, because it is neither of the other two.</p>
+
+<p>Treat it as a failure and an exception unwinds the run — the artifacts are lost, the queue item restarts, and the expensive thing you just paid for is thrown away. Treat it as a success and something worse happens: a partial result enters the world wearing the same clothes as a complete one. An agent that reconciled six of nine invoices and stopped at its ceiling, then wrote a tidy summary, has produced an answer that a downstream reader cannot distinguish from done. The failure surfaces later, in an accounting difference, with no record of where it came from.</p>
+
+<p>So the budget-exhausted result carries four things: what was produced, what remained unreached, where the allowance went — turn and tool-call counts are enough to attribute it — and what the next attempt needs. That last field is the one people leave out and the one that makes the state useful. Either the work resumes with a larger allowance, from the checkpointed state that already exists, or it escalates to a person with the transcript attached, or the task was mis-scoped and belongs split in two. Those are three different decisions, and the run should arrive carrying enough evidence to tell them apart.</p>
+
+<p>Two controls make the stop graceful rather than abrupt. Split the limit in two: a <em>soft</em> ceiling that stops new work and starts consolidating, and a <em>hard</em> ceiling that ends the run regardless of what it is doing. That is what a competent person does under a deadline, and the soft one is what turns a truncated run into a useful one. And keep the exhausted state visible everywhere it travels — in the run record, on the queue item, in the dashboard. A budget stop mapped to <code>status: done</code> anywhere in the chain deletes the signal this whole mechanism exists to produce.</p>
+
+<p>One more layer sits above the per-run budget, and skipping it is a common surprise. A loop that stays comfortably inside its per-run cap and runs four hundred times consumes a month of allowance and looks healthy at every individual step. Per-day and per-tenant ceilings, plus an alert on a job whose run count has jumped, are what catch that shape; the per-run cap is designed to bound a single bad decision, not a bad week.</p>
+
+<h2>Nesting multiplies the budget you think you have</h2>
+
+<p>Budgets are easy to reason about in a single loop and easy to lose in a hierarchy. A supervisor given a hundred turns that delegates to five subagents, each inheriting the same allowance, has granted itself six hundred turns. Multiply again for parallel fan-out and the ceiling you set has no relationship to the ceiling you have.</p>
+
+<p>Subdivide rather than copy: a child is granted the smaller of its own sensible allowance and what the parent has left, and every child's spend is debited against the parent's ledger. Depth limits — how many levels of delegation are allowed at all — are also a budget, and a separate one from step count, because a shallow tree of long runs and a deep tree of short ones fail in completely different ways. Where the boundaries between those agents should sit is the subject of <a href=\"/blog/multi-agent-orchestration-patterns\">our note on orchestration patterns</a>; the arithmetic of the allowance that flows across them is this section.</p>
+
+<h2>Set the number from the distribution, not from taste</h2>
+
+<p>Caps chosen by intuition are usually wrong in one of two directions, and both failures are quiet. Set them too low and the agent under-delivers on work it could have finished — with a tidy summary, so it reads like success. Set them too high and a single unproductive loop consumes the allowance that was supposed to cover a week of work.</p>
+
+<p>The number should come from measurement. Successful runs of a task class have a step distribution; look at the tail and set the cap a small multiple above the typical case, high enough that normal runs never touch it. Two metrics then keep it honest, and both are inexpensive to collect:</p>
+
+<ul>
+  <li><strong>The rate at which runs stop on budget.</strong> A rising rate is the cheapest early warning you will get that a tool schema changed, a retrieval index went stale, or a task description became ambiguous — it moves before the bill does, and well before anyone notices the quality drop.</li>
+  <li><strong>Steps per successful run, tracked per task class.</strong> A task that used to take six steps and now takes thirty is a regression even if every run still passes. Step count is a quality signal, not only a cost, and it is the one that catches a fix that made the common path accidentally more expensive.</li>
+</ul>
+
+<h2>What this means in practice</h2>
+
+<p>Put the counter in the harness and persist it with the run, so a restart cannot hand the loop a fresh allowance. Check it before the call that would spend it, hold one turn back for the wrap-up, and split the limit into a soft ceiling that consolidates and a hard ceiling that ends the run. Give every loop the cheapest possible alarm — a fingerprint on identical tool calls answered with the previous result, and a progress-free counter for the loops nobody predicted — then fix the tool interfaces the step counts point at. Record the exhausted state as its own outcome, propagate it rather than mapping it to done, and let a resumed run or a person pick it up from the state the run left behind.</p>
+
+<p>Then test it, because this is the cheapest reliability test in an agent system and almost nobody writes it. Stub the model so it calls the same tool with the same arguments forever, and assert three things: the run stops at the cap rather than looping, it returns the artifacts it produced, and it does not report itself complete. Add a second stub that makes no progress at all and confirm the same three properties. Everything in this note is exercised by those two tests, and the failure mode they prevent is the one that shows up as a line on an invoice with no run to explain it.</p>
+
+<p>None of this is about model quality. It is ordinary control-loop engineering applied to a component that is deliberately non-deterministic, and it is the same discipline as the retry and idempotency contracts underneath it. If a run of yours has ever been ended by a bill rather than a decision, <a href=\"/contact\">tell us where it stopped</a> — bounding that loop is routine work on the agent systems we build, and it sits under the same <a href=\"/services/ai-engineering\">AI engineering practice</a> as the durability contracts. Two related notes: <a href=\"/blog/llm-cost-optimization-strategies\">controlling LLM cost and latency</a> covers the token arithmetic a cost ceiling depends on, and <a href=\"/blog/llm-eval-gates-in-ci\">eval gates in CI</a> is how you find out whether the runs that finished early finished well — because a budget tells you a run stopped, and never what it was worth.</p>`,
+    date: '2026-10-12',
+    author: 'WeThinkDigital Engineering',
+    readTime: '10 min read',
+    category: 'AI Engineering',
+    tags: ['agents', 'agent loops', 'step budgets', 'tool calling', 'LLM reliability'],
+    metaTitle: 'Agent Step Budgets: Loop Detection and Graceful Stops',
+    metaDescription:
+      'Step, tool, token, clock and cost ceilings for agent runs — why the counter belongs in the harness, how to detect a non-progressing loop, and why running out of budget is an outcome rather than an exception.',
+    keywords: ['agent step budget', 'max turns limit', 'agent loop detection', 'runaway agent loop', 'agent termination', 'tool call limits', 'LLM agent reliability'],
+  },
+  {
     id: '15',
     slug: 'flaky-end-to-end-tests',
     title: 'Flaky End-to-End Tests: Isolation, Determinism and Quarantine',
