@@ -1,5 +1,11 @@
 [
   {
+    "id": "17",
+    "slug": "prompt-injection-trust-boundaries",
+    "title": "Prompt Injection in Agent Systems: Trust Boundaries, Not Detectors",
+    "date": "2026-10-15"
+  },
+  {
     "id": "16",
     "slug": "agent-step-budgets",
     "title": "Agent Step Budgets: Stopping a Run Without Losing the Work",
