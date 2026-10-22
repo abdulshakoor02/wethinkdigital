@@ -1,5 +1,11 @@
 [
   {
+    "id": "18",
+    "slug": "zero-downtime-schema-migrations",
+    "title": "Zero-Downtime Schema Migrations: Expand, Contract, Deploy in That Order",
+    "date": "2026-10-22"
+  },
+  {
     "id": "17",
     "slug": "prompt-injection-trust-boundaries",
     "title": "Prompt Injection in Agent Systems: Trust Boundaries, Not Detectors",

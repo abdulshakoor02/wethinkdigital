@@ -9,6 +9,203 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '18',
+    slug: 'zero-downtime-schema-migrations',
+    title: 'Zero-Downtime Schema Migrations: Expand, Contract, Deploy in That Order',
+    excerpt:
+      'A schema change has two audiences: the code running now and the code that will be running in ten minutes. Expand and contract keeps both correct — and the lock queue is what turns a well-ordered migration into an outage anyway.',
+    content: `<p>The deploy went green. The migration ran in under a second, the new column was there, and nothing in the log looked wrong. Then write latency on one table fell off a cliff for four minutes and took the checkout path with it. The statement responsible was an ordinary index build on a table that had grown past what anyone had in mind when the migration was written. The problem was not that indexing is expensive. It was that the statement needed a lock that excludes writes, and every write arriving behind it queued for the entire build.</p>
+
+<p>Two different problems get filed under the same heading here, and they need different fixes. One is the lock a statement takes and how long it holds it. The other is that a schema change has two audiences at once — the code that is running during the deploy and the code that will be running after it — and a schema that satisfies only one of them is a broken deploy no matter how fast the migration ran. Fix the ordering and you still get taken down by a lock. Fix the locks and you still serve 500s from the half of the fleet on the old image. This is what expand and contract is for, and the lock discipline is what makes it survivable.</p>
+
+<h2>Two versions of the application are always running</h2>
+
+<p>A rolling deploy does not stop the world. Instances are replaced one at a time, so for the length of the rollout some requests are served by code that knows about the new column and some by code that does not. Blue-green has the same window on the other side of the switch. Even a single-server restart has one: the new process is up and querying while the old one finishes its in-flight requests, and any background worker, queue consumer or scheduled job is a separate deployment that will lag behind by minutes or hours. A mobile client pinned to an old API version is the same problem with a longer tail.</p>
+
+<p>The useful way to hold all of that is a two-by-two. Rows are the code version, columns are the schema version, and only the diagonal is what your test suite exercises:</p>
+
+<table>
+  <thead>
+    <tr><th></th><th>Old schema</th><th>New schema</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Old code</strong></td><td>Every test you have ever run</td><td>The cell a rolling deploy walks through, and the one nobody tests</td></tr>
+    <tr><td><strong>New code</strong></td><td>The cell a rollback walks back into, deliberately</td><td>What CI proves, on every pull request</td></tr>
+  </tbody>
+</table>
+
+<p>Both off-diagonal cells are reachable in production and neither is reachable in CI unless you build for it. The top-right is the deploy itself. The bottom-left is what happens when the new code turns out to be wrong and you redeploy the previous image — which is exactly the moment you are least able to also reverse the schema.</p>
+
+<p>So the rule that generates everything else: <strong>every schema state must be correct for two consecutive code versions.</strong> A migration that satisfies that is safe to run before the code that uses it. A migration that does not is a synchronised cutover, and a synchronised cutover is downtime with extra steps.</p>
+
+<h2>Expand, then contract</h2>
+
+<p>The pattern is old enough to have several names — parallel change, expand and contract, the two-phase migration. It is worth restating as four rules because most unsafe migrations break one of them specifically.</p>
+
+<p><strong>Additive.</strong> The first phase only adds: a nullable column, a new table, a new index, a new constraint that is not yet enforced. Nothing that exists is renamed, retyped or removed, so old code continues to work unchanged.</p>
+
+<p><strong>Ignorable.</strong> Old code must be able to insert and update rows without knowing the new column exists, and the schema must not reject those rows. This is the rule people skip: adding <code>NOT NULL</code> to a column that only the new code populates means every write from an instance still on the old image fails. Enforce it after the old image is gone, not before.</p>
+
+<p><strong>Dual-written.</strong> The new code writes both the old and the new representation and reads the old one. One release later it reads the new one, falling back to the old if the new value is missing. Only after a backfill is verified does it stop writing the old.</p>
+
+<p><strong>Deleted late.</strong> The removal is a separate deploy, at least one release after the last reader disappeared, and only after you have evidence rather than an assumption that nothing reads it. Dropping a column is instantaneous and almost free; discovering at 02:00 that a report still selects it is neither.</p>
+
+<p>The cost is honest and should be stated up front: a rename is not one deploy, it is five, spread over releases. That is the price of never taking a maintenance window, and it is why teams batch related changes into one coordinated rename instead of doing them one at a time for a quarter.</p>
+
+<h2>Postgres: the lock is the whole problem</h2>
+
+<p>Almost every DDL statement in Postgres takes an <code>ACCESS EXCLUSIVE</code> lock on the table and holds it until the transaction commits. That lock conflicts with reads as well as writes, which is why a migration can take an application down without a single error in the database log. What varies enormously is how long the lock is held — and whether the statement rewrites the table, which is a function of table size rather than of how the statement looks.</p>
+
+<table>
+  <thead>
+    <tr><th>Statement</th><th>Lock</th><th>Rewrites the table</th><th>Safe form on a live table</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>ADD COLUMN</code> with a constant default</td><td><code>ACCESS EXCLUSIVE</code>, brief</td><td>No, since Postgres 11</td><td>Ship it as-is; the default is stored in the catalogue and applied on read</td></tr>
+    <tr><td><code>ADD COLUMN</code> with a volatile default</td><td><code>ACCESS EXCLUSIVE</code> for the rewrite</td><td>Yes — <code>now()</code>, <code>gen_random_uuid()</code>, anything non-constant</td><td>Add it nullable, backfill, then <code>SET DEFAULT</code> separately</td></tr>
+    <tr><td><code>SET NOT NULL</code></td><td><code>ACCESS EXCLUSIVE</code> plus a full scan</td><td>No</td><td>Add <code>CHECK (col IS NOT NULL) NOT VALID</code>, backfill, <code>VALIDATE CONSTRAINT</code>, then <code>SET NOT NULL</code></td></tr>
+    <tr><td><code>ADD CONSTRAINT</code> (check, foreign key)</td><td><code>ACCESS EXCLUSIVE</code> plus a scan; foreign keys take <code>SHARE ROW EXCLUSIVE</code></td><td>No</td><td>Always <code>NOT VALID</code> first, then <code>VALIDATE CONSTRAINT</code></td></tr>
+    <tr><td><code>VALIDATE CONSTRAINT</code></td><td><code>SHARE UPDATE EXCLUSIVE</code> — reads and writes continue</td><td>No</td><td>Safe by construction; it is the online half of the previous row</td></tr>
+    <tr><td><code>CREATE INDEX</code></td><td><code>SHARE</code>, which blocks writes for the whole build</td><td>No</td><td><code>CREATE INDEX CONCURRENTLY</code>, outside a transaction</td></tr>
+    <tr><td><code>ALTER COLUMN ... TYPE</code></td><td><code>ACCESS EXCLUSIVE</code> for the rewrite</td><td>Yes, unless the cast is binary-coercible</td><td>New column, dual write, backfill, swap — or a real maintenance window</td></tr>
+    <tr><td><code>RENAME COLUMN</code></td><td><code>ACCESS EXCLUSIVE</code>, brief</td><td>No</td><td>Never on a live table: it is instant and it breaks every running instance at once</td></tr>
+  </tbody>
+</table>
+
+<p>Four details in that table are worth their own paragraph, because each one has cost somebody a night.</p>
+
+<p><strong>The fast default only applies to constants.</strong> Since Postgres 11, <code>ADD COLUMN x timestamptz DEFAULT now()</code> is not a metadata change — a volatile default has to be evaluated per row, so the table is rewritten and the exclusive lock is held for the whole rewrite. Adding the column nullable and setting the default afterwards splits a multi-minute lock into two instant ones.</p>
+
+<p><strong><code>SET NOT NULL</code> can borrow proof.</strong> Since Postgres 12, if a validated <code>CHECK (col IS NOT NULL)</code> constraint exists, the server skips the scan and <code>SET NOT NULL</code> becomes a catalogue update. The three-statement sequence in the table is the difference between an exclusive lock measured in seconds and one measured in the length of a full table scan.</p>
+
+<p><strong>A concurrent index build cannot run inside a transaction.</strong> <code>CREATE INDEX CONCURRENTLY</code> takes a weaker lock and does not block writes, but it takes two passes over the table and it cannot be wrapped in <code>BEGIN</code>. Plenty of migration runners wrap each file in a transaction by default, which turns this into a confusing syntax error at deploy time; the statement has to be marked non-transactional or run outside the runner. It also fails rather than rolling back cleanly: a deadlock or a unique violation leaves an <code>INVALID</code> index behind that still costs write throughput until somebody drops it and starts again.</p>
+
+<p><strong>Dropping is not reclaiming.</strong> <code>DROP COLUMN</code> only marks the attribute as gone; the space comes back when the table is rewritten or vacuumed over, whichever happens first. That is usually fine — but a team that drops a wide column expecting disk to return will be confused by the graph for a week.</p>
+
+<h2>Backfill is a job, not a migration</h2>
+
+<p>The moment a change needs existing rows to be transformed, the work stops being a migration. A single <code>UPDATE</code> across millions of rows runs as one transaction: it holds row locks for its whole duration, writes one enormous WAL stream, delays every replica, bloats the table, and if it fails at ninety per cent you get to start again. Nothing about it is resumable and everything about it is invisible until it is a problem.</p>
+
+<p>Run it as a batch loop instead — outside the migration runner, with its own logging, its own throttle and the ability to stop and restart:</p>
+
+<pre><code>-- Repeat until it reports 0 rows. Keyset pagination, not OFFSET:
+-- OFFSET re-scans every row it skips and gets slower with each batch.
+WITH batch AS (
+  SELECT id
+  FROM   accounts
+  WHERE  region_code IS NULL      -- the predicate is what makes it resumable
+  ORDER  BY id
+  LIMIT  1000
+  FOR UPDATE SKIP LOCKED          -- a concurrent writer is skipped, not waited on
+)
+UPDATE accounts AS a
+SET    region_code = region_for(a.country)   -- your mapping, in SQL or in the worker
+FROM   batch
+WHERE  a.id = batch.id;</code></pre>
+
+<p>The <code>IS NULL</code> predicate is doing more work than it looks like: it makes each batch idempotent, so a crash costs one batch rather than the whole run, and it makes a second pass cheap enough to schedule as a safety net.</p>
+
+<p>That second pass matters because your dual write only covers writes that go through your application. An admin console, a bulk import, a support tool, a nightly job in another service, a colleague with a psql session — none of them know the new column exists, and all of them insert rows the app-level mapping never touches. Either the backfill runs to convergence after the code is fully rolled out, or you install a trigger for the duration of the change so that every writer maintains the new column whether or not it has been updated. The trigger is uglier and it is the more reliable of the two, because it does not depend on anyone remembering.</p>
+
+<h2>The gate before reads switch</h2>
+
+<p>A backfill that finished is not a backfill that worked. Before the release that switches reads to the new column, assert the invariant in both directions:</p>
+
+<pre><code>-- Both counts must be zero. A backfill that overwrote a correct value is
+-- as wrong as one that missed a row, and only the second shows up as NULL.
+SELECT
+  count(*) FILTER (WHERE region_code IS NULL AND region IS NOT NULL) AS missed,
+  count(*) FILTER (WHERE region_code IS DISTINCT FROM region)        AS mismatched
+FROM accounts;</code></pre>
+
+<p>Run that against a replica, record the result somewhere a reviewer can see it, and treat a non-zero count as a blocked deploy rather than a rounding error. If the transform is more interesting than a lookup — a currency conversion, a normalised address — spot-check rows against the old value as well, because a systematic error passes a NULL check happily.</p>
+
+<h2>A rename, end to end</h2>
+
+<p>Renaming <code>region</code> to <code>region_code</code> is the smallest change that exercises every part of this. It takes five deploys and one job, and none of them are interesting on their own.</p>
+
+<ol>
+  <li><strong>Deploy 1 — expand.</strong> One migration: <code>ALTER TABLE accounts ADD COLUMN region_code text;</code> Nullable, no default, no constraint. Old code is unaffected because it has never heard of the column.</li>
+  <li><strong>Deploy 2 — dual write.</strong> New code writes both columns on every insert and update, and reads <code>region</code>. Writes that arrive from old instances still populate only <code>region</code>, which is why the next step exists.</li>
+  <li><strong>Backfill job.</strong> Batched, throttled, restartable, logged. Runs after the rollout completes, not during it, and finishes with the two-count check above.</li>
+  <li><strong>Deploy 3 — switch reads.</strong> Read <code>region_code</code>, fall back to <code>region</code> when it is null, keep writing both. The fallback is what makes this reversible: if the new column turns out to be wrong for a slice of rows, the old one is still there and still precise.</li>
+  <li><strong>Deploy 4 — stop writing the old column.</strong> Only after the fallback has logged zero hits for a full release cycle. Now <code>region</code> is dead weight, and it is also the last cheap rollback you will have.</li>
+  <li><strong>Deploy 5 — contract.</strong> Drop <code>region</code>. One-way. Wait until nothing could plausibly still read it: search the code, search the collected query text if you have it, and check the reports and exports before you believe the answer.</li>
+</ol>
+
+<p>Deploy 5 is the one to be strict about. Until it runs, rolling back is a code deploy. After it runs, rolling back is a restore. That asymmetry is the entire reason the contract step waits a release instead of riding along with the read switch — and the reason a schema change should be reviewed by asking which of the five steps it is, not by asking whether the SQL looks correct.</p>
+
+<h2>Bound the wait instead of hoping</h2>
+
+<p>There is a failure mode that survives every rule above: the migration is safe, but it cannot get its lock. A long-running query holds a shared lock on the table, the <code>ALTER TABLE</code> queues behind it, and because Postgres grants locks roughly in arrival order, every subsequent read of that table queues behind the <code>ALTER</code>. One slow report becomes a table-wide outage that lasts as long as the report plus the migration — and the migration has not even started.</p>
+
+<p>The fix is a timeout short enough that the migration gives up before it becomes the head of the queue, plus a bounded retry with backoff:</p>
+
+<pre><code>-- On the migration session only, never the application's.
+SET lock_timeout = '3s';         -- give up rather than queue behind a reader
+SET statement_timeout = '30s';   -- a rewrite here is a bug, not a slow query
+
+BEGIN;
+ALTER TABLE accounts ADD COLUMN region_code text;
+COMMIT;</code></pre>
+
+<p>Retry only what is worth retrying: lock timeouts, deadlocks and serialisation failures are contention and will probably succeed on the next attempt. A syntax error, a constraint violation or a statement timeout will fail identically twenty times, and each attempt holds the exclusive lock for the full timeout while it does. Fail those on the first pass and let a human look.</p>
+
+<p>Two supporting details. Run migrations from exactly one place — a job, not every application instance at boot, and not two CI runners that both noticed the same commit — and serialise them with an advisory lock so a second migrator waits rather than interleaving. And set <code>idle_in_transaction_session_timeout</code> on the application's connections: a session that opened a transaction and went to lunch holds a shared lock on everything it read, and it will block a migration indefinitely without appearing in any query log.</p>
+
+<h2>When the change cannot be additive</h2>
+
+<p>Some changes have no safe additive form: retyping a large column, splitting a table, changing a primary key, moving a hot table onto partitions. Expand and contract still describes the shape, but the expand step is a new table rather than a new column.</p>
+
+<p>Create the new table alongside the old, write to both from the application, backfill in batches, and verify with a row count and a content checksum rather than a spot check. Then cut over in a single short transaction that does nothing but rename — <code>accounts</code> to <code>accounts_old</code>, <code>accounts_v2</code> to <code>accounts</code> — under the same <code>lock_timeout</code>. The exclusive lock is held for milliseconds because a rename is a catalogue change; everything expensive happened before it.</p>
+
+<p>Two things make this a project rather than a migration. Foreign keys, views, triggers, functions and anything with the table name baked into a string all point at the old name and have to be recreated against the new one. And the old table has to stay writable until the cutover is proven, which means the dual write has to be genuinely dual for the whole window — including the paths nobody thought about, which is the same lesson as the backfill.</p>
+
+<h2>Test the off-diagonal cells</h2>
+
+<p>CI proves the diagonal. The two cells that break deploys and rollbacks need to be produced deliberately, and both are cheap once you decide to do it.</p>
+
+<p>Restore a production-shaped copy — anonymised, and large enough that the lock behaviour is real rather than theoretical — then run the migration and, against the migrated schema, run the <em>previous</em> release's test suite. That is the top-right cell: old code, new schema. If it fails, the expand step is not additive and the deploy will fail in the middle of the rollout with half the fleet on the new image.</p>
+
+<p>The bottom-left cell is the reverse: check out the new code, point it at the pre-migration schema, and run the new tests. If that fails, the new code cannot be rolled back, which is worth knowing before you need it. It also catches a specific and common bug — new code that reads a column the migration has not yet added, in a deploy pipeline that runs code and migration in the wrong order.</p>
+
+<p>Then add a linter to the pipeline for the statements that are known to be dangerous regardless of context. Tools like <a href="https://squawkhq.com/" target="_blank" rel="noopener noreferrer">squawk</a> encode the lock table above as rules and fail a pull request that adds a column with a volatile default or calls <code>SET NOT NULL</code> without a validated check. It is the same class of gate as a lint rule for a dangerous API call: not a substitute for review, but it catches the change somebody wrote at the end of a long day, and it catches it before the deploy rather than during it.</p>
+
+<h2>What this means in practice</h2>
+
+<ol>
+  <li><strong>Classify the change before writing the SQL.</strong> Additive, or a cutover? If it renames, retypes or removes anything, it is a multi-deploy change and should be planned as one.</li>
+  <li><strong>Never rename or retype in place.</strong> Add the new shape, dual write, backfill, switch reads with a fallback, stop writing the old, drop it a release later.</li>
+  <li><strong>Keep the schema valid for the previous release.</strong> No <code>NOT NULL</code>, no constraint and no dropped column that the currently deployed image cannot satisfy.</li>
+  <li><strong>Backfill as a resumable job</strong> with keyset pagination, a throttle and a convergence pass for writers outside the application.</li>
+  <li><strong>Gate the read switch on a verification query</strong>, not on the job reporting success.</li>
+  <li><strong>Set <code>lock_timeout</code> on every migration session</strong> and retry only contention errors, so a busy table produces a retry instead of an outage.</li>
+  <li><strong>Run the previous release's tests against the new schema</strong> in CI, and let a migration linter reject the known-dangerous statements.</li>
+</ol>
+
+<p>None of this is exotic and none of it is new: it is the same discipline as any other backwards-compatible interface change, applied to the interface with the longest-lived clients and the least tolerance for a bad afternoon. The teams that find it hard are usually not writing bad SQL. They are writing correct SQL and deploying it in an order that assumes only one version of the application exists — which is true in the test suite and never true in production.</p>
+
+<p>If a schema change on your roadmap needs a maintenance window, or if nobody can say which deploy is allowed to drop the old column, <a href="/contact">tell us what the table looks like</a> — this is ordinary work in our <a href="/services/software-development">custom software practice</a>, and it sits next to two adjacent problems we have written about: <a href="/blog/durable-agent-workflows-retries-compensation">retries and compensation</a>, which is what idempotency looks like once a workflow spans several systems, and <a href="/blog/flaky-end-to-end-tests">flaky end-to-end tests</a>, which is what happens when the environment a change is verified in stops resembling the one it ships to.</p>`,
+    date: '2026-10-22',
+    author: 'WeThinkDigital Engineering',
+    readTime: '12 min read',
+    category: 'Software Development',
+    tags: ['database migrations', 'Postgres', 'zero downtime', 'expand and contract', 'deployment'],
+    metaTitle: 'Zero-Downtime Schema Migrations: Expand, Contract, Deploy',
+    metaDescription:
+      'Why safe schema changes are an ordering problem before they are a SQL problem: the two-version compatibility matrix, expand and contract, batched backfills, and the Postgres locks and lock queue that turn a correct migration into an outage.',
+    keywords: [
+      'zero-downtime schema migrations',
+      'expand and contract pattern',
+      'Postgres migration locks',
+      'backfill strategy',
+      'online DDL',
+      'database deployment order',
+      'lock_timeout',
+      'backwards compatible schema change',
+    ],
+  },
+  {
     id: '17',
     slug: 'prompt-injection-trust-boundaries',
     title: 'Prompt Injection in Agent Systems: Trust Boundaries, Not Detectors',
