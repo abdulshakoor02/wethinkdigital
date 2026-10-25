@@ -87,6 +87,27 @@ const nextConfig: NextConfig = {
 
   // Headers for caching
   async headers() {
+    /**
+     * Asset caching is production-only, deliberately.
+     *
+     * Turbopack's dev server names chunks after the module graph, not after
+     * their content: `/_next/static/chunks/src_1xz5l10._.js` keeps that exact
+     * URL across edits while its body changes. Serving it `immutable` with a
+     * one-year max-age pins the browser to whichever copy it fetched first, so
+     * the server renders the current tree while the client keeps executing the
+     * previous one — React then reports "Hydration failed because the server
+     * rendered HTML didn't match the client" and regenerates the tree on the
+     * client. Next's own dev handler sends `no-store` for exactly this reason,
+     * and a blanket header here overrides it.
+     *
+     * Production assets under /_next/static are content-hashed, so caching
+     * them forever stays correct and unchanged.
+     */
+    const assetCacheControl =
+      process.env.NODE_ENV === 'production'
+        ? 'public, max-age=31536000, immutable'
+        : 'no-store, must-revalidate';
+
     return [
       {
         source: '/(.*)',
@@ -110,7 +131,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            value: assetCacheControl,
           },
         ],
       },
