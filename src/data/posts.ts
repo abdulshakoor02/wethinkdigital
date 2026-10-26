@@ -9,6 +9,231 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '19',
+    slug: 'structured-output-contracts',
+    title: 'Structured Output From LLMs: Valid JSON Is the Easy Part',
+    excerpt:
+      'A schema-constrained decoder guarantees the shape of a response and nothing about its meaning. The failures that reach production live in that gap — null read as absent, truncated objects completed by a repair pass, and enums that changed underneath an exhaustive switch.',
+    content: `<p>The extraction service had been running for four months without a parse error. Every response validated against the schema, the retry counter sat at zero, and the latency chart was a flat line. What had gone wrong surfaced in reconciliation instead: a slice of records carried a total of zero, and zero reconciled cleanly against nothing. The schema permitted <code>total</code> to be null, the model emitted null when it could not find one, and the consumer wrote <code>payload.total ?? 0</code>. Everything downstream of that line believed the document had said zero. Nothing threw an exception, because nothing was malformed.</p>
+
+<p>That is the shape of the problem with structured output, and it gets worse as the tooling gets better. Constraining a response to a schema removes the loud failures — the stray prose before the JSON, the trailing comma, the field the model renamed — and leaves behind the quiet ones, where the object is exactly the right shape and says something false. A model that cannot emit a malformed object will emit a well-formed wrong one, and the gap between those two outcomes is where the incident lives.</p>
+
+<p>The fix is not a better parser. It is deciding, deliberately, which layer is responsible for which guarantee, and refusing to let a schema pretend to be a type check, a business rule and an access-control decision at the same time.</p>
+
+<h2>Three claims wearing one word</h2>
+
+<p>"Valid" is used for three different properties, and the confusion comes from the fact that all three are checked with code that looks similar.</p>
+
+<table>
+  <thead>
+    <tr><th>Claim</th><th>What it means</th><th>What actually enforces it</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Parseable</strong></td><td>The bytes are a JSON value</td><td>The parser, or a decoding grammar if the provider supports one</td></tr>
+    <tr><td><strong>Conformant</strong></td><td>The value matches the declared shape</td><td>The schema, at generation time or in a validator afterwards</td></tr>
+    <tr><td><strong>True</strong></td><td>The value means what the field name says</td><td>Your domain code, or nobody</td></tr>
+  </tbody>
+</table>
+
+<p>Only the first two are properties of the model call. The third is a property of your application, and there is no setting that moves it into the model. Teams get into trouble by assuming the third follows from the second, which is the same mistake as assuming a TypeScript interface proves that a number is the right number. A type annotation is a claim about shape; it was never a claim about truth.</p>
+
+<h2>What a constrained decoder actually guarantees</h2>
+
+<p>Several providers now compile your schema into a decoding grammar: at each token step, only tokens that keep the output conformant are eligible to be sampled. The guarantee is real and worth using. It is also narrower than it sounds.</p>
+
+<p>Two consequences follow directly. First, the error you would normally use as your signal disappears. There are no shape violations in the logs because shape violations are not representable, so the metric you would have watched to detect a bad call reads zero whether the system is healthy or the schema is wrong. Second, when the model does not know a value, it still has to emit one that the grammar permits. The escape hatches are null, an empty array, the first member of an enum, and zero. Constrained decoding does not make the model more certain. It removes its ability to say "I am not sure" in any form the grammar has not reserved for that purpose.</p>
+
+<p>If uncertainty matters downstream — and for extraction, classification and triage it almost always does — you have to model it explicitly. That is a schema design decision, not a prompt engineering one.</p>
+
+<h2>The subset is the design constraint</h2>
+
+<p>Providers do not accept all of JSON Schema, because a keyword that constrains values without shrinking the set of legal tokens cannot be compiled into a mask. The restrictions show up in the same places every time, and each one has a design consequence.</p>
+
+<ul>
+  <li><strong>Objects are closed.</strong> <code>additionalProperties: false</code> on every object, including nested ones. A decoder has to know when an object is finished, and an open key set makes that ambiguous.</li>
+  <li><strong>Every property is required.</strong> There is no ordinary optional field. Absence is modelled as a type union with null, which changes the generated type from <code>field?: string</code> to <code>field: string | null</code> and therefore changes every call site.</li>
+  <li><strong>Composition is limited.</strong> <code>oneOf</code>, <code>allOf</code> and <code>not</code> are commonly unsupported. <code>anyOf</code> with a literal discriminant on each branch is the union you can express.</li>
+  <li><strong>Value keywords are often unenforced.</strong> Patterns, formats, numeric bounds and array length limits have historically been ignored or rejected depending on provider and model. A constraint the grammar cannot express is a constraint you still own.</li>
+  <li><strong>Structural caps exist.</strong> Property counts, nesting depth and total enum size have limits that vary by provider and change between versions. They are low enough that a schema generated by reflecting an ORM will hit them.</li>
+</ul>
+
+<p>None of this is a reason to avoid structured output; it is the reason to hand-write the schema you need instead of deriving it from a domain model. The wire format is an interface with the model, and interfaces are supposed to be smaller than the systems behind them.</p>
+
+<pre><code>{
+  "name": "invoice_figure",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "state": {
+        "type": "string",
+        "enum": ["found", "not_in_document", "illegible"]
+      },
+      "minor_units": { "type": ["integer", "null"] },
+      "currency":    { "type": ["string", "null"] },
+      "evidence":    { "type": ["string", "null"] }
+    },
+    "required": ["state", "minor_units", "currency", "evidence"]
+  }
+}</code></pre>
+
+<p>That schema is doing one thing the naive version did not: it separates "the document has no total" from "there is a total on the page and I could not read it". Those require different human responses, and collapsing them into a single null guarantees that the second is treated as the first.</p>
+
+<h2>Optional is not null, and null is not nothing</h2>
+
+<p>Once null is the only way to express absence, every null becomes a question with three answers and no room for them. Was the field genuinely not applicable? Was it present in the source and unreadable? Did the model simply not produce it, because the field was buried in a table cell the extraction never reached?</p>
+
+<p>The way out is to stop treating null as an answer. Either pair the value with a state, as above, or require an evidence span for every field that matters and validate that the span actually appears in the input document. The second is stronger and cheaper than it sounds: if the model returns <code>"evidence": "Total due 1,240.00"</code>, asserting that this substring exists in the source catches fabrication and misreading with a string comparison, and it is the same trick that makes citation-bearing retrieval answers checkable rather than plausible.</p>
+
+<p>The generated type matters here too. With strict schemas the compiler hands you <code>string | null</code>, which forces the question at every call site instead of letting <code>undefined</code> slip through a truthiness check. That friction is the feature. A <code>field?: string</code> type invites <code>if (obj.field)</code>, which silently conflates empty string, null and missing, and ships a bug that survives code review because the check looks defensive.</p>
+
+<pre><code>type Total =
+  | { state: 'found'; minorUnits: number; currency: Currency }
+  | { state: 'absent' }
+  | { state: 'unreadable' };
+
+interface WireTotal {
+  state: 'found' | 'not_in_document' | 'illegible';
+  minor_units: number | null;
+  currency: string | null;
+  evidence: string | null;
+}
+
+export function toTotal(w: WireTotal, source: string): Total {
+  if (w.state === 'not_in_document') return { state: 'absent' };
+  if (w.state === 'illegible') return { state: 'unreadable' };
+
+  // A found total without its parts is a contradiction, not a partial success.
+  if (w.minor_units === null || w.currency === null) return { state: 'unreadable' };
+  if (!Number.isSafeInteger(w.minor_units)) return { state: 'unreadable' };
+  if (w.evidence !== null &amp;&amp; !source.includes(w.evidence)) return { state: 'unreadable' };
+
+  const currency = parseCurrency(w.currency);
+  if (currency === null) return { state: 'unreadable' };
+
+  return { state: 'found', minorUnits: w.minor_units, currency };
+}</code></pre>
+
+<p>The function is boring and that is the point: it is the only place in the system that knows the wire shape, it returns a closed union, and it has no branch that quietly substitutes a default. Everything after it works with a <code>Total</code>, and a <code>Total</code> cannot be zero because something failed.</p>
+
+<h2>Constraints the grammar cannot see</h2>
+
+<p>Put a pattern or a range in the schema and it may be silently dropped. The documented workaround is to move the constraint into the field description, which does help — descriptions are read by the model and they raise adherence — but "raises" is not "guarantees", and the difference only shows up in production volume.</p>
+
+<p>So validate after parsing, and give each violation a policy rather than a comment. There are only three sensible ones:</p>
+
+<ul>
+  <li><strong>Reject</strong> — the value is unusable and the caller must retry or surface an error. Right for anything a human will act on directly.</li>
+  <li><strong>Quarantine</strong> — accept the record, hold the field, route it to a review queue. Right for extraction, where the rest of the object is still valuable.</li>
+  <li><strong>Repair</strong> — one bounded attempt to fix the specific field. Legitimate for format problems, never for missing facts.</li>
+</ul>
+
+<p>Choosing per field, up front, is what stops a validation failure from being handled by whichever engineer happens to be on call. It also produces a number per field, which is the only way to notice that one specific constraint fails at a rate ten times the others — usually because the description and the validator disagree about what the field means.</p>
+
+<h2>Truncation, streaming, and acting on half an object</h2>
+
+<p>A decoding mask constrains each token against the schema. It does not know how many tokens you are going to let the model spend. Cut the response off at the token limit and you get a <code>finish_reason</code> of length with an object that is incomplete — and if any code path "completes" it by closing brackets and re-parsing, you have built a machine that converts a capacity problem into a data loss problem. The array of line items ends where the budget ran out, the object parses, and the total is now wrong by however much was in the tail.</p>
+
+<p>Treat a length-terminated response as a failure regardless of whether it parses. Then measure the rate, because a rising truncation rate is a real signal: prompts drifting longer, documents getting bigger, or an output schema that asks for more than the budget allows.</p>
+
+<p>Streaming has the same shape of hazard. Text is safe to render as it arrives, because a partial paragraph is visibly partial. Tool arguments are not: the JSON accumulates, and a consumer that parses whatever has arrived so far will act on the first prefix that happens to be syntactically complete — which is exactly the prefix that omits the later keys. Validate the fully accumulated object before executing anything, and if the UI wants to show progress from partial arguments, label it as provisional, because that is what it is.</p>
+
+<p>There is a cost on this side too. Compiling a schema into a grammar is not free: the first call with a new schema pays a compile cost, which is worth caching by name and version rather than re-declaring per request. And a schema with hundreds of enum members spends output tokens enumerating the chosen one, which is a real line item once volume arrives.</p>
+
+<h2>Model your output, not your database</h2>
+
+<p>The instinct, when you already have types, is to generate the schema from them. It produces a faithful description of your domain and a bad interface for a model: deep nesting, fields that are irrelevant to the task, and property counts that breach provider limits. The model then has to make one call do the work of five, and quality drops in a way that looks like a model problem.</p>
+
+<p>Three habits fix most of it:</p>
+
+<ul>
+  <li><strong>One schema per question.</strong> Two small calls that each answer one thing beat one call that answers everything. They are easier to evaluate separately and their failures are attributable.</li>
+  <li><strong>Discriminated unions, not optional soup.</strong> Each <code>anyOf</code> branch carries a literal <code>kind</code>, so the model commits to a branch and cannot produce a hybrid that is missing the fields the branch requires.</li>
+  <li><strong>Enums are a versioned vocabulary.</strong> Adding a member is a breaking change for anything with an exhaustive switch, exactly like adding a value to a status column. Map unknown members to an explicit <code>other</code> at the boundary instead of throwing, and log it — that count is your early warning that the vocabulary is out of date.</li>
+</ul>
+
+<p>That last one is worth stating plainly because it is the same lesson as any other interface change: the consumer and the producer are deployed at different times, and a schema is a contract between them.</p>
+
+<h2>The repair loop is a measurement, not a fix</h2>
+
+<p>The standard implementation validates, and on failure appends the validator's error to the conversation and asks again. It works often enough that it becomes permanent infrastructure, and it hides three costs.</p>
+
+<p>The first is latency: every repair doubles the p99 for that path. The second is spend, since the failed attempt and the retry are both billed. The third is the one that matters. A repair that succeeds often does so by fabricating a value that satisfies the constraint. The model was told the date was not in ISO format; it now returns a well-formed date that is not the date in the document. The retry turned a loud format failure into a confident wrong answer, and the validator's own success is what launders it.</p>
+
+<blockquote>A repair loop is safe for structure and unsafe for truth. If a field must be read from a document, a second attempt that produces a more convenient value is not a recovery — it is a fabrication with better formatting.</blockquote>
+
+<p>So bound it at one attempt, restrict it to structural problems, and instrument the rate. A repair rate that creeps up is the schema telling you it is ambiguous or the prompt telling you it is underspecified. Fixing that is the actual repair; the loop is a symptom you are measuring.</p>
+
+<p>One more rule, which belongs to the same family as any retried side effect: never retry an action whose effect already happened. If the validation failure occurs after a write, the retry needs an idempotency key or it needs compensation — the same problem as <a href="/blog/durable-agent-workflows-retries-compensation">retries inside a durable workflow</a>, arriving through a different door.</p>
+
+<h2>Types that lose information in transit</h2>
+
+<p>JSON numbers are doubles in most runtimes, and that has consequences the schema cannot express:</p>
+
+<ul>
+  <li><strong>Large integers.</strong> Identifiers above 2^53 — the ones issued by many distributed ID schemes — lose precision the moment they are parsed as numbers. Send them as strings and keep them as strings.</li>
+  <li><strong>Money.</strong> Integer minor units plus an ISO 4217 code, never a bare float and never a number without the currency. Rounding is your code's decision, not the model's, and a float that round-trips through a decimal representation is a rounding bug waiting for a reconciliation report.</li>
+  <li><strong>Dates.</strong> ISO 8601 with an explicit offset. Date parsing of anything else is implementation-defined, so a locale-formatted string works in the environment where it was tested and silently becomes the previous day in another.</li>
+  <li><strong>Booleans.</strong> The string "false" is truthy. If the field can arrive as a string, the schema is wrong, not the check.</li>
+  <li><strong>Units.</strong> Put them in the field name — <code>duration_ms</code>, not <code>duration</code>. A number without a unit is a future incident with a plausible-looking value.</li>
+</ul>
+
+<h2>Put the boundary in one place</h2>
+
+<p>One function per schema, at the edge, that takes the parsed response and returns either a domain object or a typed error. Nothing downstream should see the wire type; nothing upstream should know the domain type. In practice that means no <code>as</code>, no <code>any</code>, and a closed result type that the compiler forces you to handle.</p>
+
+<p>What the boundary does <em>not</em> cover is worth being explicit about, because teams routinely assume otherwise:</p>
+
+<ul>
+  <li><strong>Domain invariants.</strong> That a total is an integer does not make it positive, and does not make it equal the sum of the line items.</li>
+  <li><strong>Authorisation.</strong> A schema cannot know that this caller should not see this record. Permission belongs in retrieval and in the data layer, not in a field description.</li>
+  <li><strong>Provenance.</strong> Whether the value came from the document, from the model's priors, or from an earlier turn is not representable in a shape — only in an evidence field you chose to require.</li>
+</ul>
+
+<p>The framing that gets all of this right without inventing concepts: treat model output as a form submission from an untrusted client. You would not trust a browser's JSON body because it matched your request type; you would validate it, check that the user may act on those rows, and reject what does not hold. Everything here follows from applying that habit to a client that is fluent and confidently wrong.</p>
+
+<h2>What to instrument and what to test</h2>
+
+<p>Under a constrained decoder the shape metrics stay near zero by construction, which makes the semantic ones the only ones worth a dashboard:</p>
+
+<ul>
+  <li><strong>Validation failure rate by schema name and version.</strong> Expected to be low, watched anyway — a provider change or a model rollback shows up here first.</li>
+  <li><strong>Repair rate.</strong> Rising means the schema or prompt drifted.</li>
+  <li><strong>Null rate per field.</strong> The cheapest drift detector available. One field's null rate moving from two percent to twenty is a prompt change, a document change or a model change, and nothing else will tell you which.</li>
+  <li><strong>Other-bucket rate for enums</strong>, which is how you find out your vocabulary stopped covering reality.</li>
+  <li><strong>Truncation rate and p99 output tokens</strong>, which is capacity, not quality, and fails differently.</li>
+</ul>
+
+<p>On the test side, three things earn their keep. Golden fixtures per schema, including the adversarial ones: an empty document, a document in another language, two candidate values, a value that breaks the pattern, and a document that simply does not contain the answer. A conformance check in CI that compiles every schema against the provider's supported subset at build time, so an unsupported keyword is a failing build with a JSON pointer in the message rather than a 400 at 03:00. And a checked-in snapshot of the generated types, so renaming a field is a visible diff instead of a silent rename in a payload nobody re-reads.</p>
+
+<h2>What this means in practice</h2>
+
+<p>The tooling has made syntax a solved problem, and that is genuinely useful — it removes a whole class of parsing code and the retries that went with it. What it has not done is move the responsibility for meaning. The schema is an interface, the validator is a boundary check, and the domain rules are still yours, in the same place they were before a model was involved.</p>
+
+<p>Concretely: state the guarantee you are relying on for each field, decide what null means before you write the schema, require evidence for anything a human will act on, and put a single parse function between the model and the rest of the system. That is a day of work at the start of a project and a week of archaeology if you skip it.</p>
+
+<p>If you are wiring structured extraction or tool calling into a product and the failure mode you keep finding is a well-formed wrong answer, <a href="/contact">tell us what the payload looks like</a> — this is the routine half of our <a href="/services/ai-engineering">LLM and agent systems practice</a>. Two neighbours are worth reading next: <a href="/blog/llm-eval-gates-in-ci">eval gates in CI</a>, which is how you catch a semantics regression that shape validation will never see, and <a href="/blog/agent-step-budgets">agent step budgets</a>, which is the same problem — bounding a loop that looks healthy at every individual step.</p>`,
+    date: '2026-10-26',
+    author: 'WeThinkDigital Engineering',
+    readTime: '13 min read',
+    category: 'AI Engineering',
+    tags: ['structured output', 'JSON schema', 'LLM reliability', 'output validation', 'API contracts'],
+    metaTitle: 'Structured Output From LLMs: Valid JSON Is the Easy Part',
+    metaDescription:
+      'Schema-constrained decoding guarantees the shape of a model response, not its meaning: null versus absent, keywords the grammar cannot enforce, truncation, enum drift, repair loops, and where the validation boundary belongs.',
+    keywords: [
+      'structured output LLM',
+      'JSON schema constrained decoding',
+      'LLM output validation',
+      'nullable versus optional schema',
+      'tool call argument validation',
+      'enum drift',
+      'truncated LLM response',
+      'LLM output contracts',
+    ],
+  },
+  {
     id: '18',
     slug: 'zero-downtime-schema-migrations',
     title: 'Zero-Downtime Schema Migrations: Expand, Contract, Deploy in That Order',
