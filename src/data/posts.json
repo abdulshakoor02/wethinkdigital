@@ -1,5 +1,11 @@
 [
   {
+    "id": "20",
+    "slug": "multi-tenant-isolation-shared-database",
+    "title": "Tenant Isolation in a Shared Database: Where the Leaks Actually Happen",
+    "date": "2026-10-29"
+  },
+  {
     "id": "19",
     "slug": "structured-output-contracts",
     "title": "Structured Output From LLMs: Valid JSON Is the Easy Part",

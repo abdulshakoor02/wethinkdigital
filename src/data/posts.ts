@@ -9,6 +9,235 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '20',
+    slug: 'multi-tenant-isolation-shared-database',
+    title: 'Tenant Isolation in a Shared Database: Where the Leaks Actually Happen',
+    excerpt:
+      'A cross-tenant leak is rarely a breach of the boundary. It is a missing seam — one query without a predicate, one cache key without a tenant, one worker that never re-entered its context. The enforcement points are the design.',
+    content: `<p>A support engineer exported a customer's invoice history and found a second customer's invoice in the file. Nothing had thrown, no test had failed, and no alert had fired — the endpoint had been in production for a year. The query behind it was one of roughly forty that filtered by tenant, and it was the one written in a hurry against a table with a <code>tenant_id</code> column rather than against a repository that required one.</p>
+
+<p>That is what a cross-tenant leak usually looks like: not a broken boundary, but an absent one at a single seam, inside a request that returns 200 and a body that looks entirely normal. Ordinary authorisation fails loudly — a user without a role gets a 403, someone notices. Tenant isolation fails quietly, because the response is well-formed, the row exists, and the only person who could recognise it as wrong is the customer who should never have seen it.</p>
+
+<p>So the useful question is not "is the database isolated". It is: how many places in this system can reach tenant data, and what stops each one from reaching the wrong tenant's?</p>
+
+<h2>Shared schema is fine; the count of enforcement points is the risk</h2>
+
+<p>Three models get argued about endlessly, and the argument usually mistakes operational cost for safety.</p>
+
+<table>
+  <thead>
+    <tr><th>Model</th><th>What actually isolates</th><th>What it costs</th><th>How it fails</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Database per tenant</td><td>Connection string</td><td>Migrations run N times, N connection pools, cross-tenant reporting is a data project</td><td>A job pointed at the wrong connection string writes one tenant's data into another's database</td></tr>
+    <tr><td>Schema per tenant</td><td><code>search_path</code> on the connection</td><td>Migration fan-out, catalogue bloat, per-tenant DDL locks</td><td>A mis-set <code>search_path</code> falls back to <code>public</code>, and every query quietly reads the shared schema</td></tr>
+    <tr><td>Shared schema, <code>tenant_id</code> column</td><td>Every query's predicate</td><td>One enforcement point per code path</td><td>A single missing predicate, in code that looks like the other forty</td></tr>
+  </tbody>
+</table>
+
+<p>All three reduce to the same underlying problem, which is that some piece of ambient state — a connection string, a search path, a session variable — has to be correct at the moment the query runs, and nothing in the type system knows about it. Shared schema does not introduce the hazard; it just makes the hazard visible, because it lives in your own query text instead of in deployment configuration.</p>
+
+<p>Shared schema plus row-level security is a reasonable default for most products, and it becomes a genuinely strong design when you stop treating it as a policy file and start treating it as one layer of a boundary with several. What follows is the order those layers need to go in.</p>
+
+<h2>Row-level security is a backstop, and it has three ways to be off</h2>
+
+<p>The appeal of row-level security is that it enforces the predicate in the database, so a forgotten <code>WHERE tenant_id = $1</code> returns nothing instead of everything. That is real, and it is worth having. It is also only true if the role running your queries is subject to the policy, and there are three ordinary ways for it not to be.</p>
+
+<ul>
+  <li><strong>The table owner bypasses its own policies.</strong> By default RLS does not apply to the owner, which means the migration role and the runtime role must be different, and the table needs <code>FORCE ROW LEVEL SECURITY</code> if they ever coincide — which they will in development, and in whichever environment someone set up by running migrations as the app user.</li>
+  <li><strong>Superusers and <code>BYPASSRLS</code> roles ignore policies entirely.</strong> A managed database often hands you a superuser and everyone uses it because it works. Then RLS is doing nothing at all, everywhere, and the only evidence is that it never complains.</li>
+  <li><strong>Views run with the owner's privileges.</strong> A view over a tenant table evaluates policies as its owner, so a reporting view can return every tenant's rows while the underlying table is correctly protected. Postgres 15 added <code>security_invoker</code> for exactly this, and a view created before that upgrade is a leak that looks like a feature.</li>
+</ul>
+
+<pre><code>-- The runtime role must not own the tables, must not be a superuser,
+-- and must not carry BYPASSRLS. Verify, do not assume:
+--   SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user;
+CREATE ROLE app_runtime LOGIN NOBYPASSRLS;
+GRANT SELECT, INSERT, UPDATE, DELETE ON invoices TO app_runtime;
+
+ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invoices FORCE ROW LEVEL SECURITY;   -- owner is subject too
+
+CREATE POLICY tenant_isolation ON invoices
+  AS PERMISSIVE
+  FOR ALL
+  TO app_runtime
+  USING      (tenant_id = current_setting('app.tenant_id')::uuid)
+  WITH CHECK (tenant_id = current_setting('app.tenant_id')::uuid);</code></pre>
+
+<p>Two details in that policy are deliberate. <code>current_setting</code> is called without the <code>missing_ok</code> flag, so an unset context raises an error rather than evaluating to null. A null predicate matches nothing, which is the right outcome — zero rows — but it arrives as a successful empty result, and an empty result is indistinguishable from "this tenant has no invoices". The error is better: it points at the code path that forgot.</p>
+
+<p>The second detail is <code>WITH CHECK</code>. Without it, or with the reflexive <code>WITH CHECK (true)</code> that appears in a lot of examples, a tenant can insert a row carrying someone else's <code>tenant_id</code> and the write succeeds. Reads stay clean, so the leak is invisible until the other tenant's next export.</p>
+
+<p>One more asymmetry worth knowing before you rely on this. Policies are permissive by default and additive: several permissive policies combine with <code>OR</code>, so a broad policy added for one role widens access for every role it applies to. And where there is no policy for a command, the command is denied — a <code>DELETE</code> against a table with only a <code>SELECT</code> policy affects zero rows and returns success. That is safe for the data and dangerous for your error handling, because a handler that checks for an exception rather than a row count will report a deletion that never happened.</p>
+
+<h2>The tenant context is where it actually leaks</h2>
+
+<p>Everything above assumes the session variable holds the right tenant at the moment the policy is evaluated. That assumption is the part that breaks in production, and it breaks in a way that only appears under concurrency, which is why it survives testing.</p>
+
+<p>Consider the two ordinary ways to set the context on a pooled connection.</p>
+
+<pre><code>-- Session scope. Persists for the life of the physical connection.
+SET app.tenant_id = '...';
+
+-- Transaction scope. Ends at COMMIT or ROLLBACK.
+SET LOCAL app.tenant_id = '...';</code></pre>
+
+<p>A plain <code>SET</code> survives the request that issued it. Behind a transaction-mode pooler the physical connection is handed to the next client when the transaction ends, and the setting goes with it. If that next client is a route that never sets a tenant — a health check, a job, an internal admin path, an endpoint added last week — the policy evaluates against the previous tenant and returns that tenant's rows. The request has no idea it is reading someone else's data, because from its point of view it asked a question and got a plausible answer.</p>
+
+<p><code>SET LOCAL</code> is the fix, and it has its own trap. It is a no-op outside a transaction block, and it is a no-op that some drivers merely warn about and some do not warn about at all. If your query layer runs statements in autocommit, the <code>SET LOCAL</code> commits immediately, the value disappears, and the query that follows evaluates the policy against whatever the connection was already holding. The script looks correct. The written-down advice — "use <code>SET LOCAL</code> not <code>SET</code>" — was followed. The boundary was not.</p>
+
+<blockquote>The dangerous state is not a missing tenant. It is an inherited one. A missing context fails closed; an inherited context fails open, with data, silently, and only for some fraction of requests.</blockquote>
+
+<p>The consequence is a rule with no exceptions: the transaction and the context are one unit. There is exactly one function that opens a transaction, sets the context as its first statement, runs the caller's work, and commits. Nothing else is allowed to check out a connection.</p>
+
+<pre><code>import { Pool, type PoolClient } from 'pg';
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+export async function withTenant&lt;T&gt;(
+  tenantId: TenantId,
+  work: (client: PoolClient) =&gt; Promise&lt;T&gt;,
+): Promise&lt;T&gt; {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    // Transaction-scoped, and set inside the transaction: it cannot outlive
+    // this unit of work, so it cannot be inherited by the next holder.
+    await client.query('SELECT set_config($1, $2, true)', ['app.tenant_id', tenantId]);
+    const result = await work(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}</code></pre>
+
+<p>Note the argument type. <code>TenantId</code> should be a branded type rather than <code>string</code>, minted in exactly one place — where the principal's membership is verified — and accepted nowhere else. Without the brand, the parameter is interchangeable with any other string, including the tenant claim from a request body, and the easy fix for a failing query becomes "pass the id the client sent".</p>
+
+<pre><code>declare const tenantBrand: unique symbol;
+
+export type TenantId = string &amp; { readonly [tenantBrand]: 'TenantId' };
+
+/** The only way to obtain a TenantId: membership already checked. */
+export function resolveTenant(principal: Principal, claimed: string): TenantId {
+  if (!principal.memberships.some((m) =&gt; m.tenantId === claimed &amp;&amp; m.active)) {
+    throw new ForbiddenTenant(claimed);
+  }
+  return claimed as TenantId;
+}</code></pre>
+
+<p>The same reasoning applies to the request shape. A route that reads <code>?tenantId=</code> and passes it to <code>withTenant</code> has moved the boundary into the client. The tenant must come from the authenticated session; the query string, if it exists at all, is only a hint that gets checked against memberships before it becomes a <code>TenantId</code>.</p>
+
+<h2>Context that survives a queue, and the jobs that never had it</h2>
+
+<p>Async local storage makes the wrapper comfortable inside a request: establish the tenant once in middleware, read it deep in a repository, never thread it through fifteen signatures. It also creates a false impression of coverage, because the context dies at the process boundary. A worker consuming a message from a queue starts with no ambient tenant at all.</p>
+
+<p>So the message payload carries the tenant, and the consumer re-enters <code>withTenant</code> with it before touching anything. The payload is data, not a claim: if the job can be enqueued by a tenant's user, the enqueue call is where membership gets checked, and the payload records the outcome rather than the request.</p>
+
+<p>Cron-style jobs that sweep every tenant need one transaction per tenant, not one transaction with a list of ids. The tempting shortcut is a policy expression that accepts an array — <code>tenant_id = ANY(current_setting('app.tenant_ids')::uuid[])</code> — which is fine in isolation and fails closed on an empty array. It becomes a hole the moment someone adds a branch for the "system" context, because the usual implementation of that branch is a predicate that returns true when the list is empty. A sweep job should look like a loop over <code>withTenant</code> calls, and the policy should never learn about a privileged context at all.</p>
+
+<h2>Structural constraints beat review discipline</h2>
+
+<p>Policies and wrappers are runtime checks. A few schema decisions remove entire classes of mistake by making the wrong row unrepresentable.</p>
+
+<ul>
+  <li><strong>Composite foreign keys.</strong> If <code>invoice_lines.invoice_id</code> references <code>invoices.id</code>, nothing stops a line from pointing at another tenant's invoice; the write is legal, and the read that joins them either leaks or disappears depending on whose context it runs in. Reference <code>(tenant_id, id)</code> instead — <code>FOREIGN KEY (tenant_id, invoice_id) REFERENCES invoices (tenant_id, id)</code> — with a unique constraint on the parent pair. Now a cross-tenant link cannot be written, by any code path, including the one written in a hurry.</li>
+  <li><strong>Uniqueness scoped to the tenant.</strong> <code>UNIQUE (email)</code> on a users table turns "this address already exists" into a cross-tenant existence oracle, and refuses a legitimate second tenant's user. <code>UNIQUE (tenant_id, email)</code> is almost always what was meant.</li>
+  <li><strong>An immutable <code>tenant_id</code>.</strong> Rows that change tenant are rows that moved between customers, which is a data-migration decision, not an <code>UPDATE</code>. Revoke the column from the runtime role or reject the change in a trigger.</li>
+  <li><strong>Opaque identifiers.</strong> Sequential keys invite enumeration, and enumeration is how a bug in one endpoint becomes a survey of the whole table. UUIDs do not fix a missing predicate, but they remove the easiest way to find one.</li>
+</ul>
+
+<p>Adding <code>tenant_id</code> to a table that already has rows is its own migration problem — backfill, then enforce, in separate deploys, with the column nullable and the constraint added only once the backfill is complete. That ordering is the same expand-and-contract discipline as any other <a href="/blog/zero-downtime-schema-migrations">zero-downtime schema change</a>, and getting it wrong is how a migration window becomes an outage.</p>
+
+<h2>The paths that never touch your ORM</h2>
+
+<p>Every one of these is a legitimate part of a mature system, and each is a place where the database's policy does not reach.</p>
+
+<ul>
+  <li><strong>Caches.</strong> A key like <code>invoice:{id}</code> in shared Redis is tenant-blind. Either the key carries the tenant, or the value must never be reachable by an id alone. The same applies to cache invalidation and to negative caching, which is where a "not found" for tenant A gets served to tenant B.</li>
+  <li><strong>Object storage and signed URLs.</strong> A signed URL is a bearer token: whoever holds it reads the object, with no further check. Bucket prefixes per tenant, authorization evaluated at signing time, short lifetimes — and a revocation path, because revoking someone's membership does not revoke a URL that was already issued.</li>
+  <li><strong>Search and vector indexes.</strong> These need the tenant filter inside the query, before scoring, not applied to the results afterwards. Post-filtering also breaks the ranking budget: retrieve fifty globally, drop the ones the caller cannot see, and the caller may be left with two results while the answer sat at position fifty-one. Our note on <a href="/blog/building-production-rag-systems">RAG in production</a> covers the same failure from the retrieval side, and the ACL metadata in the index has to be refreshed when membership changes or it serves revoked documents with confidence.</li>
+  <li><strong>The warehouse.</strong> Row-level security in the operational database does not follow rows into an analytics store. An export job writes tenant data into tables that analysts query across tenants by design, and the export is now the boundary. Decide deliberately: per-tenant schemas in the warehouse, or aggregated and unlinked data only.</li>
+  <li><strong>Logs, traces and error tracking.</strong> These are query surfaces with no policy attached. A request log that includes a payload, an exception grouped across tenants, a trace that any engineer can open and search — all of it is data access, and none of it is covered by the policy you just wrote.</li>
+  <li><strong>Agent tools.</strong> An LLM with a SQL or API tool runs with whatever credentials the tool has. If the agent service holds a shared runtime role, the model can read every tenant, and the only thing between it and a cross-tenant answer is a sentence in a prompt. Give the agent a tool bound to the caller's tenant context, and treat its arguments as untrusted input — the same trust-boundary reasoning as <a href="/blog/prompt-injection-trust-boundaries">prompt injection</a>, applied to data access rather than instructions.</li>
+</ul>
+
+<h2>Tests that can actually fail</h2>
+
+<p>Isolation tests are usually written as a happy path: log in as tenant A, request A's record, expect 200. That test passes on every system, including the broken ones. The test that discriminates is the negative one, and it has a specific shape.</p>
+
+<ul>
+  <li><strong>Two tenants, minimum.</strong> A fixture that creates both, with a record in each, and a helper that authenticates as one and requests the other's id. Three if you support an admin or impersonation path, because that path is usually the one with the widened policy.</li>
+  <li><strong>Assert the shape of the refusal.</strong> A 403 on a foreign id confirms that the record exists, which is itself a leak of a small but real fact. A 404 is the right answer, and the test should pin it, along with the absence of any field belonging to the other tenant in the body.</li>
+  <li><strong>Assert writes by their effect, not their status.</strong> A cross-tenant <code>DELETE</code> blocked by a missing policy returns success with zero rows. The test must reload the row and assert it still exists, then assert the response did not claim otherwise.</li>
+  <li><strong>A concurrency test for the pool.</strong> Fire interleaved requests for both tenants in parallel against a pool of one or two connections, and assert every response contains only its own tenant's data. This is the only test that catches a session-scoped context leak, and it needs a real database rather than a mock — which is why it belongs in the integration suite that runs against a container.</li>
+  <li><strong>A completeness check.</strong> Enumerate the routes from the router and fail if a route has no isolation test registered against it. A matrix that is maintained by hand rots the first week someone is busy; one that is generated from the route table cannot silently miss the endpoint that was added on Friday.</li>
+</ul>
+
+<p>Then add the two schema assertions that make the whole thing regression-proof. Both are ordinary queries and both belong in CI, not in a runbook.</p>
+
+<pre><code>-- 1. Every tenant table must have RLS enabled AND forced.
+--    Returns rows when something is wrong; the test asserts zero rows.
+SELECT c.relname
+FROM pg_class c
+JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE c.relkind = 'r'
+  AND n.nspname = 'public'
+  AND c.relname NOT IN ('schema_migrations')
+  AND (NOT c.relrowsecurity OR NOT c.relforcerowsecurity);
+
+-- 2. The runtime role must not be able to bypass anything.
+SELECT rolname FROM pg_roles
+WHERE rolname = current_user
+  AND (rolsuper OR rolbypassrls);</code></pre>
+
+<p>The first query is the one that pays for itself. A new table added without a policy is otherwise a leak that ships and waits; with this assertion the build fails on the pull request, with a table name in the message, while the person who wrote it still remembers the schema.</p>
+
+<h2>What isolation does not buy you</h2>
+
+<p>Row filtering answers "may this caller see this row". It says nothing about the questions that arrive once a shared platform has real customers on it, and it is worth being explicit so nobody assumes otherwise.</p>
+
+<ul>
+  <li><strong>Noisy neighbours.</strong> One tenant's reporting query can saturate shared CPU, fill the connection pool, or push the queue latency up for everyone. Per-tenant concurrency limits and fair scheduling are a separate mechanism from row-level security, and they need their own design.</li>
+  <li><strong>Quotas and rate limits.</strong> Keyed on the verified tenant, not on an API key that a client can rotate, and enforced at the edge so a runaway client cannot reach the database at all.</li>
+  <li><strong>Cost attribution.</strong> You cannot answer "what does this customer cost us" from a shared table. Tenant-tagged telemetry from the first request is much cheaper than reconstructing it later.</li>
+  <li><strong>Deletion.</strong> "Delete this tenant" is a cascade across every table with legal meaning and a retention obligation attached. Soft-delete, a scheduled hard-delete, and a documented list of every store that holds a copy — including backups, caches and the warehouse — is the actual work.</li>
+  <li><strong>Residency and encryption requirements.</strong> Some contracts force per-tenant keys or a region boundary, and both are cheap at design time and very expensive at scale.</li>
+</ul>
+
+<h2>What this means in practice</h2>
+
+<p>The order matters more than the individual pieces, because each layer makes the next one cheaper to trust.</p>
+
+<p>First, make the tenant context impossible to omit in code: one branded type, one function that opens a transaction and sets the context, and a lint rule or code review habit that rejects a raw connection checkout anywhere else. Second, turn on row-level security with a runtime role that is neither owner nor superuser, and force it on every table. Third, add the structural constraints — composite foreign keys, tenant-scoped uniqueness, an immutable <code>tenant_id</code> — so the schema refuses the mistakes the code has not been written to make yet. Fourth, sweep the paths outside the database, because that is where the policy does not reach. Fifth, put the concurrency test and the two schema queries in CI, so the boundary is checked by the build rather than by memory.</p>
+
+<p>What remains is a boundary you can reason about: enforced at one choke point in code, verified at the storage layer, constrained in the schema, and asserted on every pull request. That is a different thing from a boundary enforced in forty places by forty people who each believed the other thirty-nine were careful. Isolation is a protocol, and protocols are only worth what their weakest participant enforces.</p>
+
+<p>If you are adding a second customer to a system that was built for one, or inheriting a schema where <code>tenant_id</code> exists but nothing enforces it, <a href="/contact">tell us what the table layout looks like</a> — this is ordinary, careful <a href="/services/software-development">platform engineering</a>, and it is the part of a product that is expensive to retrofit and unremarkable to build correctly the first time.</p>`,
+    date: '2026-10-29',
+    author: 'WeThinkDigital Engineering',
+    readTime: '14 min read',
+    category: 'Software Development',
+    tags: ['multi-tenancy', 'PostgreSQL', 'row-level security', 'access control', 'data isolation'],
+    metaTitle: 'Tenant Isolation in a Shared Database: Where the Leaks Actually Happen',
+    metaDescription:
+      'Cross-tenant leaks come from missing seams, not broken boundaries: row-level security bypasses, session-scoped tenant context under pooling, tenant-blind caches and indexes, and the tests that catch them.',
+    keywords: [
+      'multi-tenant data isolation',
+      'postgres row level security',
+      'tenant context connection pooling',
+      'cross-tenant data leak',
+      'shared schema multi-tenancy',
+      'security_invoker views',
+      'tenant scoped cache keys',
+      'multi-tenant isolation testing',
+    ],
+  },
+  {
     id: '19',
     slug: 'structured-output-contracts',
     title: 'Structured Output From LLMs: Valid JSON Is the Easy Part',
