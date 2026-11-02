@@ -9,6 +9,197 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '21',
+    slug: 'performance-budgets-in-ci',
+    title: "Performance Budgets in CI: Enforce the Numbers the Runner Can't Lie About",
+    excerpt:
+      'A performance score asserted inside a shared CI container measures the runner as much as the page. The budgets that survive are the ones on numbers the build controls exactly — and the timing metrics need a different gate entirely.',
+    content: `<p>Three months after a team wired a performance gate into pull requests, the gate was green and the site was slower. The path there was mundane. The job ran Lighthouse against a preview deployment on a shared runner, asserted a performance score of at least 90, and failed regularly — frequently on pull requests that had changed a paragraph of copy. Someone marked the step non-blocking so the pipeline could go green, and from that point the number was decoration.</p>
+
+<p>That life cycle is the normal one: written with intent, noisy within a month, advisory within a quarter, deleted within a year. It is not a discipline failure. It is a measurement failure — the gate asserted a value that the machine performing the measurement did not control, so the value moved for reasons unrelated to the commit, and the only way to keep shipping was to stop listening.</p>
+
+<p>The way out is to sort performance signals by who owns their variance, and give each one the gate it can survive.</p>
+
+<h2>Three kinds of number, and only one of them fails cleanly</h2>
+
+<table>
+  <thead>
+    <tr><th>Signal</th><th>What moves it</th><th>Variance on a shared runner</th><th>Where it belongs</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Transfer bytes per route (script, CSS, font, image)</td><td>The commit</td><td>Effectively zero — arithmetic on build output</td><td>Error-level gate on every pull request</td></tr>
+    <tr><td>Request and chunk counts, third-party origins</td><td>The commit, plus whatever is injected at runtime</td><td>Low in the lab, higher in the field</td><td>Error for first-party, warn for third-party</td></tr>
+    <tr><td>Lab timings (LCP, blocking time, CLS) from a fixed run</td><td>The commit, the CPU contention, the cache state</td><td>Material, run to run</td><td>Delta against a baseline, warn level, median of N runs</td></tr>
+    <tr><td>Field p75 (Chrome UX Report, your own RUM)</td><td>The commit, the device mix, geography, third parties</td><td>Dominated by the population, not the code</td><td>Monthly review — never a pull-request gate</td></tr>
+  </tbody>
+</table>
+
+<p>Work down that table and the design writes itself. Bytes are arithmetic on the build output: same commit, same bytes, on any machine, at any hour. Lab timings are an experiment on a shared computer with a cold cache and an emulated network, and they move when the runner is busy. Field data is a census of your users, and it moves because the population moved — slowly, and always after the fact.</p>
+
+<p>A budget asserted in the wrong row does not measure the page. It measures the runner, and it fails on the days the runner is busy.</p>
+
+<h2>Bytes are the one number worth failing a build on</h2>
+
+<p>Transfer size per route is the only performance signal a CI job can assert exactly, and it happens to catch most serious client-side regressions: a client boundary that pulled an entire page into the browser bundle, a charting library imported for one sparkline, an icon set namespace-imported so nothing tree-shakes, a fourth font weight added to a family. Each of those shows up as bytes long before it shows up as a millisecond.</p>
+
+<p>The budget file is small enough to review inside a diff:</p>
+
+<pre><code>[
+  {
+    "path": "/*",
+    "resourceSizes": [
+      { "resourceType": "script", "budget": 180 },
+      { "resourceType": "total", "budget": 420 }
+    ],
+    "resourceCounts": [
+      { "resourceType": "third-party", "budget": 4 }
+    ]
+  },
+  {
+    "path": "/dashboard",
+    "resourceSizes": [
+      { "resourceType": "script", "budget": 240 }
+    ]
+  }
+]</code></pre>
+
+<p>The catch-all entry at the top is load-bearing and is usually the first thing missing. Per-route budgets alone leave every new route unmeasured, which means the largest feature of the quarter — the one that ships behind a fresh client component — is exempt from the gate by default. A <code>/*</code> entry with a conservative total, overridden downward for routes you have already tuned, makes the exemption something you opt into rather than something you inherit.</p>
+
+<p>The second detail is units, and it costs an afternoon the first time. In a Lighthouse CI <code>budget.json</code>, <code>resourceSizes</code> are kilobytes. In the equivalent inline assertion — <code>resource-summary:script:size</code> — <code>maxNumericValue</code> is bytes. The same threshold copied between the two forms is off by a factor of a thousand, and one direction fails every build on its first run (and gets deleted), while the other never fires again. Timing budgets carry a <code>tolerance</code> field for the same underlying reason that delta thresholds exist: a raw millisecond value from a shared runner is not a fact.</p>
+
+<h2>A threshold set once decays; a ratchet does not</h2>
+
+<p>A budget picked by feel ends up in one of two useless states. Loose enough that nothing ever trips it, or tight enough that it fails on unrelated work. What holds is a ratchet: the number tracks the measured value plus a small headroom, and it only moves down unless a pull request moves it up.</p>
+
+<p>The upward move is the whole point. A diff that changes <code>180</code> to <code>260</code> is a design decision written down where a reviewer will see it, with its justification attached to the change that needed it. Without that, the same eighty kilobytes arrive as eight separate five-kilobyte imports across two quarters, each of which passed, and nobody can say when the page got heavy.</p>
+
+<p>Ratchet mechanically or not at all. The job on the main branch rebuilds, measures, and rewrites the budget to the achieved value plus headroom; headroom wide enough to absorb legitimate variation between runs, narrow enough that a heavy dependency cannot hide inside it. A ratchet maintained by hand is a chore, and chores on performance work have a half-life of about six weeks.</p>
+
+<h2>Responsiveness changed metric, and the new one cannot be measured by a click</h2>
+
+<p>In March 2024, Interaction to Next Paint replaced First Input Delay as the Core Web Vital for responsiveness, and the reason matters to anyone writing a budget. FID measured one thing about one interaction: the delay between the first input on a page and the moment its handler started. A page could pass FID while every subsequent click took half a second, because the metric never looked at the second click, and never looked at the handler's execution or the paint that followed it.</p>
+
+<p>INP measures the whole interaction — input delay, processing time, presentation delay — across the visit, and reports close to the worst of them rather than the first. That makes it a far better description of what users feel, and a much worse thing to assert synthetically, because a page's INP is a property of a distribution of interactions that a real person performed. A script clicking one button on a cold load measures neither the distribution nor the real loading conditions.</p>
+
+<p>So the gate goes on the causes and the field measures the effect. In the lab, the number worth asserting is main-thread work: total blocking time, long tasks during hydration, script execution inside the trace. Those are what become input delay and processing time on a mid-range phone, and they respond to the commit rather than to the click.</p>
+
+<p>In the field, the attribution build of <code>web-vitals</code> splits an interaction into its three subparts and, on Chromium, attaches the long animation frames that overlapped it:</p>
+
+<pre><code>import { onINP } from 'web-vitals/attribution';
+
+onINP(({ value, attribution }) =&gt; {
+  const { inputDelay, processingDuration, presentationDelay } = attribution;
+  const slowest = attribution.longAnimationFrameEntries
+    .flatMap((frame) =&gt; frame.scripts)
+    .sort((a, b) =&gt; b.duration - a.duration)[0];
+
+  navigator.sendBeacon('/rum', JSON.stringify({
+    metric: 'INP',
+    value,
+    inputDelay,
+    processingDuration,
+    presentationDelay,
+    culprit: slowest?.sourceURL ?? slowest?.invoker ?? 'unknown',
+  }));
+});</code></pre>
+
+<p>Which subpart dominates tells you which fix applies, and they are not interchangeable. Input delay means something else held the main thread when the user clicked — a tag manager, hydration, a task scheduled earlier — and no amount of work on your own handler helps. Processing time means your handler. Presentation delay means the DOM update, style recalculation and layout that follow it, which is usually a DOM-size problem.</p>
+
+<blockquote>INP is the right metric and the wrong build gate. It describes the interaction a user had, not the code a pull request changed.</blockquote>
+
+<p>Two honest limits. The Event Timing API behind INP is implemented in Chromium and not in Safari or Firefox, and the field data in the Chrome UX Report is Chrome data by definition, so the metric is a census of one engine — your Safari and Firefox users are invisible to the number that represents responsiveness. And long animation frames are Chrome 123 and later, so the attribution is a sample of a sample. Neither is a reason to skip it; both are reasons not to present INP as the whole of the user experience.</p>
+
+<h2>Lab and field answer different questions, and the field answers late</h2>
+
+<p>A lab run is one device, one network profile, one cold cache, one URL, one moment. That is exactly the right experiment for the question a pull request asks — did this change make this page more expensive? — and exactly the wrong instrument for the question the business asks.</p>
+
+<p>The field answers the business question, on a delay. The Chrome UX Report aggregates a 28-day rolling window, updated daily and lagging reality by a couple of days, so a change made today takes roughly a month to be fully reflected and roughly a month to leave. That property settles the argument about whether field data should block a merge: it cannot. A gate that takes four weeks to change its mind is not a gate.</p>
+
+<p>Two traps come with field data. The first is reporting a mean. The published thresholds are defined at the 75th percentile, and an average across device classes hides the phone users who are failing. Segment by device at minimum, and by route group when the page mix is wide. The second is coverage: the report only includes URLs and origins with enough traffic. Long-tail routes have no field data at all, which means the pages nobody visits are simultaneously the pages with no external signal and the pages a synthetic suite has to cover deliberately rather than by luck.</p>
+
+<h2>Comparing a pull request to the wrong baseline</h2>
+
+<p>Most timing gates that fail for no reason are comparing a fresh measurement against a number produced by a different machine, a different container image, a different browser build, or a week-old run. Three rules remove nearly all of it.</p>
+
+<p>Build the baseline from the merge base, on the same runner image, in the same job. Run the measurement more than once and assert the median rather than a single sample. Assert the delta against that baseline rather than an absolute figure.</p>
+
+<p>The absolute figure deserves its own note. A Lighthouse performance score is a weighted composite of several metrics mapped through a curve that compresses differences at the fast end. Near the top of the range, a large change in LCP can move the score by a point or two; near the middle, a small change can swing it by several. Which is why a gate should assert the metric values you actually care about, against a threshold you chose on purpose, and leave the composite score as something to look at rather than something to fail on.</p>
+
+<h2>The failure message is the product</h2>
+
+<p>An assertion that prints <code>performance score 71 &lt; 90</code> is not actionable, and an unactionable failure is how a gate gets disabled. What a developer needs is the route, the metric, the current value, the budget, the delta, and the single largest contributor — with a link to the artifact that shows it.</p>
+
+<pre><code>performance budget failed — 2 assertions
+
+  /dashboard   script transfer
+    312 KB -&gt; 361 KB   (+49 KB, budget 240 KB)
+    +48.6 KB   chunk 4f2a.js   (recharts, d3-scale)
+    first-load JS on this route is now the largest in the app
+
+  /pricing     third-party requests
+    4 -&gt; 7             (budget 4)
+    +3   googletagmanager.com, hotspot.js, cdn.example-metrics.com</code></pre>
+
+<p>With that output, the person who caused the regression fixes it in the same pull request, which is the only outcome that scales. Levels matter for the same reason. Bytes at <code>error</code>. Timing metrics at <code>warn</code> until you have measured their noise floor on your own runners. Third-party counts at <code>warn</code>, because a new tag is usually an intentional business decision that should still be visible in the diff rather than a build failure the committer cannot resolve.</p>
+
+<h2>What the runner cannot see</h2>
+
+<p>Whatever the gate asserts, the list of things it structurally cannot observe is long enough to write down, because each item is a place where a green build means less than it appears to.</p>
+
+<ul>
+  <li><strong>Scripts injected at runtime.</strong> A tag manager can add three origins the lab run never requested, and consent tooling means some visitors get a different set than others. The build controls none of it, which is why the budget should name origins rather than trust the document.</li>
+  <li><strong>Personalisation, experiments and geo routing.</strong> Different buckets get different DOM, different images and different time to first byte. A synthetic run sees one bucket, on one continent, with one cache state.</li>
+  <li><strong>Authenticated pages.</strong> The dashboard behind a login is frequently the heaviest page in a product and frequently absent from the synthetic set, because signing an automated browser in properly is real work.</li>
+  <li><strong>Cache state.</strong> A lab run is a cold load. Most of your returning users are not.</li>
+  <li><strong>The device distribution.</strong> Emulated throttling is a proxy for slow hardware, not a measurement of it. A mid-range Android parsing and executing your bundle is the real test, and only field data includes that at scale.</li>
+</ul>
+
+<h2>Break the gate on purpose</h2>
+
+<p>A gate nobody has watched fail is a gate of unknown function. Four checks establish that it works before you rely on it for a year.</p>
+
+<ul>
+  <li><strong>Seed a regression.</strong> On a branch, import something heavy into the route with the tightest budget, open the pull request, and confirm the failure names the chunk and the route rather than printing a total. If it cannot identify the contributor, the tooling is reporting the symptom and not the cause.</li>
+  <li><strong>Run the same commit unchanged.</strong> Several times. If the timing assertions move, the threshold sits below the noise floor and belongs at <code>warn</code> until it does not.</li>
+  <li><strong>Move the baseline.</strong> Merge something unrelated and confirm the baseline rebuilds. A stale baseline is a permanent red light, and permanent red lights are disabled within a week.</li>
+  <li><strong>Watch the clock.</strong> A job that adds ten minutes gets moved to nightly, and a nightly gate is a report rather than a gate. Build once, run the checks against that build, and do not rebuild per URL.</li>
+</ul>
+
+<h2>What it costs</h2>
+
+<p>The byte budget is nearly free: computed from build output, finished in seconds, incapable of flaking. The timing budget costs CI minutes, a container and a tuning period while you measure the spread on your own hardware — a measurement worth making rather than guessing, because a threshold borrowed from someone else's write-up is a threshold for someone else's runners. The field side costs a small script in the critical path, somewhere to store samples, and a person looking at the segmented 75th percentile once a month. That last item is the one that gets dropped, and it is the one that turns everything else into a dashboard nobody reads.</p>
+
+<p>The maintenance bill is a budget file that pull requests occasionally touch. That is the mechanism working, not a cost of it: the alternative is the same knowledge living in a chat message from two years ago.</p>
+
+<h2>What this means in practice</h2>
+
+<p>Start with the number that cannot lie. Per-route byte budgets at error level, a catch-all so new routes are covered the day they appear, and a ratchet that lowers them as the code improves. That single gate catches client-boundary mistakes, accidental heavy imports and runtime third parties, which is most of what actually goes wrong.</p>
+
+<p>Then add lab timings at warn level, compared against a baseline built from the merge base on the same runner, median of several runs, with a failure message that names the contributor. Then instrument the field with the attribution build, store the subparts, and review the segmented 75th percentile monthly against the published thresholds rather than against last week. And when a regression does arrive, require the attribution to name a cause before anyone proposes a fix — a percentile that moved without a named script is a number, not a diagnosis.</p>
+
+<p>The structural work — where the client boundary sits, which routes render dynamically, what blocks the first response — is where the wins are, and it is covered in our note on <a href="/blog/nextjs-15-performance-optimization">building fast Next.js applications</a>. This is the mechanism that keeps that work from decaying once attention moves elsewhere, and it is the same discipline as any other <a href="/blog/llm-eval-gates-in-ci">gate in CI</a>: separate the signal that decides from the number that describes, and never let a noisy measurement become the reason people stop reading the build.</p>
+
+<p>If your pipeline's performance step is currently advisory, or the site got slower with no single commit to blame, <a href="/contact">send us the build output and a few months of field data</a> — putting a budget in place that survives is ordinary <a href="/services/web-development">web development work</a> for us, and the useful part is choosing which numbers deserve to fail a build.</p>`,
+    date: '2026-11-02',
+    author: 'WeThinkDigital Engineering',
+    readTime: '13 min read',
+    category: 'Web Development',
+    tags: ['performance budgets', 'Core Web Vitals', 'CI', 'INP', 'field data'],
+    metaTitle: "Performance Budgets in CI: Enforce the Numbers the Runner Can't Lie About",
+    metaDescription:
+      'Why a performance score in a shared CI container is noise: per-route byte budgets with a ratchet, delta gates against a same-runner baseline, INP measured by cause in the lab and by attribution in the field.',
+    keywords: [
+      'performance budgets in CI',
+      'lighthouse ci assertions',
+      'core web vitals budgets',
+      'per route bundle size budget',
+      'lab data versus field data',
+      'INP attribution',
+      'long animation frames',
+      'web performance regression testing',
+    ],
+  },
+  {
     id: '20',
     slug: 'multi-tenant-isolation-shared-database',
     title: 'Tenant Isolation in a Shared Database: Where the Leaks Actually Happen',

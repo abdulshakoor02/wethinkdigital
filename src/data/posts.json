@@ -1,5 +1,11 @@
 [
   {
+    "id": "21",
+    "slug": "performance-budgets-in-ci",
+    "title": "Performance Budgets in CI: Enforce the Numbers the Runner Can't Lie About",
+    "date": "2026-11-02"
+  },
+  {
     "id": "20",
     "slug": "multi-tenant-isolation-shared-database",
     "title": "Tenant Isolation in a Shared Database: Where the Leaks Actually Happen",
