@@ -9,6 +9,251 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '22',
+    slug: 'sandboxing-agent-commands',
+    title: 'Sandboxing Agent Commands: Isolation, Egress and Borrowed Credentials',
+    excerpt:
+      'An agent that can run commands is executing code you did not write, from a branch you have not reviewed, with whatever the machine can reach. The container is the easy part — egress and credentials are where the design actually happens.',
+    content: `<p>Here is a run that is easy to build and hard to notice. The agent is asked to fix a failing test. It clones the branch, runs the install step, and the install step executes a lifecycle script from the branch the agent has just written. The script has no purpose other than to be run. A reviewer would have caught it in a diff, but review happens after the run, and the run had a network.</p>
+
+<p>Nothing in that sequence requires a malicious model. The model was doing the ordinary thing an engineer does first. What made it dangerous is that the sandbox was configured to let the job finish: it had outbound access because dependencies needed to be fetched, it had the repository mounted read-write because the agent needed to edit files, and it had a token in the environment because cloning a private repository needs one. Each decision is individually reasonable. Together they describe a machine that will execute arbitrary code with credentials, and the only remaining question is who writes the code.</p>
+
+<p>That is the shape of the problem. Once an agent can run commands, three things become true at once: it executes code nobody wrote for this purpose, at machine speed, with the reach of whatever you mounted into the box. Isolation is the discipline of deciding that reach deliberately. It is not a judgement about whether the model is trustworthy, and treating it as one is how teams end up with a container that stops nothing that matters.</p>
+
+<h2>Three things a sandbox is for</h2>
+
+<p>The word "sandbox" gets used for one idea and three different jobs. Keeping them separate is what makes the configuration reviewable.</p>
+
+<table>
+  <thead>
+    <tr><th>Adversary</th><th>What it looks like</th><th>What actually contains it</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>The content the agent reads</strong></td><td>An issue description, a dependency's README, a test fixture, a retrieved document that contains instructions</td><td>Tool permissions and egress, enforced in code and in the network — the model cannot distinguish data from instruction</td></tr>
+    <tr><td><strong>The code it runs</strong></td><td>Build scripts, test files, lockfile-resolved packages, a Makefile in the branch under repair</td><td>Namespace and kernel isolation, a read-only root filesystem, no credentials, no network by default</td></tr>
+    <tr><td><strong>The agent's own errors</strong></td><td>A recursive delete one directory too high, a force-push, a test suite that spawns processes until the host swaps</td><td>Mount scope, resource limits, wall-clock timeouts, and an artifact boundary instead of live write access</td></tr>
+  </tbody>
+</table>
+
+<p>The first row is the one teams underestimate, because it does not look like an attack surface. If the agent can read a file, that file can influence a command. If it can run a command, then the gap between "read something" and "execute something" is a single tool call — which is why the controls for the first row are the controls for the second. You do not get to secure the prompt and leave the shell open.</p>
+
+<p>What none of these three rows gives you is confidence in the result. Isolation bounds what a process can reach. Integrity is a separate property: whether the change that came back should be applied. A sandbox has nothing to say about that, and the sections near the end are about the gates that do.</p>
+
+<h2>The isolation ladder</h2>
+
+<p>There is a ladder of isolation mechanisms, and each rung is a different answer to the same question: what can this process touch that it should not be able to?</p>
+
+<table>
+  <thead>
+    <tr><th>Rung</th><th>What it isolates</th><th>What it leaves exposed</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Same process</td><td>Nothing</td><td>Your application's memory, its credentials, its database handles</td></tr>
+    <tr><td>Subprocess with a timeout</td><td>Crash containment</td><td>Filesystem, network, environment, the rest of the host</td></tr>
+    <tr><td>Default container</td><td>Filesystem view, process table, network stack, resource usage</td><td>The host kernel, and anything you mounted in</td></tr>
+    <tr><td>Hardened container</td><td>The above plus capabilities, uid, syscall set, writable paths</td><td>The host kernel, still — a kernel bug is an escape</td></tr>
+    <tr><td>Userspace kernel (gVisor)</td><td>The syscall surface: the host kernel sees a narrow, filtered set</td><td>Kernel-adjacent paths that the userspace kernel delegates; syscall-heavy work pays for the interception</td></tr>
+    <tr><td>MicroVM (Firecracker)</td><td>Everything, behind a real guest kernel and a minimal device model</td><td>Boot time and per-VM memory; your orchestration has to manage lifecycle</td></tr>
+    <tr><td>Dedicated ephemeral host</td><td>The machine itself, discarded after the run</td><td>Cost and startup latency; still needs egress and credential discipline</td></tr>
+  </tbody>
+</table>
+
+<p>Two things about this ladder are worth stating plainly, because they contradict the instinct to pick a rung based on how much you trust the model.</p>
+
+<p>First, the rung is chosen by reach, not by model quality. An agent with no network and no credentials on a hardened container is a smaller risk than a careful, well-prompted agent with a git token and outbound HTTPS, and it is smaller by a wide margin. The model's disposition is not a control; the configuration is.</p>
+
+<p>Second, most teams do not need the top rung for every job. What they need is that the rung is written down, matches what the workload can reach, and does not quietly change when someone adds a volume mount to make a build pass. A default container with the network off, no credentials and a read-only root filesystem beats a microVM with the docker socket mounted, every time. The mechanism matters less than whether the boundary is closed.</p>
+
+<h2>What the default container actually gives you</h2>
+
+<p>A container is namespaces, cgroups, capabilities and a syscall filter. Namespaces give the process its own view of the process table, mounts, network and hostname. Cgroups bound how much CPU, memory and I/O it can consume. Capabilities split the powers that root traditionally had into separate grants, and the syscall filter refuses calls the runtime does not expect a container to make.</p>
+
+<p>All of that runs on the host kernel. The isolation is real and useful — it eliminates a long list of mistakes — but the boundary is the kernel's correctness, so a kernel vulnerability is an escape, and gVisor or a microVM is the answer when that residual risk is unacceptable for the workload. The remaining exposure, though, is usually not a kernel bug. It is configuration.</p>
+
+<p>These are the ones that matter, in the order they tend to appear:</p>
+
+<ul>
+  <li><strong>The docker socket.</strong> Mounting <code>/var/run/docker.sock</code> into a container hands the process control of the host daemon, which is root on the host by another name. It is mounted constantly, because the job needs to build an image. Build the image somewhere else.</li>
+  <li><strong>A writable copy of the repository, including <code>.git</code>.</strong> Discussed below, because it is the most common and the most consequential.</li>
+  <li><strong>Credentials as environment variables.</strong> The environment is readable by every child process, and it is the first thing a debugging command prints. Any code the agent runs can read it.</li>
+  <li><strong>Home directories.</strong> A mounted <code>~/.ssh</code> or <code>~/.aws</code> for convenience is a long-lived credential inside an untrusted process.</li>
+  <li><strong>Root inside the container.</strong> On a rootful daemon, uid 0 in the container is uid 0 on the host unless user namespaces are remapping it. Run as an unprivileged user even when the workload does not seem to need it.</li>
+  <li><strong>A privileged flag added during debugging.</strong> <code>--privileged</code> and <code>--pid=host</code> disable most of what the ladder above provides. They are easy to add at 02:00 and easy to leave in.</li>
+</ul>
+
+<p>A hardened invocation is not long. It is just specific about each of those:</p>
+
+<pre><code>docker run --rm \\
+  --user 65534:65534 \\
+  --read-only \\
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=512m \\
+  --cap-drop=ALL \\
+  --security-opt no-new-privileges \\
+  --pids-limit=512 \\
+  --memory=2g --memory-swap=2g \\
+  --cpus=2 \\
+  --network=none \\
+  --workdir /workspace \\
+  -v "$RUN_DIR:/workspace:rw" \\
+  "sandbox@sha256:$IMAGE_DIGEST" \\
+  npm test</code></pre>
+
+<p>The read-only root filesystem is the flag that quietly catches the most: build tooling that writes to its own install directory, or to <code>$HOME/.cache</code>, fails immediately and visibly instead of mutating the image for the next run. The writable <code>/tmp</code> with <code>noexec</code> closes the obvious hop of compiling a payload and running it from scratch space. <code>no-new-privileges</code> stops a setuid binary inside the image from escalating. None of these are exotic; they are the defaults a sandbox should have had.</p>
+
+<h2>The writable working copy</h2>
+
+<p>Mounting the repository read-write is usually justified in one sentence — the agent needs to edit files — and it quietly grants four things beyond editing: the ability to rewrite git hooks, the ability to amend or rewrite history, the ability to read every file in the working tree, and, if a credential helper is configured, the ability to push.</p>
+
+<p>Two of those are worse than they look. History rewriting means the diff you review is not necessarily the diff that was produced: a suspicious commit can be amended out of existence before anyone looks, and the reflog that would have proved it lives in a directory the agent controls. Reading the working tree means every <code>.env</code>, fixture and test credential is now input to a model, and anything a model reads can end up in a tool call.</p>
+
+<p>The arrangement that avoids all of it: a fresh export of the branch with no <code>.git</code> directory, no credential helper and no untracked secrets, mounted writable; and the only artifact that leaves the sandbox is a patch file plus the command log. A separate, privileged step applies the patch to a real working copy after review. This is the same shape as any build system that separates an untrusted compile from a trusted publish, and it costs one extra step in the pipeline.</p>
+
+<p>If the agent genuinely needs git history to do the work, clone it read-only and keep the push credential out of the box entirely — which is the next section.</p>
+
+<h2>Egress is the irreversible part</h2>
+
+<p>Most sandbox failures are recoverable. A deleted workspace is re-cloned, a broken patch is reverted, a container that ran out of memory is restarted. Exfiltration is not recoverable. Once bytes leave the network, the incident is a notification with a deadline, and no amount of rollback touches it. So egress deserves more attention than it usually gets, and it is usually configured as an afterthought: the job needed to install packages, so the network was left on.</p>
+
+<p>There are two honest configurations, and a third that looks like one of them and is not.</p>
+
+<ul>
+  <li><strong>No network at all.</strong> <code>--network=none</code>, with every dependency vendored into the image at build time. This is the strongest and the cheapest to reason about, and it is achievable more often than teams expect — a repository's test dependency set changes far less often than the tests do. The cost is image size and the discipline of rebuilding it when dependencies change.</li>
+  <li><strong>Default deny through an allowlisting proxy.</strong> The sandbox can reach exactly one address: a proxy that forwards to an explicit list of hosts, on explicit methods, and logs every request. Everything else is refused at the network layer, not in the tool implementation.</li>
+  <li><strong>A proxy that honours <code>CONNECT</code> to any host.</strong> That is <code>--network=on</code> with an extra hop. If the forwarder will tunnel anywhere, the allowlist is decorative.</li>
+</ul>
+
+<p>Enforce the allowlist in the network, not only in the tool layer. A tool-level check is bypassed by any code path nobody reviewed — and in this design there is always code nobody reviewed, because the agent runs repository code. That is precisely the argument for the network boundary: it does not depend on the code inside behaving.</p>
+
+<p>Three leaks are worth calling out because they survive a naive "no HTTP" rule:</p>
+
+<ul>
+  <li><strong>DNS.</strong> If the sandbox can resolve names, it can encode data in query labels and read the answers. A resolver is a bidirectional channel unless queries are forced through the proxy or answered from a fixed local map.</li>
+  <li><strong>The link-local metadata address.</strong> On cloud hosts, <code>169.254.169.254</code> answers with instance credentials unless the service is configured otherwise. Session-token requirements help, and the default hop limit is what keeps containers out — which means somebody raising that limit to debug something is how the hole opens. Block link-local ranges at the sandbox network, and do not rely on the metadata service's configuration as your control.</li>
+  <li><strong>Package installs.</strong> Fetching a dependency is code execution by proxy: <code>npm ci</code> runs lifecycle scripts, and a lockfile can point at a tarball. If installs are allowed, they belong behind the proxy with the registry as the only permitted host, and they belong in the image build rather than in the run when that is possible.</li>
+</ul>
+
+<p>Log every denied attempt. A denied connection from a build script to an unfamiliar host is the single highest-value signal a sandbox produces, and it is only visible if denials are recorded rather than silently dropped.</p>
+
+<h2>Borrowed credentials</h2>
+
+<p>The strongest credential control is not a scoped token or a short expiry: it is that the sandbox never holds one. Take the secret out of the workload and put it in a broker that adds it to a request the sandbox is allowed to make. The agent sees an identifier; the broker holds the key; the host sees an authenticated call from an allowlisted origin.</p>
+
+<p>Where a token genuinely has to be inside the box — a private dependency fetch, for instance — make it per-run, single-purpose, short-lived and revocable, and bind it to the run identifier so that revoking it is one operation rather than a credential rotation. A token with a one-hour life that can only read one repository is a very different object from a personal access token with organisation-wide write scope, and the difference is a configuration line, not an architecture.</p>
+
+<p>What should never happen is write access. The agent does not need to push, and if it does, no amount of prompt discipline substitutes for that fact. Hand it a workspace with no credentials and take a patch back.</p>
+
+<pre><code>type Capability =
+  | { kind: 'read'; host: string }
+  | { kind: 'patch'; repo: string };
+
+interface RunContext {
+  runId: string;
+  egressAllowlist: ReadonlySet&lt;string&gt;;
+  expiresAt: number;
+}
+
+type Decision = { allow: true; token: string } | { allow: false; reason: string };
+
+export function authorise(cap: Capability, run: RunContext, now: number): Decision {
+  if (now &gt; run.expiresAt) return { allow: false, reason: 'run window closed' };
+
+  if (cap.kind === 'patch') {
+    // A sandboxed run never holds write access. It returns a diff, and a
+    // separate step with its own credentials applies it after review.
+    return { allow: false, reason: 'write access is not delegated to sandboxes' };
+  }
+
+  if (!run.egressAllowlist.has(cap.host)) {
+    return { allow: false, reason: 'host not on the run allowlist' };
+  }
+
+  return { allow: true, token: issueReadToken(cap.host, run.runId, run.expiresAt) };
+}</code></pre>
+
+<p>The function is deliberately dull, and the important part is the branch that refuses: write capability is not granted to a sandbox at all, so the check cannot be relaxed by widening an allowlist in a hurry. A design where the refusal lives in code you can point at is the one that survives a deadline.</p>
+
+<h2>Limits that fail loudly</h2>
+
+<p>Resource limits are the least interesting part of the design and the one that produces the most surprising incidents, because the failures are not local. A process that spawns children faster than they exit will exhaust the host's process table; a test suite that fills a disk takes down whatever else shares it; a build log that grows to hundreds of megabytes is both a disk problem and, once the agent reads it, a token bill.</p>
+
+<table>
+  <thead>
+    <tr><th>Failure</th><th>How it presents</th><th>Control</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Fork bomb or leaked children</td><td>Host stops accepting connections; unrelated services time out</td><td><code>--pids-limit</code>, and kill the process group rather than the parent pid</td></tr>
+    <tr><td>Memory growth</td><td>Host swap thrash, then the OOM killer chooses a victim you did not pick</td><td><code>--memory</code> with swap pinned to the same value, so the container is killed instead of the host</td></tr>
+    <tr><td>Disk fill</td><td>Writes fail in unrelated containers sharing the volume</td><td>Size-limited tmpfs, quotas on any volume, and no writes outside the workspace</td></tr>
+    <tr><td>Wall-clock hang</td><td>A run sits in a retry loop holding a worker for hours</td><td>A deadline on the run, not only per command; kill the whole tree when it passes</td></tr>
+    <tr><td>Output flood</td><td>Gigabytes of test output read into a model context</td><td>Cap the captured output at the tool boundary and summarise the tail, not the whole stream</td></tr>
+  </tbody>
+</table>
+
+<p>Two details make the difference between a limit and a hope. Kill the process group: a timeout that kills only the parent leaves the children, and those children keep the port, the lock or the CPU. And distinguish "slow" from "stuck" before retrying — a run that hit a deadline because the suite takes eleven minutes will hit it again, and re-running it with a larger number is how a deadline silently becomes a policy of never failing.</p>
+
+<h2>The image is part of the contract</h2>
+
+<p>If the sandbox image is a tagged reference, the environment is whatever that tag pointed at this morning. Two runs a week apart are then not comparable, and a failure that reproduces in the pipeline and not locally is a difference of image, not of code. Pin by digest, build the image from a lockfile, and version it alongside the agent that uses it.</p>
+
+<p>There is a tradeoff in how much to bake in. A minimal image with no toolchain forces network access, which is the thing the previous section spent its time removing. A fat image with Node, Python, a browser and the test tooling can run offline, at the cost of size and pull time. For a workload that runs often, the fat image is usually the right answer: the size is paid once per host, and the offline guarantee is worth more than the bytes. For a workload that runs rarely, the calculus flips and a pre-warmed pool is a better use of the effort than a large image.</p>
+
+<p>Warm pools deserve one caution. A pool of pre-booted sandboxes that are reused across runs leaks state between runs unless each one is reset to a known image: a cache, a temporary credential, a file left in <code>/tmp</code>. Reset is cheaper to verify than to assume, and the check is trivial — start a run, write a file outside the workspace, and assert that the next run on that host cannot see it.</p>
+
+<h2>What the sandbox cannot do</h2>
+
+<p>This is the part that is usually left out of the diagram, and it is where the real risk sits once the isolation is competent.</p>
+
+<ul>
+  <li><strong>It cannot tell you the patch is correct.</strong> A test written by the same agent that wrote the change is not evidence. An assertion can be weakened, a fixture can be made to match the new behaviour, and the suite goes green while the bug remains. The gate is a diff review against the acceptance criteria, plus at least one check the agent cannot edit — a mutation run, or a suite owned outside the sandbox.</li>
+  <li><strong>It cannot contain tools that are not a shell.</strong> An HTTP tool, a mail tool, a deploy tool and a database tool are all egress with a nicer interface. Enumerating the tool list and asking, for each, "what can this reach" is the same exercise as the network configuration, and it usually finds one tool that was added for a demo and never scoped.</li>
+  <li><strong>It cannot protect the pipeline downstream.</strong> If the artifact is later built by a CI job that checks out untrusted code with secrets in the environment, the boundary moved rather than closed. Untrusted code builds with no secrets, always — the pull-request event that runs in the base repository's context with credentials available is the classic way this is lost.</li>
+  <li><strong>It cannot substitute for reviewing the diff.</strong> The command log tells you what ran; the diff tells you what will ship. Teams that get comfortable reading logs start treating a clean run as an approval, and a clean run only means the commands exited zero.</li>
+</ul>
+
+<blockquote>Isolation bounds the blast radius of a mistake. It never decides whether the change is right, and no configuration makes it do so.</blockquote>
+
+<h2>What to log, and what to alarm on</h2>
+
+<p>A run should be reconstructable from its record without the container still existing: the image digest, the run identifier, every command with its arguments, exit code and duration, peak memory, files changed outside the workspace, and every egress attempt with the destination and whether it was allowed.</p>
+
+<p>Three of those deserve to be alarms rather than log lines. Denied egress attempts, because a build script probing a host is exactly what a supply-chain attempt looks like from the network side. Writes outside the workspace, because they should be zero, and a non-zero count is either a misconfigured tool or an attempt to persist. And commands that failed and were retried unchanged more than twice, because that is the signature of an agent that has stopped reasoning and started looping — the same failure the step budget exists to bound, arriving through the shell instead of the model.</p>
+
+<h2>A checklist you can test</h2>
+
+<p>Configuration that has not been tested is a belief. Each of these is a small experiment, and each one either passes or produces a concrete fix:</p>
+
+<ul>
+  <li><strong>Try to reach the internet.</strong> From inside the sandbox, attempt a connection to a host that is not on the allowlist. Expect a denial, and expect the denial in the log.</li>
+  <li><strong>Try to reach the metadata address.</strong> Same test against <code>169.254.169.254</code>. A response is a configuration bug, not a curiosity.</li>
+  <li><strong>Print the environment.</strong> It should contain no credential, no token and no connection string.</li>
+  <li><strong>Write outside the workspace.</strong> It should fail. If it succeeds, the root filesystem is not read-only.</li>
+  <li><strong>Spawn children and exit.</strong> Confirm the timeout kills the tree, not just the parent.</li>
+  <li><strong>Run twice on the same host.</strong> Confirm the second run cannot see a file the first one wrote.</li>
+  <li><strong>Break the test.</strong> Weaken an assertion in a copy of the suite and confirm the pipeline still fails somewhere the agent cannot reach.</li>
+</ul>
+
+<p>If you are putting an agent in front of a real repository and the current arrangement is a container with the network on and a token in the environment, that is the ordinary starting point rather than a failure of judgement — it is how the first version of every such system looks. The work is to close it in the order that removes the most irreversible risk first: egress, then credentials, then the writable mount, then the kernel boundary if the workload justifies it. Two neighbours are worth reading next: <a href="/blog/prompt-injection-trust-boundaries">prompt injection</a>, which is about the content that drives the agent into those tool calls, and <a href="/blog/durable-agent-workflows-retries-compensation">durable agent workflows</a>, which is about what happens when a run that has already changed something needs to be retried. If you are designing this boundary for a system in production, <a href="/contact">tell us what the agent can currently reach</a> — bounding that is routine work in our <a href="/services/ai-engineering">agent systems practice</a>.</p>`,
+    date: '2026-11-05',
+    author: 'WeThinkDigital Engineering',
+    readTime: '15 min read',
+    category: 'AI Engineering',
+    tags: ['agent sandboxing', 'container isolation', 'egress control', 'credentials', 'autonomous agents'],
+    metaTitle: 'Sandboxing Agent Commands: Isolation, Egress and Credentials',
+    metaDescription:
+      'Bound what an agent can reach when it runs commands: the isolation ladder, a hardened container, default-deny egress, borrowed credentials, and what containment cannot fix.',
+    keywords: [
+      'agent sandbox',
+      'sandboxed code execution',
+      'container isolation for agents',
+      'egress allowlist',
+      'cloud metadata endpoint',
+      'short-lived credentials',
+      'untrusted build scripts',
+      'agent command execution',
+    ],
+  },
+
+  {
     id: '21',
     slug: 'performance-budgets-in-ci',
     title: "Performance Budgets in CI: Enforce the Numbers the Runner Can't Lie About",

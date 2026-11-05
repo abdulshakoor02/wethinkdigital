@@ -1,5 +1,11 @@
 [
   {
+    "id": "22",
+    "slug": "sandboxing-agent-commands",
+    "title": "Sandboxing Agent Commands: Isolation, Egress and Borrowed Credentials",
+    "date": "2026-11-05"
+  },
+  {
     "id": "21",
     "slug": "performance-budgets-in-ci",
     "title": "Performance Budgets in CI: Enforce the Numbers the Runner Can't Lie About",
