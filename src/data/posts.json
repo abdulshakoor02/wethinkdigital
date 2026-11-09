@@ -1,5 +1,11 @@
 [
   {
+    "id": "23",
+    "slug": "embedding-model-migration",
+    "title": "Migrating an Embedding Model: Shadow Indexes and a Cutover You Can Reverse",
+    "date": "2026-11-09"
+  },
+  {
     "id": "22",
     "slug": "sandboxing-agent-commands",
     "title": "Sandboxing Agent Commands: Isolation, Egress and Borrowed Credentials",

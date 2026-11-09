@@ -9,6 +9,202 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '23',
+    slug: 'embedding-model-migration',
+    title: 'Migrating an Embedding Model: Shadow Indexes and a Cutover You Can Reverse',
+    excerpt:
+      'Changing the embedding model is a full corpus migration wearing the costume of a config change. The rebuild is the easy half — the evidence that the new index is better, and the switch that goes back, are the work.',
+    content: `<p>The change is one line. An environment variable moves from one model identifier to a newer one, the deploy goes green, and every request returns 200. Three weeks later somebody says the assistant has been giving vaguer answers lately, and the investigation starts from the assumption that the prompt changed or the model got worse. The actual cause is that the documents and the queries are now living in two different coordinate systems.</p>
+
+<p>An embedding is not a property of a document. It is the output of a function applied to text: a specific model, at a specific version, with a specific preprocessing step, producing a vector of a specific width. Two vectors are comparable only when the same function produced both. Change any part of that function and every stored vector is stale — not wrong in a way that announces itself, but stale in a way that returns plausible neighbours from the wrong neighbourhood.</p>
+
+<p>That is why an embedding migration is not a configuration change. It is a data migration over the whole corpus with a deployment on each end, and the interesting engineering is in the middle: how you rebuild a few million vectors without stopping writes, how you know the new index is better before you trust it, and how you get back if it is not.</p>
+
+<h2>The model identifier is part of the index identity</h2>
+
+<p>Most teams store the vector and forget the function that produced it. Then the migration arrives, there is no record of which rows were embedded with which model, so "re-embed everything" is the only safe answer and "did we finish" has no answer at all.</p>
+
+<p>The fix is cheap if you do it before you need it: treat the embedding configuration as an identity, store it next to the vector, and refuse to compare vectors whose identities differ. Not warn — refuse. A system that silently compares them is a system that will do it during an incident, when somebody patches the check out to stop the noise.</p>
+
+<pre><code>type Metric = 'cosine' | 'dot' | 'l2';
+
+interface IndexIdentity {
+  readonly model: string;      // provider and model name
+  readonly revision: string;   // model version, never "latest"
+  readonly dimensions: number;
+  readonly metric: Metric;
+  readonly normalised: boolean;
+  readonly chunker: string;    // e.g. "structure-v3"
+}
+
+function identityKey(id: IndexIdentity): string {
+  return [
+    id.model,
+    id.revision,
+    id.dimensions,
+    id.metric,
+    id.normalised ? 'norm' : 'raw',
+    id.chunker,
+  ].join(':');
+}
+
+function assertSameIndex(a: IndexIdentity, b: IndexIdentity): void {
+  if (identityKey(a) !== identityKey(b)) {
+    throw new Error(
+      'refusing to compare vectors from ' + identityKey(a) +
+        ' against ' + identityKey(b),
+    );
+  }
+}</code></pre>
+
+<p>The chunker belongs in that list even though it has nothing to do with the model, because the chunk is the unit that gets embedded. If you change chunk boundaries in the same release — and teams almost always want to, since they are touching the pipeline anyway — then two documents embedded with the same model are still not comparable as units of retrieval. One variable per migration. The chunker can move next week, against a stable model.</p>
+
+<h2>Four ways the migration fails</h2>
+
+<p>Only one of them produces an error, which is why the other three are worth naming.</p>
+
+<table>
+  <thead>
+    <tr><th>Failure</th><th>What you observe</th><th>Why</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Dimensions changed</strong></td><td>Writes rejected by the column type, or a constraint someone "fixes" by truncating the vector</td><td>The new model emits a different width. Truncating or padding arbitrary components destroys the geometry rather than compressing it</td></tr>
+    <tr><td><strong>Same width, different space</strong></td><td>No error. Results are still lists of documents, still ordered, still plausible</td><td>Both models may emit vectors of identical width; they do not emit the same numbers. Distance between a query vector from one and a document vector from the other is a number with no meaning</td></tr>
+    <tr><td><strong>Half-migrated corpus</strong></td><td>Some queries look fine, others are nonsense, apparently at random</td><td>A document is either in the new space or the old one. Which one has nothing to do with the query, so the failure looks like flakiness</td></tr>
+    <tr><td><strong>Metric or normalisation drift</strong></td><td>Ordering changes even when the model did not</td><td>Cosine on unnormalised vectors, inner product on normalised ones, L2 where the model was trained for cosine — the distances are related but not equivalent</td></tr>
+  </tbody>
+</table>
+
+<p>The second row is the expensive one because there is nothing to alarm on. A dimension mismatch fails loudly at the write and gets fixed in an hour. A shared vector space that no longer is one fails quietly for as long as it takes a human to notice that the answers got vague. If you take one thing from this section: a successful insert is not evidence that the vectors are comparable.</p>
+
+<h2>Backfill from the text, not from the index</h2>
+
+<p>Before anything else, answer the question that decides whether this is a two-week project or a much longer one: do you still have the text you embedded?</p>
+
+<p>You cannot invert an embedding. If the pipeline kept only vectors and the source document has since been edited, deleted or overwritten, there is nothing left to re-embed — the new index can only be built from whatever source of truth remains, and the difference between the two corpora is a correctness problem rather than a migration detail. Teams that store the chunk text beside the vector, with the content hash that produced it, have a boring migration. Teams that treat the vector table as the corpus have a data recovery problem first.</p>
+
+<p>Given the text, the backfill is a batch job over a stable keyset, and it needs the same three properties as any other long-running job: it is resumable, it is idempotent, and it records what it could not do.</p>
+
+<pre><code>-- One page of work, ordered by a stable key rather than OFFSET.
+SELECT c.id, c.document_id, c.content, c.content_hash
+FROM   chunks c
+WHERE  c.id &gt; $1
+ORDER  BY c.id
+LIMIT  500;
+
+-- Land the result only if the chunk has not changed since it was read.
+UPDATE chunk_embeddings
+SET    vector = $2, identity = $3, content_hash = $4
+WHERE  chunk_id = $5
+  AND  content_hash = $4
+  AND  (identity IS DISTINCT FROM $3);</code></pre>
+
+<p>The <code>content_hash</code> guard in the <code>WHERE</code> clause is the part people leave out. Between reading a chunk and writing its vector — milliseconds per row, hours across the job — the document can be edited. Without the guard, the backfill writes an embedding of the old text over a row whose text has changed, marks it complete, and the new index now holds a vector that does not match its document. Nothing errors. The chunk is simply unreachable by any query about its current content, and the coverage metric says the migration finished.</p>
+
+<p>Two mechanisms close that window, and most systems need both. Keep the hash guard on the write so a stale result is discarded rather than applied. Then run a catch-up pass over the change log after the main backfill: anything whose version moved since the job started gets picked up, because it was either skipped or invalidated while the job ran.</p>
+
+<h2>Build the shadow index, keep the old one serving</h2>
+
+<p>With the text in hand the shape is simple: the old index keeps answering queries, the new index is built beside it, and the write path feeds both. What makes it survivable in production is that each piece is a separate failure domain.</p>
+
+<table>
+  <thead>
+    <tr><th>Piece</th><th>During the migration</th><th>Failure it isolates</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Read path</strong></td><td>Pinned to the old index identifier</td><td>A bad backfill cannot degrade the answers currently being served</td></tr>
+    <tr><td><strong>Write path</strong></td><td>Embeds new and updated content into both indexes; the new leg can fail without failing the request</td><td>A model-provider outage does not stop ingestion, and a missed dual write shows up as coverage rather than as an empty page</td></tr>
+    <tr><td><strong>Backfill</strong></td><td>Reads source text, writes to the new index only, throttled and checkpointed</td><td>A rate limit or a crash costs time, not correctness</td></tr>
+  </tbody>
+</table>
+
+<p>Address the index through an alias, or a collection name derived from the identity, never through a hardcoded physical name — so cutover is a pointer change rather than a deploy. If the vector store does not support an atomic alias swap, make the alias a row in your own database and resolve it in the read path: one extra read, cached for seconds, and a rollback that does not require a rebuild.</p>
+
+<p>Dual-writing is where the cost lands. New content is embedded twice for the duration, and the new leg may be slower or more expensive, so the write path now has a dependency that can slow ingestion down. Make the new leg asynchronous and allowed to lag: the catch-up pass will recover anything the queue dropped, provided it is keyed on document version rather than on time. A write path that fails when the second index is unavailable converts a migration into an outage.</p>
+
+<h2>Building the index without stopping writes</h2>
+
+<p>In Postgres with pgvector the mechanics are worth knowing, because the defaults are not the ones you want on a live table.</p>
+
+<p><code>CREATE INDEX</code> takes an exclusive lock and blocks writes for the duration of the build — fine on a fresh table, unacceptable where the application is still writing. <code>CREATE INDEX CONCURRENTLY</code> is the live-table version: it does not block reads or writes, it cannot run inside a transaction block, and it is slower because it has to reconcile rows written while it scanned. Two consequences follow. If it fails or is cancelled it leaves an <em>invalid</em> index behind that still consumes space, and it must be dropped and rebuilt rather than resumed. And it holds a lock that conflicts with several schema changes, so it cannot share a window with the DDL you were also planning.</p>
+
+<p>The build also wants memory. HNSW construction holds the graph in memory up to <code>maintenance_work_mem</code>. When it exceeds that, pgvector spills and finishes the remaining vectors through the on-disk path, inserting them one at a time, and says so in a notice that is easy to lose in a log full of migration output. A build that should take twenty minutes can take hours for that reason alone. Size the setting for the graph, measure the build against real volume rather than a ten-thousand-row sample, and run it on a connection no pooler will kill for being idle.</p>
+
+<p>Managed vector stores hide most of this and expose a different sharp edge: the swap itself. Confirm that reads and writes follow the alias atomically, or you get a window where new documents land in the old collection after the switch and are invisible in the new one. That window is short and produces exactly the kind of permanent, quiet gap the coverage metric exists to catch.</p>
+
+<h2>Prove it before you point traffic at it</h2>
+
+<p>Here is the uncomfortable part: similarity scores from two different models are not comparable. A cosine of 0.81 under the old model and 0.74 under the new one say nothing about each other, and neither says anything about relevance. Any threshold calibrated on the old model — a relevance floor, a "no confident match" cutoff, a gate in front of the reranker — is now an arbitrary number.</p>
+
+<p>So compare behaviour, not scores.</p>
+
+<ul>
+  <li><strong>Agreement at k.</strong> Run a fixed query set against both indexes and measure how often the top-k document identifiers overlap. Low overlap is not automatically bad — a better model should disagree with a worse one — but it tells you how much of the system's behaviour is about to change, which is the number you need before a canary.</li>
+  <li><strong>Recall against judgements.</strong> If you have labelled query-document pairs, measure whether the known-relevant document appears in the top k under each index. This is the only measurement that answers "is the new one better" rather than "is it different".</li>
+  <li><strong>The downstream answer eval.</strong> Retrieval metrics are a proxy. The question that matters is whether the generated answer is still correct and still grounded in the passages it cites, and that is a separate harness run against both indexes.</li>
+  <li><strong>Slices, not averages.</strong> Exact identifiers — error codes, product names, ticket numbers — often get worse under a pure dense upgrade, because the new model generalises and the old term match was doing the work. If that slice matters, the answer is hybrid retrieval, not a different model.</li>
+</ul>
+
+<blockquote>A model that is better on a public benchmark and unmeasured on your queries is a hypothesis, and the migration is the experiment. Run the experiment on the shadow index, where a wrong answer costs a log line instead of a customer.</blockquote>
+
+<p>Calibrate the new thresholds from the new index's own score distribution on the same query set. The shape of that distribution shifts with the model, and copying the old floor across is one of the most common ways a migration ships with a refusal behaviour nobody intended — either it refuses everything, or it never refuses, and both look like a model problem.</p>
+
+<h2>Cut over with a switch you can flip back</h2>
+
+<p>Cutover should be a pointer change, and the old index should stay warm until the rollback window closes. The capacity cost is real and temporary. The alternative is discovering on day two that the new index is worse for a query class you did not sample, and having to rebuild the old one from text you may no longer have.</p>
+
+<p>Three states, not two. Serving the old index while logging what the new one would have returned is a genuinely useful intermediate state: a live comparison on real traffic with no risk to the answer. Then serve the new index and keep the comparison logging for a few days — it is the fastest way to answer "was this query better before" when a complaint arrives.</p>
+
+<p>Two details decide whether rollback takes seconds or an afternoon. The index identifier must appear in the response metadata and the trace, so a complaint maps to an index rather than to a deploy time. And the query embedding cache key must include the identity — model, revision, dimensions, normalisation — because a cache keyed only on query text will happily return a vector from the old space for hours after the switch, producing a small, baffling percentage of wrong answers. It is the most common bug in this migration, and it lives in a function nobody thought to review.</p>
+
+<h2>What a reranker does and does not fix</h2>
+
+<p>It is tempting to treat reranking as insurance: retrieve wide, rerank, and trust the better model downstream to smooth over the transition. That works only for ordering among the candidates you retrieved. A cross-encoder scores query-passage pairs it is given; if the first stage returned the wrong fifty because document vectors and query vectors were in different spaces, the right passage was never a candidate and no reranker can see it.</p>
+
+<p>Reranking is still the right place to spend compute — it is cheap relative to generation, and it reliably improves ordering among plausible candidates — but it sits on top of a consistent first stage. Fix the space, then rerank.</p>
+
+<h2>The numbers to watch for a week</h2>
+
+<p>Post-cutover monitoring for retrieval is not the same as for a web service. There is no error rate to watch, because every request succeeds.</p>
+
+<ul>
+  <li><strong>Coverage.</strong> The count of documents without a vector matching the current identity. It should reach zero and stay there. A backfill that finished at 99.4% is a permanent, silent hole, and it is the metric most migrations never emit.</li>
+  <li><strong>Empty-result rate, by query class.</strong> A step change means the relevance floor is wrong for the new distribution, or the corpus gap is wider than the coverage number suggests.</li>
+  <li><strong>Change rate against a frozen canary set.</strong> A small fixed list of queries with their expected documents, asserted after deploy. If the canary disagrees, you learn it in minutes rather than in a support thread.</li>
+  <li><strong>Latency at the tail.</strong> A larger model or wider vectors cost time at query, at write and at build. Measure the whole path, not the model call.</li>
+  <li><strong>Reformulation rate.</strong> Users who immediately rephrase are telling you the first answer missed. It moves before any explicit complaint does.</li>
+</ul>
+
+<h2>When not to migrate</h2>
+
+<p>If the new model is better on a public leaderboard and you cannot measure it on your own queries, the migration is a coin flip with a two-week price. The work that has to come first is a small judgement set — a few hundred real queries with the documents that should answer them — which is also the artefact you need for every retrieval change after this one.</p>
+
+<p>If the corpus is small enough to rebuild in minutes and the queries are dominated by exact identifiers, an upgrade can be a net negative: a stronger general-purpose model may be worse at the string matching that was already working. And if nobody owns the index — if the vector store is a managed service whose settings nobody has opened — the migration is a good moment to establish that ownership, because the next model release will arrive whether or not you planned for it.</p>
+
+<p>None of this is exotic. It is a data migration with a deployment on each end, which is exactly why it deserves the same discipline as a schema change: identity recorded, backfill idempotent, old and new coexisting, evidence before cutover, and a switch that goes back. The model was never the hard part.</p>
+
+<p>Two neighbours worth reading next: <a href="/blog/building-production-rag-systems">the RAG pipeline this index sits inside</a>, which covers chunking, hybrid retrieval and grounded refusal, and <a href="/blog/llm-eval-gates-in-ci">eval gates in CI</a>, which is where the judgement set becomes a gate instead of a spreadsheet. If you are planning a model change against a corpus you cannot rebuild quickly, <a href="/contact">tell us what the index currently holds</a> — this is routine work in our <a href="/services/ai-engineering">AI engineering practice</a>.</p>`,
+    date: '2026-11-09',
+    author: 'WeThinkDigital Engineering',
+    readTime: '12 min read',
+    category: 'AI Engineering',
+    tags: ['embedding migration', 'vector search', 'retrieval quality', 'backfill', 'RAG operations'],
+    metaTitle: 'Migrating an Embedding Model Without Breaking Retrieval',
+    metaDescription:
+      'Moving a retrieval system to a new embedding model: index identity, a resumable backfill, a shadow index built without blocking writes, evidence before cutover, and a rollback you can flip.',
+    keywords: [
+      'embedding model migration',
+      'vector index rebuild',
+      'shadow index',
+      're-embedding a corpus',
+      'pgvector hnsw build',
+      'embedding versioning',
+      'retrieval quality evaluation',
+      'index rollback',
+    ],
+  },
+
+  {
     id: '22',
     slug: 'sandboxing-agent-commands',
     title: 'Sandboxing Agent Commands: Isolation, Egress and Borrowed Credentials',
