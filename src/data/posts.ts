@@ -9,6 +9,216 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '24',
+    slug: 'deleting-documents-from-rag',
+    title: 'Deleting a Document From a RAG System: The Copies You Forgot to Count',
+    excerpt:
+      'A delete request returns 204 and closes a ticket, while the passage stays retrievable for months. The row is one copy — the chunks, vectors, cached answers, traces, judgement sets and backups are the rest, and only some of them can be rebuilt.',
+    content: `<p>The delete request arrives on a Tuesday. The handler removes the row, the API returns <code>204</code>, the ticket closes. Six months later a customer forwards an answer that quotes four sentences from a document they deleted in the spring — verbatim, with a citation to a page that no longer exists.</p>
+
+<p>Nobody forgot the delete. The delete covered one of about ten copies. In a retrieval system a document is not a row in a table: it is the row, plus everything derived from it since it was ingested. Chunks, vectors, a lexical index entry, an answer that was cached three weeks ago, the prompt trace from the eval run, the passage sitting in a judgement set, the warehouse extract, the nightly backup. Deleting means removing all of them, and the ones that matter are the ones you cannot reconstruct from the text.</p>
+
+<p>This is a distributed-systems problem wearing the costume of a CRUD endpoint, and the costume is convincing enough that most systems ship a handler that covers the easy third of it.</p>
+
+<h2>Inventory the copies before designing anything</h2>
+
+<p>The useful classification is not "where does the text live" but "can this copy be rebuilt from text I still control". That single question decides whether deletion is a background job or a manual action with an owner and a deadline.</p>
+
+<table>
+  <thead>
+    <tr><th>Artefact</th><th>Derived from</th><th>Rebuildable</th><th>Removal</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Source row, stored original</strong></td><td>—</td><td>The source itself</td><td>Hard delete plus a tombstone that outlives it</td></tr>
+    <tr><td><strong>Chunks and vectors</strong></td><td>Source text</td><td>Yes</td><td>Delete, then physical purge on the index</td></tr>
+    <tr><td><strong>Lexical index entry</strong></td><td>Source text</td><td>Yes</td><td>Delete; usually the easiest of the set</td></tr>
+    <tr><td><strong>Answer cache</strong></td><td>Query plus retrieved passages</td><td>No — the answer is the artefact</td><td>Purge by document id, or bump a corpus epoch</td></tr>
+    <tr><td><strong>Conversation history, agent memory</strong></td><td>Generated answers</td><td>No</td><td>Scrub the thread, or delete it whole</td></tr>
+    <tr><td><strong>Prompt and response traces</strong></td><td>Full prompt, passages included</td><td>No</td><td>Redact at write, or include the store in the fan-out</td></tr>
+    <tr><td><strong>Judgement and eval sets</strong></td><td>Human labels over passages</td><td>No — the labels are the work</td><td>Remove the passage, keep the labels that survive it</td></tr>
+    <tr><td><strong>Warehouse and analytics</strong></td><td>Events carrying text</td><td>No</td><td>Partition drop, or never ship the text</td></tr>
+    <tr><td><strong>Provider-side logs</strong></td><td>Prompts sent to a model API</td><td>No</td><td>Contractual retention window, zero-retention option</td></tr>
+    <tr><td><strong>Backups</strong></td><td>Everything above</td><td>No</td><td>Crypto-shred, or a window plus a replayable delete log</td></tr>
+  </tbody>
+</table>
+
+<p>Most implementations have a real delete path for the first three rows and an unexamined <code>ON DELETE CASCADE</code> for the rest. The cascade is where it usually breaks, because a foreign key deletes the chunk row and leaves the vector in a store that has no foreign keys at all, or deletes the document and leaves the cached answer untouched, pointing at passages that no longer exist.</p>
+
+<h2>The vector index does not delete the way a table does</h2>
+
+<p>Start with the mechanics, because they explain why "deleted" and "gone" are different states and why the gap has operational consequences.</p>
+
+<p>In Postgres with pgvector and an HNSW index, <code>DELETE</code> marks the tuple dead in the heap. Queries filter dead tuples by visibility, so the passage stops being returned — the correctness story is fine. What does not happen is any shrinking. The graph keeps the entry for a deleted tuple, at least until the graph is repaired, so the index grows while the corpus does not, every query walks through more dead nodes, and recall drops as the dead fraction rises. A tenant leaving, a retention purge, a re-ingest that replaces a large corpus: each of those leaves the index carrying weight it will not give back on its own.</p>
+
+<p>The remedy is a maintenance job — <code>REINDEX</code>, or a rebuild into a new index and a pointer swap — run on a schedule rather than in response to an incident. Treat the physical purge the same way as an embedding migration: build beside, swap, keep the old one warm until the new one is proven. The mechanics are the same shape in the opposite direction.</p>
+
+<p>The second consequence is less obvious and bites harder: <strong>a filter is applied after traversal, not before it</strong>. With an ordinary <code>WHERE</code> clause, HNSW walks the graph, gathers candidates, then filters. Asking for ten results where ninety percent of the corpus belongs to another tenant does not give you the ten nearest of yours; it gives you whatever survives from the candidates the traversal happened to reach. The more selective the filter, the worse the recall — and deletion adds a filter exactly like that. Per-tenant partitions or partial indexes, or the iterative-scan settings in recent pgvector, are the mitigations. Measure recall after a large deletion rather than assuming it held.</p>
+
+<h2>Re-ingest is where documents come back</h2>
+
+<p>Two resurrection paths account for most of the "we deleted it and it came back" incidents, and neither is a deletion bug.</p>
+
+<p><strong>The stale tail.</strong> Chunk identifiers are usually derived from the document id and a position: <code>doc_8817:12</code>. A document that shrinks from forty chunks to twenty-eight gets its first twenty-eight rows overwritten on the next ingest, and chunks twelve through nineteen of the old version stay exactly where they were, still retrievable, still citing the current document — which no longer contains the sentence they quote. The re-ingest job reports success. Nothing is stale by its own bookkeeping, because the rows it wrote are all correct.</p>
+
+<pre><code>BEGIN;
+
+-- Replace the chunk set as a set, not as an upsert over positions.
+DELETE FROM chunks
+WHERE  document_id = $1
+  AND  version     &lt;&gt; $2;
+
+INSERT INTO chunks (document_id, version, position, content, content_hash)
+SELECT $1, $2, position, content, content_hash
+FROM   unnest($3::chunk_input[])
+ON CONFLICT (document_id, version, position)
+DO UPDATE SET content = excluded.content,
+              content_hash = excluded.content_hash;
+              -- the embedding for this row is now stale and must be refreshed
+
+COMMIT;</code></pre>
+
+<p><strong>The nightly sync.</strong> If ingestion reads from an object prefix or a third-party system, deleting the document in your database does nothing to the source, and the next sync reinstates it with a fresh id. The deletion has to be recorded where ingest reads — a tombstone the ingest job consults — or the sync has to read from a source that knows about the deletion. Deleting from a derived store while leaving the origin untouched is a request to be undone at 02:00.</p>
+
+<h2>Tombstone first, purge second</h2>
+
+<p>The ordering rule is not stylistic. If you purge first and tombstone second, there is a window — seconds if you are careful, hours if a queue is backed up — in which a replica, a cache, or a retried request can still serve the document. If you tombstone first, every read path that honours the tombstone is correct immediately, and the purge becomes a background concern with a deadline instead of a correctness requirement.</p>
+
+<pre><code>CREATE TABLE document_deletions (
+  document_id  uuid        PRIMARY KEY,
+  tenant_id    uuid        NOT NULL,
+  requested_at timestamptz NOT NULL DEFAULT now(),
+  purge_by     timestamptz NOT NULL,          -- deletion SLO, not an estimate
+  completed_at timestamptz                    -- set only when every target reports
+);
+
+-- The read path. One definition, one place, joined by every query that can
+-- return a passage.
+SELECT c.document_id, c.content, c.embedding &lt;=&gt; $1 AS distance
+FROM   chunks c
+WHERE  c.tenant_id = $2
+  AND  NOT EXISTS (
+         SELECT 1
+         FROM   document_deletions d
+         WHERE  d.document_id = c.document_id
+       )
+ORDER  BY c.embedding &lt;=&gt; $1
+LIMIT  10;</code></pre>
+
+<p>The filter has to live in the storage query — a view, a row-level policy, a repository function that every caller uses — not in the service layer where three callers will honour it and a fourth, written six months later by someone who never saw this table, will not. The service that forgets is the one that leaks, and it will be the least-reviewed one.</p>
+
+<p>The cost is real: a growing table and an extra lookup on the hottest query in the system. Partition the tombstone table by month, keep the join cheap, and expire rows only after the purge is verified <em>and</em> the backups that could still contain the document have aged out. Deleting a tombstone earlier than that re-arms the resurrection.</p>
+
+<h2>An embedding is a copy, not a hash</h2>
+
+<p>"We only keep the vectors" is the sentence that makes this problem feel solved, and it is wrong in a way that matters. An embedding is a lossy encoding of its text, and lossy is not anonymous: published inversion methods reconstruct a large share of the source wording from the vector alone, and the shorter the chunk, the more complete the reconstruction. The vector of a paragraph is not a fingerprint of that paragraph; it is a compressed rendering of it that a determined process can read back.</p>
+
+<p>So a vector row is in scope for a deletion request. A pipeline that drops the text column and keeps the embedding has moved the copy, not removed it. The same argument applies to the lexical index, which is closer to plain text than the vector is.</p>
+
+<h2>Cached answers outlive the passages they quoted</h2>
+
+<p>An answer cache is keyed on something like tenant, normalised query, prompt version and model, and stores the rendered answer with the identifiers it cited. Delete a document and the cache still holds an answer built from it — and because a hit skips retrieval entirely, no tombstone filter ever runs. The passage is served from a store that never learned the document was deleted, and the citation in the answer points at a page that now 404s.</p>
+
+<p>A TTL is not a deletion mechanism. It is a delay with a bound you did not choose.</p>
+
+<ul>
+  <li><strong>A reverse map.</strong> Keep <code>document_id → cache keys</code> and purge on delete. Precise, and it is a second index to keep in sync with the first — which means it drifts.</li>
+  <li><strong>A corpus epoch.</strong> Put an integer in the cache key and bump it on any deletion for that tenant. Coarse: one deletion invalidates every cached answer for the tenant. But it is one column, it cannot drift, and the cost is recomputation rather than a leak.</li>
+  <li><strong>Re-validate on read.</strong> A cache hit whose cited document ids are no longer live is a miss. One set lookup against a small table, and it catches the entries both mechanisms above missed.</li>
+</ul>
+
+<p>Take the epoch as the default and the read-time check as the backstop. The reverse map is the right answer only if you already have a reliable change-data path to maintain it.</p>
+
+<h2>Traces are the copy nobody scopes</h2>
+
+<p>Retrieval debugging needs the passages that were retrieved, so they get written into the trace, which goes to an observability store with its own retention window and, often, its own vendor. The deleted text now lives somewhere that has never heard of your deletion endpoint and whose retention is measured in weeks.</p>
+
+<p>Two answers, and most systems end up with a mix. Redact at write time — log the passage identifiers, scores and hashes rather than the text — which keeps the shape of the retrieval debuggable and gives up replay of the exact prompt. Or include the trace store in the deletion fan-out, which works only if the vendor supports deletion by an identifier you actually stored. Decide which one before an erasure request forces the decision, because retrofitting either across a year of stored traces is a data project.</p>
+
+<h2>Backups are the boundary you cannot edit</h2>
+
+<p>An immutable snapshot cannot be rewritten, so deletion inside a backup is either cryptographic or temporal.</p>
+
+<p><strong>Crypto-shredding</strong> encrypts each stored original with a per-document key and destroys the key on delete. The backup still contains bytes nobody can read, which is the strongest available answer — provided the keys live outside the backup set. Keys stored beside the data they protect turn the whole scheme into a rename.</p>
+
+<p><strong>A bounded window</strong> says backups expire in N days, deletion log entries are kept for longer, and any restore replays the deletions before serving traffic. The inequality to remember is that <em>the delete log must outlive the backup</em>. Keep deletions for thirty days against ninety-day backups and a restore silently reinstates a document with no record that it was ever removed. Nobody will notice until the same customer asks again.</p>
+
+<p>Which brings the only test that settles the question: delete a document, restore yesterday's snapshot into staging, run the canary query. If the passage comes back, the replay was never wired, and you found out in staging instead of in front of a customer.</p>
+
+<h2>Absence is only provable with a canary</h2>
+
+<p>You cannot read code and conclude that a document is gone. The check that works is a fixture designed to be findable: a document containing a unique nonsense token — <code>ZQ-7F3A-PURGE</code> — ingested through the real pipeline into the real index, with the real chunker and the real embedding model. Then delete it and ask whether the token is still reachable, from every path that can produce text.</p>
+
+<pre><code>const CANARY = 'ZQ-7F3A-PURGE';
+const probes = [
+  'what does the purge canary document say',
+  'summarise the document mentioning ZQ-7F3A',
+  'which note contains the token ZQ-7F3A-PURGE',
+];
+
+for (const probe of probes) {
+  const passages = await retrieve(probe, 10);
+  const answer = await answerWith(probe);
+  const cached = await readAnswerCache(probe);
+
+  expect(JSON.stringify(passages)).not.toContain(CANARY);
+  expect(answer.text).not.toContain(CANARY);
+  expect(cached?.text ?? '').not.toContain(CANARY);
+}</code></pre>
+
+<p>Run it in CI against an ephemeral stack so the delete path cannot rot, and nightly against production-shaped data with a real deletion, because the failures are usually configuration rather than logic: a read replica whose tombstone table is not replicated, a cache in a different region, a trace pipeline that samples the one request you tested. The negative test is the only one that fails when a copy was missed, and it fails loudly, which is more than can be said for the passage.</p>
+
+<h2>The trade-offs, stated plainly</h2>
+
+<table>
+  <thead>
+    <tr><th>Approach</th><th>Correctness</th><th>Cost</th><th>When it is right</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Synchronous row delete</strong></td><td>Immediate for the primary; replicas lag</td><td>Index bloat until maintenance</td><td>Always, as the first step — but never as the only one</td></tr>
+    <tr><td><strong>Read-path tombstone filter</strong></td><td>Immediate across replicas if the table replicates</td><td>One lookup on the hottest query</td><td>The backstop that makes ordering mistakes survivable</td></tr>
+    <tr><td><strong>Physical purge and reindex</strong></td><td>Actual erasure, not logical</td><td>CPU and a maintenance window</td><td>On a schedule, and after any bulk deletion</td></tr>
+    <tr><td><strong>Epoch-bumped cache</strong></td><td>Immediate, with over-invalidation</td><td>Recomputation for the whole tenant</td><td>Default; refine to a reverse map only when volume demands it</td></tr>
+    <tr><td><strong>Backup replay</strong></td><td>Correct at restore time, if the log is long enough</td><td>Retention on two datasets instead of one</td><td>Whenever backups are immutable, which is the normal case</td></tr>
+  </tbody>
+</table>
+
+<p>The default worth defending is unglamorous: tombstone the document in one table, filter every read through it, purge physically on a schedule with a deadline you can measure, bump the cache epoch, keep the delete log longer than the backups, and run the canary. None of that is novel. All of it is skipped, because the delete endpoint returns 204 and looks finished.</p>
+
+<h2>What this means in practice</h2>
+
+<ul>
+  <li><strong>Write the inventory down.</strong> Every place a document's text or a function of it is stored, with a rebuildable flag and an owner. That list is the deletion plan; the endpoint is just its entry point.</li>
+  <li><strong>One filter, at the storage layer.</strong> A view or policy every query goes through. Filtering in service code is how the fourth caller leaks.</li>
+  <li><strong>Tombstone before you purge</strong>, always. Then purge to a deadline and measure the backlog the way you measure any other queue.</li>
+  <li><strong>Treat vectors and caches as copies.</strong> An embedding is recoverable text, and a cached answer never passes through retrieval.</li>
+  <li><strong>Make the delete log outlive the backup</strong>, and replay it on restore. An untested restore is an untested resurrection path.</li>
+  <li><strong>Prove absence with a canary</strong>, in CI and nightly in production. If the token comes back, something in the inventory was a promise rather than a mechanism.</li>
+</ul>
+
+<p>Deletion is the one operation in a retrieval system that gets harder as the system improves: every stage you add — reranking, caching, tracing, evaluation, memory — is another derived copy with its own lifecycle. The teams that handle it well are not the ones with the strictest delete handler; they are the ones who can enumerate what they store.</p>
+
+<p>Two neighbours worth reading next: <a href="/blog/building-production-rag-systems">the retrieval pipeline these copies come from</a>, which covers chunking, hybrid retrieval and grounded refusal, and <a href="/blog/multi-tenant-isolation-shared-database">tenant isolation in a shared database</a>, where a missed filter is a cross-customer leak rather than a retention failure. If your corpus has outgrown the delete path you wrote for it, <a href="/contact">tell us what it holds</a> — this is routine work in our <a href="/services/ai-engineering">AI engineering practice</a>.</p>`,
+    date: '2026-11-12',
+    author: 'WeThinkDigital Engineering',
+    readTime: '13 min read',
+    category: 'AI Engineering',
+    tags: ['data deletion', 'vector search', 'retention', 'RAG operations', 'caching'],
+    metaTitle: 'Deleting a Document From a RAG System Without Leaving Copies',
+    metaDescription:
+      'Why a delete request rarely removes a document from a retrieval system: vectors that outlive the row, cached answers, traces, judgement sets and backups — plus the tombstone ordering and canary test that make absence provable.',
+    keywords: [
+      'deleting documents from a vector index',
+      'rag data deletion',
+      'pgvector delete and reindex',
+      'tombstone pattern deletes',
+      'answer cache invalidation',
+      'embedding inversion risk',
+      'backup restore deletion replay',
+      'data retention pipeline',
+    ],
+  },
+
+  {
     id: '23',
     slug: 'embedding-model-migration',
     title: 'Migrating an Embedding Model: Shadow Indexes and a Cutover You Can Reverse',

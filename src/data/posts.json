@@ -1,5 +1,11 @@
 [
   {
+    "id": "24",
+    "slug": "deleting-documents-from-rag",
+    "title": "Deleting a Document From a RAG System: The Copies You Forgot to Count",
+    "date": "2026-11-12"
+  },
+  {
     "id": "23",
     "slug": "embedding-model-migration",
     "title": "Migrating an Embedding Model: Shadow Indexes and a Cutover You Can Reverse",
