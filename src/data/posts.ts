@@ -9,6 +9,268 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '25',
+    slug: 'tracing-agent-runs',
+    title: 'Tracing an Agent Run: The Spans You Keep and the Evidence You Lose',
+    excerpt:
+      'A customer reports the run id, so you open the trace — and it shows six of eleven spans, a retry that looks like one slow call, and a tool error the runtime handled so the span still says OK. Span design, context across queues, and why sampling decides which failures you will never see.',
+    content: `<p>The complaint arrives with a run id attached, which feels like a gift: the customer did the hard part. You paste it into the trace view and get a timeline that is roughly right and specifically useless. Six spans where there should be eleven. A tool call that returned a <code>500</code> and is green, because the runtime caught the error and handed the message back to the model as text. One step that took four seconds, which turns out to be three attempts at the same call with a rate-limit pause in between. The run produced a confident, wrong answer, and nothing in the trace says why.</p>
+
+<p>This is the normal state of agent observability, and it is not a tooling gap. OpenTelemetry will happily store whatever you send it. The problem is that an agent run is not shaped like a request: it is a tree of decisions, retries, and partial results, spread across a queue, a model provider and three internal services, and the instrumented version of it is usually a flattened approximation that was never designed to answer the question you actually have.</p>
+
+<p>The question is always some variant of <em>why did it do that</em>. Three sub-questions have to be answerable from the stored trace alone: what did the model see at the step in question, what did the system do with what the model said, and what bounded the run — a step budget, a timeout, a schema rejection, a human. Everything below is about making those three answerable after the fact, on the run you did not know to watch.</p>
+
+<h2>Model the run as a tree before you touch attributes</h2>
+
+<p>The span hierarchy decides what you can ask. Get it wrong and no amount of attribute work rescues the trace, because you can still read the fields but the causal structure is gone.</p>
+
+<p>The shape that has held up: one root span per run (a <code>CONSUMER</code> span when a worker picks the job up, a <code>SERVER</code> span when a request triggers it), one child span per step, and under each step the things that actually happened — a model call, a tool call, a retrieval, a guardrail check. Tool calls nest under the step that proposed them, not under the run, because "which decision produced this write" is the first thing you need when the write was wrong. When a step fans out to parallel tool calls, they are siblings, and the step's duration is the wall clock of the slowest one — which is a different number from the sum of the parts, and worth knowing you are looking at.</p>
+
+<p>Names should be stable and typed: <code>agent.run</code>, <code>agent.step</code>, <code>chat gpt-5.1</code>, <code>execute_tool refund_order</code>. Identifiers and variable data go in attributes. A span name containing the order id turns one row in your dashboard into ten thousand, and it makes every grouping you try later meaningless.</p>
+
+<pre><code>import { SpanStatusCode, trace } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('agent-runtime');
+
+interface RunContext {
+  runId: string;
+  tenantId: string;
+  stepIndex: number;
+  stepsRemaining: number;
+  promptVersion: string;
+}
+
+export async function tracedModelCall&lt;T extends { usage: { input: number; output: number }; finishReason: string }&gt;(
+  ctx: RunContext,
+  request: { model: string; attempt: number; temperature: number },
+  call: () =&gt; Promise&lt;T&gt;,
+): Promise&lt;T&gt; {
+  return tracer.startActiveSpan(\`chat \${request.model}\`, async (span) =&gt; {
+    span.setAttributes({
+      'gen_ai.operation.name': 'chat',
+      'gen_ai.request.model': request.model,
+      'gen_ai.request.temperature': request.temperature,
+      'agent.run_id': ctx.runId,
+      'agent.tenant_id': ctx.tenantId,
+      'agent.step_index': ctx.stepIndex,
+      'agent.attempt': request.attempt,
+      'agent.steps_remaining': ctx.stepsRemaining,
+      'agent.prompt_version': ctx.promptVersion,
+    });
+
+    try {
+      const result = await call();
+      span.setAttributes({
+        'gen_ai.usage.input_tokens': result.usage.input,
+        'gen_ai.usage.output_tokens': result.usage.output,
+        'gen_ai.response.finish_reasons': result.finishReason,
+      });
+      return result;
+    } catch (error) {
+      span.recordException(error as Error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+}</code></pre>
+
+<p>Two details in that snippet matter more than the rest. The span is created inside the active context, so a tool call made from the model's response nests automatically rather than becoming a root of its own. And the attempt number is an attribute, not part of the span name — which is what makes retries legible instead of invisible (more on that below).</p>
+
+<h2>The attributes that decide whether the trace is useful</h2>
+
+<p>Attribute choice is where teams oscillate between two failure modes: too little to reconstruct anything, or so much that storage costs more than the inference did. The split that works is between <em>decision attributes</em> — low cardinality, safe to index, describe what the system chose — and <em>payload</em>, which belongs somewhere else.</p>
+
+<table>
+  <thead>
+    <tr><th>Attribute</th><th>What it answers</th><th>Cardinality</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>agent.run_id</code>, <code>agent.tenant_id</code></td><td>Which run, which customer — the join key when the tree is broken</td><td>Low per run, high overall; index it, do not group by it</td></tr>
+    <tr><td><code>agent.step_index</code>, <code>agent.attempt</code></td><td>Where in the run this happened, and whether it is a retry</td><td>Low</td></tr>
+    <tr><td><code>agent.steps_remaining</code></td><td>Whether the run was truncated by its budget rather than finished</td><td>Low</td></tr>
+    <tr><td><code>agent.prompt_version</code></td><td>Which prompt text this step ran against</td><td>Low, and it is the one people forget</td></tr>
+    <tr><td><code>gen_ai.request.model</code>, token counts, <code>finish_reasons</code></td><td>Cost, latency and truncation per call</td><td>Low</td></tr>
+    <tr><td><code>tool.name</code>, <code>tool.outcome</code>, <code>tool.error_kind</code></td><td>What was attempted and how it failed — not the arguments</td><td>Low</td></tr>
+    <tr><td><code>tool.args_sha256</code>, <code>prompt.sha256</code></td><td>Deduplication and lookup into payload storage</td><td>High, but compared not grouped</td></tr>
+  </tbody>
+</table>
+
+<p>The prompt version deserves emphasis because its absence quietly invalidates history. You change a system prompt on Tuesday, the failure rate moves on Wednesday, and every aggregate you pull afterwards mixes two systems. Version the prompt as data with a hash, stamp it on every model span, and the change becomes a filter rather than a confound.</p>
+
+<h2>Handled errors are not recorded errors</h2>
+
+<p>The green span on a failed tool call is worth its own section, because it is the most common reason a trace says everything is fine while a customer says it is not.</p>
+
+<p>An agent runtime is built to absorb failures. The tool throws, the wrapper catches it, the error becomes a string in the next model message, and the loop continues — often to a worse answer, because the model now reasons over "error: internal server error" with no idea whether to retry, escalate, or give up. From the orchestrator's point of view the step completed. From OpenTelemetry's point of view the span completed without an exception. Both are technically true and the trace is a lie by omission.</p>
+
+<pre><code>try {
+  const result = await tool.execute(args);
+  span.setAttribute('tool.outcome', 'ok');
+  return { ok: true, result };
+} catch (error) {
+  // The run survives this. The trace must not pretend it did not happen.
+  span.setStatus({ code: SpanStatusCode.ERROR });
+  span.recordException(error as Error);
+  span.setAttributes({
+    'tool.outcome': 'error',
+    'tool.error_kind': classify(error),   // 'validation' | 'timeout' | 'upstream'
+    'agent.recovered': true,              // handled, not fatal
+  });
+  return { ok: false, message: toModelMessage(error) };
+}</code></pre>
+
+<p>With <code>tool.outcome</code> and <code>agent.recovered</code> in place, "runs that completed but hit at least one tool error" becomes a query instead of an investigation. Without them, the only evidence is prose inside a prompt body you may not be storing.</p>
+
+<p>The companion piece is a summary span emitted at the end of the run: outcome, step count, total tokens, whether any budget was exhausted, which guardrail fired, and whether the answer was served from a cache. One span that answers "how did this run end" is what makes tail sampling work later, and what lets you chart run outcomes without reconstructing them from children.</p>
+
+<h2>Sampling is a one-way door, and the door is at the root</h2>
+
+<p>Every serious system samples, because full-fidelity traces of a multi-step agent are expensive to store. The trap is that the standard samplers were designed for request traffic, and agent runs violate their assumptions in three ways.</p>
+
+<p><strong>The decision is made before the evidence exists.</strong> Head sampling chooses at the root span, when nothing is known about the outcome. For an HTTP endpoint that is fine — requests are interchangeable. Agent runs are not: the run that hallucinates is unique, and reproducing it may not be possible at all, because the model, the retrieval results and the timing all fed into it. A ratio applied at the root deletes exactly the runs you would have wanted, with no way to recover them; the decision happens in the SDK, before any exporter sees a span.</p>
+
+<p><strong>The decision is inherited.</strong> With a parent-based sampler, children follow the root's sampled flag and the ratio is applied once, at the root — which is usually what you want, since half a trace is worse than none. But the root is often in a different service than the one you are debugging: an HTTP handler upstream, a gateway, a queue producer. The worker that runs the agent can be configured at 100% and still export nothing, because it is honouring a decision made elsewhere. When a run is missing entirely, check the sampler on whichever service creates the root, not the one with the agent in it.</p>
+
+<p><strong>Long runs outlive the decision window.</strong> Tail sampling decides after the run finishes, which is the right model for agents: keep every failure, every run that exhausted its step budget, every run above a latency or cost threshold, and sample the boring successes hard. It requires a stateful collector tier that buffers spans until it can decide, with spans for one trace routed to the same instance — that is the load-balancing exporter's job, and forgetting it produces traces that are each decided twice and stored inconsistently. The buffering also imposes <code>decision_wait</code>: spans arriving after the window are excluded from the decision, so a run that waits on a human approval or a slow queue sits right at the boundary and comes out fragmented, sometimes with the summary span — the one carrying the outcome — left out.</p>
+
+<p>The configuration that survives contact with production is two-stage: a high head-sampling rate at the source for the agent's own spans (or always-on, if volume permits), and outcome-based retention in the collector, ordered so specific rules run before the probabilistic fallback. If volume forces you to drop at the SDK, drop non-agent traffic instead. And keep a separate, unsampled path for the numbers you bill against: sampled traces are a debugging aid, and token totals derived from them are an estimate with a bias you cannot correct for.</p>
+
+<h2>Context breaks at every boundary that is not a function call</h2>
+
+<p>An agent run crosses more process boundaries than a typical request: a queue between the API and the worker, another between steps if steps are durable, a webhook for a slow tool, a resume after a deploy, a pause for human approval. Each boundary is a place where the trace context either travels with the work or dies.</p>
+
+<p>Queues are the usual culprit. The producer creates a span, enqueues a job, and the job payload carries ids but not the <code>traceparent</code>. The consumer starts a fresh root, and the run becomes five unrelated traces with the same <code>run_id</code> and no relationship between them. Carry the context in the payload and extract it on the consumer side:</p>
+
+<pre><code>import { context, propagation, SpanKind, trace } from '@opentelemetry/api';
+
+// Producer: serialize the active context into the job payload.
+const carrier: Record&lt;string, string&gt; = {};
+propagation.inject(context.active(), carrier);
+await queue.add('agent.step', { runId, stepIndex, carrier });
+
+// Consumer: rehydrate it and start the step as a CONSUMER span under it.
+const parentContext = propagation.extract(context.active(), job.data.carrier);
+const stepSpan = tracer.startSpan(
+  'agent.step',
+  { kind: SpanKind.CONSUMER, attributes: { 'agent.run_id': job.data.runId } },
+  parentContext,
+);
+
+// Work that is genuinely detached — a retried job, a resumed run, a webhook
+// arriving after the original span closed — gets a link instead of a parent.
+tracer.startSpan('agent.resume', {
+  links: [{ context: trace.getSpanContext(parentContext)! }],
+});</code></pre>
+
+<p>The link is the part people skip. A resumed run legitimately has a new trace, because the old one is closed; a parent-child edge would produce a child that starts after its parent ended, and every duration calculation downstream quietly breaks. Links express "related, not nested", which is exactly the relationship.</p>
+
+<p>Because propagation will still fail somewhere — a library that swallows context across a <code>setTimeout</code>, a worker that deserializes into a new async context — treat <code>agent.run_id</code> as the durable key and the trace as the convenient view. It costs one attribute per span and it is what lets you stitch a broken run back together by query months later.</p>
+
+<h2>Streaming ends the span before the run does</h2>
+
+<p>Streamed responses break instrumentation in a way that is easy to miss because nothing errors. The handler returns as soon as the first token arrives, the span ends there, and the recorded duration is time-to-first-token labelled as latency. Token usage is worse: providers report it in the final stream event, which arrives after the span has ended, so the attribute is either dropped or never set. On a disconnect — user closes the tab, proxy times out mid-stream — the provider bills for what it generated and your trace shows a short, successful call.</p>
+
+<p>The fix is mechanical: keep the span open until the stream closes, set time-to-first-token as its own attribute, and record the terminal state explicitly (<code>completed</code>, <code>cancelled</code>, <code>upstream_error</code>). If a stream can be resumed or retried, that terminal state is the difference between a bug you can find and a gap in the timeline.</p>
+
+<h2>Clocks, retries and latency that belongs to someone else</h2>
+
+<p>Three timing errors make traces read as if the model is slow when it is not, and each has a distinct signature.</p>
+
+<p><strong>Wall-clock skew.</strong> Spans carry absolute timestamps from different hosts. Without clock discipline — NTP, and a container image that actually runs it — a child span can appear to start before its parent, or two parallel tool calls can appear sequential. Trust parentage and durations; treat absolute timestamps as approximate and never build an ordering rule on them.</p>
+
+<p><strong>Retries collapsed into one call.</strong> If each attempt is a separate span with an <code>attempt</code> attribute, a rate-limited step reads as three calls with a pause between them and the cause is visible. If retries reuse a single span, the step reads as one slow call, latency dashboards absorb the backoff as model time, and the remediation is aimed at the wrong component.</p>
+
+<p><strong>Queue wait attributed to the model.</strong> The gap between "job enqueued" and "worker picked it up" is usually invisible unless you instrument it. Without a queue-wait span the model call appears to take eleven seconds when two of them were the model and nine were a saturated worker pool. This is the single most common misattribution we see in agent latency charts, and the fix is one span with a start time from the enqueue timestamp.</p>
+
+<h2>Prompt bodies: attribute, object storage, or nothing</h2>
+
+<p>You cannot debug a prompt-driven system without sometimes seeing the prompt. You also cannot put prompts in span attributes and call it done.</p>
+
+<p>The mechanical limits come first. Attributes are typed key-value metadata meant for filtering, not blobs; collectors and exporters apply size limits and truncate, usually silently, so a large prompt shows up as a prefix with no indication that anything was cut. Every backend's query language indexes those values and charges for them. And a prompt body on a span is a copy of customer data in a store with its own retention window, its own access control, and no knowledge of your deletion path.</p>
+
+<p>The middle path keeps the trace queryable and the body optional: hash and length as attributes, the body in object storage keyed by that hash, with a retention class and a tenant scope.</p>
+
+<pre><code>const digest = createHash('sha256').update(prompt).digest('hex');
+
+span.setAttributes({
+  'prompt.sha256': digest,
+  'prompt.bytes': Buffer.byteLength(prompt, 'utf8'),
+  'prompt.template_id': templateId,
+  'prompt.template_version': templateVersion,
+  'prompt.redacted': redactionApplied,
+});
+
+if (captureBodies) {
+  await payloadStore.put(digest, prompt, { ttlDays: 14, tenantId: ctx.tenantId });
+  span.setAttribute('prompt.body_ref', \`payload://\${digest}\`);
+}</code></pre>
+
+<p>Two properties fall out of this. Identical prompts across runs collapse to one stored object, which is most of them, because templates dominate. And turning capture off is a deployment flag rather than a migration — which is what you want the week an erasure request lands on the trace store, since the trace was never the only copy and should not become the one you cannot enumerate.</p>
+
+<p>Redact at write, before the span leaves the process. It is far easier to decide once that account numbers, tokens and free-text customer notes never enter telemetry than to build a retroactive scrubber across a year of spans in a vendor's store.</p>
+
+<h2>The trace has to answer three questions</h2>
+
+<p>Before adding another dashboard, check the shape against what an on-call engineer needs at 02:00 with a run id in hand.</p>
+
+<ul>
+  <li><strong>What did the model see?</strong> Step index, prompt version, the identifiers of the retrieved passages and their scores, the tool results returned into context — as references, with bodies available on demand. If the answer requires reconstructing the prompt from logs, the trace is not the record.</li>
+  <li><strong>What did the system do with the answer?</strong> Which tool was called, with which arguments (hash plus a stored body), what came back, whether the schema validated on the first attempt, whether a guardrail rejected it, whether the runtime retried. The common failure here is a trace that records the model's intention and not the execution.</li>
+  <li><strong>What bounded the run?</strong> Step budget, wall-clock deadline, token ceiling, human approval, a policy refusal. Runs that stop because a limit was hit look identical to runs that finished, unless the reason is recorded, and that ambiguity sends people to the prompt when the answer is the budget.</li>
+</ul>
+
+<table>
+  <thead>
+    <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Trace has fewer spans than the run had steps</td><td>Head sampling at an upstream root, or context lost across the queue</td><td>Always-on for agent spans; carry <code>traceparent</code> in the job payload</td></tr>
+    <tr><td>All spans green, answer wrong</td><td>Tool errors caught and returned to the model as text</td><td>Set span status, <code>tool.outcome</code>, <code>agent.recovered</code></td></tr>
+    <tr><td>One step looks slow, no retries visible</td><td>Retries share a span, or queue wait is inside the model span</td><td>Separate attempt spans; a queue-wait span from the enqueue timestamp</td></tr>
+    <tr><td>Run appears cut off halfway</td><td>Tail sampler decided before the late spans arrived</td><td>Raise <code>decision_wait</code> past the longest realistic run, or keep the summary span out of the wait</td></tr>
+    <tr><td>Child span starts after its parent ended</td><td>Resumed or detached work modelled as a child</td><td>New trace with a span link, joined by <code>run_id</code></td></tr>
+    <tr><td>Prompt attribute is a truncated prefix</td><td>Body stored as a span attribute</td><td>Hash plus reference; body in object storage with a TTL</td></tr>
+    <tr><td>Token totals disagree with the invoice</td><td>Usage derived from sampled traces, or set after the span closed</td><td>Record usage before <code>span.end()</code>; bill from the unsampled path</td></tr>
+  </tbody>
+</table>
+
+<h2>What this means in practice</h2>
+
+<ul>
+  <li><strong>One trace per run, one attribute that survives everything.</strong> Get the tree right, propagate context across every queue, and put <code>run_id</code> on every span so a broken tree is still reconstructable.</li>
+  <li><strong>Record decisions, not just durations.</strong> Step index, attempt, remaining budget, prompt version, tool outcome. Those five turn a timeline into an explanation.</li>
+  <li><strong>Never let a handled error be a green span.</strong> The runtime absorbing a failure is exactly when the trace most needs to show it.</li>
+  <li><strong>Sample by outcome, at the collector.</strong> Head-drop only what you can afford to lose forever, and never derive cost from a sampled trace.</li>
+  <li><strong>Keep payloads out of attributes.</strong> Hash, length, template version and a reference; bodies in storage with a retention class you can defend.</li>
+  <li><strong>Budget the telemetry.</strong> A 40-step run with full prompts is a multi-megabyte trace. Decide the per-run ceiling the way you decide the step budget, before the invoice decides it for you.</li>
+</ul>
+
+<p>None of this makes an agent correct. It makes the failures visible, which is the precondition for everything else — you cannot fix a step budget that was never recorded as exhausted, or a retry storm that looks like one slow call. The trace is the only artefact of a run that survives the run, and it is worth designing with the same care as the loop itself.</p>
+
+<p>Two neighbours worth reading next: <a href="/blog/agent-step-budgets">agent step budgets</a>, where the limits this trace records are actually enforced, and <a href="/blog/llm-eval-gates-in-ci">eval gates in CI</a>, which catch quality regressions before they reach a production run. If you are instrumenting agents that already work and cannot explain why they sometimes do not, <a href="/contact">tell us what the run looks like</a> — this is routine work in our <a href="/services/ai-engineering">AI engineering practice</a>.</p>`,
+    date: '2026-11-16',
+    author: 'WeThinkDigital Engineering',
+    readTime: '13 min read',
+    category: 'AI Engineering',
+    tags: ['observability', 'tracing', 'agent systems', 'OpenTelemetry', 'sampling'],
+    metaTitle: 'Tracing Agent Runs: Span Design, Sampling and Lost Evidence',
+    metaDescription:
+      'Why an agent trace shows six of eleven spans and all-green errors: span hierarchy, decision attributes, context propagation across queues, tail sampling for long runs, prompt payload storage and the timing errors that misattribute latency.',
+    keywords: [
+      'tracing ai agent runs',
+      'opentelemetry genai semantic conventions',
+      'llm observability span design',
+      'agent trace sampling tail based',
+      'trace context propagation queue worker',
+      'tracing retries attempt attribute',
+      'prompt payload storage trace',
+      'agent run debugging production',
+    ],
+  },
+
+  {
     id: '24',
     slug: 'deleting-documents-from-rag',
     title: 'Deleting a Document From a RAG System: The Copies You Forgot to Count',
