@@ -9,6 +9,282 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
   {
+    id: '26',
+    slug: 'llm-rate-limits-retry-storms',
+    title: 'Rate Limits and Retry Storms: The Capacity Your Client Is Hiding',
+    excerpt:
+      'A 429 is not a failed request, it is a statement about the next window. Retries at four layers multiply into an outage nobody owns, and the fix is admission control: a retry budget paid for by successes, concurrency sized from Little\'s law, a bounded queue with priority, and failover that is visible instead of silent.',
+    content: `<p>At 14:02 the p99 latency graph goes vertical and the error rate settles at eight percent. By 14:20 it has recovered on its own. Nothing was deployed, the provider's status page stayed green, and the postmortem says "upstream rate limiting" — which is a description of the symptom, not the cause. What actually happened is that a backfill started twenty minutes early, every <code>429</code> it received was retried three times by the SDK, twice by the worker, and once more by the agent loop that treats a failed model call as a step to redo. The provider served exactly the traffic it had promised to serve. We offered it six times that and then reported the rejection as an outage.</p>
+
+<p>Rate limits get treated as an operational nuisance to be absorbed with backoff. They are better understood as admission control that somebody else owns: the provider sets the window, you decide how much load to offer it and what happens to the excess. Nearly every incident in this class is a failure of the second decision. The provider does not know what a user is waiting for, which request is a nightly recomputation, or which tenant is paying for a premium tier. You do.</p>
+
+<p>So the work is not "handle 429 better". It is: decide, in one place, how much concurrent load this system may offer each model, what it does when the answer is no, and how a batch job is prevented from spending an interactive user's headroom. Everything below is that, with the failure modes each control introduces.</p>
+
+<h2>A rate limit is a window, not a wall you can push</h2>
+
+<p>A modern inference API enforces several limits at once. Requests per minute. Tokens per minute. Often concurrent requests, and for some models a separate cap per model or per region. Any one of them being exhausted returns <code>429</code> regardless of which limit it was, so the status code on its own tells you almost nothing. The headers do.</p>
+
+<p>Every response carries the state of the account — not just the failures. Remaining requests, remaining tokens, and when each window resets. Treat those headers as the only honest measurement of headroom you have, because everything else in your system is a guess about them. One detail bites almost everyone who parses them: some providers report the reset as a duration (<code>6m0s</code>, <code>1s</code>) and others as an RFC 3339 timestamp. Reading a duration as a timestamp does not fail loudly, it produces a wait measured in decades, and the retry never fires again.</p>
+
+<p>Two more properties of the window matter more than the numbers.</p>
+
+<p><strong>Rejected requests count.</strong> The provider meters what you sent, including the requests it refused. A tight retry loop is therefore not a way to find the limit, it is a way to stay at it: each rejected attempt keeps the window full, so the condition that caused the rejection is extended by the attempts to escape it. This is the mechanism by which a two-second overrun becomes a fourteen-minute one.</p>
+
+<p><strong>The window is charged on the maximum, not the actual.</strong> Token accounting is based on the prompt plus the output ceiling the request declares, not on what the model eventually writes. A request that allows four thousand output tokens but produces two hundred still occupies four thousand tokens of window budget for as long as it is in flight. That is the correct conservative behaviour from the provider's side — it cannot know in advance — but it means a generous <code>max_tokens</code> is a throughput decision, not just a safety net. Under load, the first lever is usually not "shrink the prompt", it is "stop reserving output you never use".</p>
+
+<blockquote>Not every 429 is transient. A rate limit is one diagnosis; an exhausted balance, an expired payment method or a project spend cap are others, and they arrive as the same status code. Retrying a billing failure is not resilience, it is a loop that keeps a permanent problem invisible to the person who could fix it.</blockquote>
+
+<p>Which is why the classification step has to happen before any retry logic: status code, then error code from the body, then headers, then a decision. Retry the transient. Fail fast and alert on the permanent. Shed early on provider overload, where a <code>503</code> with a retry hint means the queue in front of the model is already deep and your request is not going to be the one that gets through.</p>
+
+<h2>Retries multiply at every layer, and nobody owns the product</h2>
+
+<p>Ask an engineer how many times a model call is attempted and they will say three, because that is what their wrapper does. The number is usually much larger, because retries exist at several layers that were each designed independently.</p>
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>What it does</th><th>Who knows about it</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Provider SDK</td><td>Retries eligible <code>429</code> and <code>503</code> responses with its own backoff before your code sees an error</td><td>The SDK's configuration, which nobody reads</td></tr>
+    <tr><td>Client wrapper</td><td>Retries again on any exception it considers transient</td><td>The author of the wrapper</td></tr>
+    <tr><td>HTTP gateway or sidecar</td><td>Retries idempotent-looking requests on upstream failure</td><td>Whoever owns the ingress config</td></tr>
+    <tr><td>Queue consumer</td><td>Returns the message to the queue on failure; redelivery is a retry with no backoff and no budget</td><td>Whoever owns the consumer</td></tr>
+    <tr><td>Agent loop</td><td>Sees "rate limited" as tool output and decides to call the same tool again in a new step</td><td>The model, which cannot know the budget</td></tr>
+  </tbody>
+</table>
+
+<p>Three layers at three attempts each is twenty-seven offered requests for one logical call, all carrying the same prompt, all arriving in the same second. No single layer is unreasonable. The product is not anyone's design. This is the ordinary state of a system that added resilience one component at a time and never added up what it had built.</p>
+
+<p>The agent loop is the layer people forget, and it is the one that turns a provider limit into a step-budget failure. A tool call that fails with a <code>429</code> becomes a message in the context. The next step re-plans, chooses the same tool, and generates a fresh call — with fresh attempts behind it. The run does not just spend tokens on retries, it spends its <em>steps</em> on them, and reaches its ceiling having produced nothing. If you cap steps but not attempts per step, the cap does not bound the load.</p>
+
+<p>The rule that fixes this is boring and effective: exactly one layer retries. The SDK's automatic retries are disabled. The queue treats a failure as a failure, not a hint to try again in a tight loop. The agent's tool wrapper classifies the error and, if it is retryable and the budget allows, does the retrying inside one step so the model sees one outcome. Every other layer propagates with the error intact, including the retry hint.</p>
+
+<h2>Retry budgets, not retry counts</h2>
+
+<p>A fixed attempt count is the wrong shape for a shared resource. Three attempts is the right number when the failure rate is two percent and the wrong number when it is eighty percent, which is exactly the moment the limit is being enforced. What you want is a client that retries while it is succeeding and stops when it is not — which is what a retry budget does: retries are paid for by successes, so a fully failing client runs out of permission to retry instead of tripling the load.</p>
+
+<pre><code>type Outcome = 'retry' | 'fatal' | 'shed';
+
+interface ProviderError extends Error {
+  status: number;
+  code?: string;
+  retryAfterMs?: number;
+}
+
+/** Status is not a diagnosis. Read the code, then decide. */
+export function classify(error: ProviderError): Outcome {
+  if (error.status === 429) {
+    // Billing and quota failures also arrive as 429 and waiting never fixes them.
+    if (error.code === 'insufficient_quota' || error.code === 'spend_limit_exceeded') {
+      return 'fatal';
+    }
+    return 'retry';
+  }
+  if (error.status === 503 || error.status === 529) return 'shed';
+  if (error.status &gt;= 500) return 'retry';
+  return 'fatal';
+}</code></pre>
+
+<p>The budget itself is a small token bucket with an unusual refill rule: successes add credit, retries spend it. Ten percent is a reasonable starting ratio — one retry per ten successful calls — with a burst capacity for the occasional isolated blip. In a healthy system the budget is never the constraint. In a failing one it drains within seconds and the client stops offering load, which is the entire point.</p>
+
+<pre><code>/**
+ * Retries are paid for by successes. A client that is mostly failing stops
+ * retrying instead of multiplying the load on a provider that is already
+ * refusing it.
+ */
+export class RetryBudget {
+  private tokens: number;
+
+  constructor(
+    private readonly capacity = 20,
+    private readonly perSuccess = 0.1,
+  ) {
+    this.tokens = capacity;
+  }
+
+  /** Call once per successful request. */
+  credit(): void {
+    this.tokens = Math.min(this.capacity, this.tokens + this.perSuccess);
+  }
+
+  /** Call before each retry attempt. */
+  tryConsume(): boolean {
+    if (this.tokens &lt; 1) return false;
+    this.tokens -= 1;
+    return true;
+  }
+}</code></pre>
+
+<p>Two details around the retry itself matter as much as the budget. The first is jitter. Exponential backoff without it synchronises every client on the same schedule: they all fail at the same instant, all wait the same interval, and all return together to create a second, perfectly formed spike — most visibly at the window reset, which is the one moment every client is watching. Honouring a retry hint and then adding a random delay is the difference between a decaying incident and a sawtooth. The hint is a floor, not a schedule.</p>
+
+<p>The second is what the request does when it is retried. Retrying a model call is safe, because a stateless completion has no side effect. Retrying a tool call is not: the first attempt may have written the record before the connection dropped, and the second attempt writes it again. That is a separate problem with its own solution — idempotency keys at the tool boundary and compensation for the writes that cannot be made idempotent, which is what <a href="/blog/durable-agent-workflows-retries-compensation">durable agent workflows</a> is about. Do not let a generic retry wrapper cross that boundary: it will retry a refund because the connection timed out.</p>
+
+<h2>The deadline decides how many attempts are worth making</h2>
+
+<p>An attempt that cannot finish before the deadline is not a recovery attempt, it is load. If the remaining budget is four hundred milliseconds and the p95 latency of the call is three seconds, retrying does not improve the response — it occupies a concurrency slot for three seconds and returns a timeout instead of the error it already had. Worse, it consumes the window that the next request needed.</p>
+
+<p>So the retry decision has four inputs, not one: the classified outcome, the attempt count, the retry budget, and the remaining deadline. Any sane implementation computes the last as <code>deadline - now</code> and refuses to retry when that is below the observed latency of the call.</p>
+
+<pre><code>const P95_LATENCY_MS = 3_000;
+const sleep = (ms: number) =&gt; new Promise&lt;void&gt;((resolve) =&gt; setTimeout(resolve, ms));
+
+export async function withRetry&lt;T&gt;(
+  call: (attempt: number) =&gt; Promise&lt;T&gt;,
+  budget: RetryBudget,
+  deadline: number, // absolute epoch ms, inherited from the caller
+  maxAttempts = 3,
+): Promise&lt;T&gt; {
+  let attempt = 0;
+
+  for (;;) {
+    attempt += 1;
+    try {
+      const result = await call(attempt);
+      budget.credit();
+      return result;
+    } catch (raw) {
+      const error = raw as ProviderError;
+      const remaining = deadline - Date.now();
+
+      if (
+        classify(error) !== 'retry' ||
+        attempt &gt;= maxAttempts ||
+        remaining &lt; P95_LATENCY_MS ||
+        !budget.tryConsume()
+      ) {
+        throw error;
+      }
+
+      const floor = error.retryAfterMs ?? 0;
+      const ceiling = Math.min(8_000, 250 * 2 ** attempt);
+      await sleep(Math.max(floor, Math.random() * ceiling)); // full jitter
+    }
+  }
+}</code></pre>
+
+<p>The <code>deadline</code> parameter is the part that gets skipped, and skipping it is why timeouts stack. If every hop sets its own thirty-second timeout, a request that traverses four hops can take two minutes while the caller gave up at five seconds — and each hop, believing it has time, retries. Propagating an absolute deadline rather than a per-hop duration is the difference between a system that fails fast under load and one that keeps working on requests nobody is waiting for.</p>
+
+<h2>Concurrency is the number you actually set</h2>
+
+<p>Throughput limits and concurrency limits are not the same, and a system can respect the first while violating the second. The arithmetic that connects them is Little's law: the number of requests in flight equals arrival rate times latency. Twenty requests per second at two and a half seconds each is fifty requests in flight. If your semaphore permits two hundred, you are not going to run faster; you are going to queue two hundred requests inside a provider that will accept thirty, and get a <code>429</code> for the rest.</p>
+
+<p>The most common real-world cause of this class of incident is not a badly sized semaphore, it is a correctly sized semaphore multiplied by the number of instances. A limit of twenty concurrent calls per process is conservative on a laptop. Behind an autoscaler that ran to ten instances during the morning peak, it is two hundred against an account that permits thirty. Nothing in the code changed; the fleet did. Per-process limits have to either be divided by the fleet size or, better, enforced somewhere shared — a Redis token bucket, a dedicated gateway, anything with a single view of the account.</p>
+
+<p>You generally need both controls. Concurrency bounds simultaneous requests, which is what protects you when latency spikes: with unbounded concurrency, a latency increase multiplies in-flight work and turns a slow provider into a saturated one. A token bucket bounds throughput over time, which is what the provider actually meters. A retry budget bounds the extra load your own resilience generates. Three small mechanisms, each with one job, all of which have to be shared state rather than per-pod counters.</p>
+
+<h2>Queue with a bound, and shed on purpose</h2>
+
+<p>Once requests arrive faster than they can be served, something has to hold them. That something is a queue, and its length is an availability decision rather than an implementation detail. An unbounded queue is the most expensive way to hide a rate limit: requests accumulate until the process runs out of memory, every one of them is past its deadline by the time it is served, and the work done on them is paid for and thrown away.</p>
+
+<p>The useful shape is a bounded queue with two properties: an admission check that rejects work which cannot be completed before its deadline, and lanes with reserved headroom.</p>
+
+<pre><code>type Lane = 'interactive' | 'batch';
+
+interface Admission {
+  lane: Lane;
+  tenantId: string;
+  deadline: number;
+}
+
+/**
+ * Batch work may use the capacity interactive traffic is not using, but it may
+ * never take the headroom a user is waiting on.
+ */
+export function admit(job: Admission, inFlight: Record&lt;Lane, number&gt;): boolean {
+  if (job.deadline &lt;= Date.now()) return false; // expired while queued
+  if (job.lane === 'interactive') return inFlight.interactive &lt; 40;
+  return inFlight.interactive + inFlight.batch &lt; 50;
+}</code></pre>
+
+<p>Reserved headroom is the control that stops a backfill from becoming a user-visible incident. Without it, a nightly job that starts at 02:00 will eventually overlap with a market opening in another timezone, and the first thing you will notice is that interactive latency is bad at exactly the hour the graph used to be flat. A single FIFO queue shared by both workloads has no way to express the difference between a user waiting on a page and a report that will be read tomorrow morning; the queue tells you they are the same thing.</p>
+
+<p>The same argument applies inside a tenant boundary. A shared account with several customers means one customer's bulk import can consume the whole window and starve everyone else, which shows up as "the product is slow for some customers, randomly". A per-tenant bucket with a guaranteed share, and borrowing from the unallocated remainder, keeps the fairness question explicit. Borrowed capacity must be reclaimable — otherwise the first tenant to arrive after a quiet period takes everything and does not give it back until its job finishes.</p>
+
+<p>And when the queue is full, reject at the edge rather than holding the connection. A fast <code>503</code> with a retry hint lets the caller choose; a request that waits ninety seconds to fail has consumed a client's patience, a server slot and a retry, and produced nothing.</p>
+
+<h2>Failover is a change of product, not a change of endpoint</h2>
+
+<p>Every account eventually gets a second provider or a second model, and the first version of that code is usually a try/catch: if the primary throws, call the secondary. It works, in the sense that the request returns. What it hides is that the fallback is a different system.</p>
+
+<ul>
+  <li><strong>A different tokenizer</strong>, so the same prompt is a different number of tokens, and any cost or window arithmetic calibrated on the primary is wrong on the secondary.</li>
+  <li><strong>Different structured-output behaviour</strong> — one model enforces a schema strictly, another approximates it, and the validator you wrote against the first is now load-bearing in a way it was not designed for.</li>
+  <li><strong>Different tool-calling reliability</strong>, which matters most in agent loops: a model that occasionally emits a malformed tool call produces a retry storm on the tool layer, not the model layer, and the trace blames the tool.</li>
+  <li><strong>Its own rate limit</strong>, usually much smaller, because it is the account you opened as insurance rather than the one you sized for production.</li>
+</ul>
+
+<p>The consequence is that failover has to be rationed and visible. Rationed, because failing over one hundred percent of traffic moves the outage to the secondary: it was sized for overflow, not for the peak. Visible, because a silent fallback is a quality regression that will be investigated as a prompt problem for a week — the responses are worse, nothing errors, and the only evidence is a model name in a log nobody is aggregating. Put the serving model on the response and on every model span, and make the fallback path an evaluated configuration rather than an untested branch. A fallback that quietly drops tool definitions or truncates context is worse than an honest error, because it produces a plausible answer to a different question.</p>
+
+<h2>Separate the keys you share</h2>
+
+<p>Limits are scoped to an account and a project, not to a workload or an environment. When a nightly job, an evaluation suite and production traffic share one project, they share one window, and the job that runs at the least convenient time is the one that causes the incident. This is the signature of the "random" spike: 429s at an hour when user traffic is flat, from a code path that has been running unchanged for months, because a backfill grew with the corpus.</p>
+
+<p>The cheap fix is a project or key per workload — interactive, batch, evaluation, development — so a limit breach is attributable and one workload's excess cannot become another's outage. The structural fix is to treat non-interactive work as a different kind of job: batch endpoints where the provider offers them, off-peak scheduling, and a pacer that reads the remaining-tokens header and sleeps when it is near the floor rather than at the ceiling. A batch job that gets rate limited has already failed at its only real design constraint, which is that nobody is waiting for it and it therefore never needed to compete.</p>
+
+<h2>Measure the queue, not the error rate</h2>
+
+<p>Error rate is the worst dashboard for this problem because it is the last thing to move. The system starts queueing, latency climbs, retries add load, and only after all of that does the first <code>429</code> reach your metrics — at which point it is described as the cause. Instrument the stages that precede it.</p>
+
+<table>
+  <thead>
+    <tr><th>What you see</th><th>What is actually happening</th><th>What to measure</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Error rate flat, p99 climbing</td><td>Admission delay, not failures — work is waiting, not failing</td><td>Queue wait time per request, split by lane</td></tr>
+    <tr><td>429s in bursts on a fixed interval</td><td>Clients synchronised to the reset boundary, retrying together</td><td>Retry count per logical call; jitter present or absent</td></tr>
+    <tr><td>429s only overnight</td><td>A scheduled job sharing the project limit</td><td>Requests per minute per key, not per service</td></tr>
+    <tr><td>Failures under load with low token usage</td><td>Request-rate limit hit first, not the token limit</td><td><code>remaining-requests</code> vs <code>remaining-tokens</code></td></tr>
+    <tr><td>Quality complaints, no errors</td><td>Silent fallback to a different model</td><td>Serving model on every response and span</td></tr>
+    <tr><td>Spend rising, request count flat</td><td>Retries re-sending full prompts and being billed as calls</td><td>Tokens per logical call, separated from tokens per attempt</td></tr>
+    <tr><td>Limit reached while your own counter says thirty percent under</td><td>Another service on the same key, or in-flight requests not counted until they complete</td><td>In-flight gauge attributed per service</td></tr>
+  </tbody>
+</table>
+
+<p>Two of those are worth building first: retries per logical call, which is the number that tells you your resilience is amplifying, and queue wait per lane, which is the number that tells you the incident started before anything failed. Both are derived from data you already have if you are tracing the calls — attempts as an attribute rather than a span name, which is the one design decision in <a href="/blog/tracing-agent-runs">tracing an agent run</a> that pays for itself the first time a limit is hit.</p>
+
+<h2>Degrade before you fail</h2>
+
+<p>Under a hard limit, there are three honest answers and one dishonest one. The honest ones: answer from a cheaper model with a lower ceiling and say so, serve a cached or precomputed result with its age attached, or defer the work to a queue and tell the user when it will be ready. The dishonest one is to fail the request while a working degraded path existed, because nobody decided in advance which one to take.</p>
+
+<p>That decision belongs per route, written down, not improvised in an exception handler at 14:05. A summarisation endpoint can fall back to a smaller model and keep 90 percent of its value. A tool-calling agent cannot, because a weaker model with a malformed tool call creates a retry storm that is worse than the original error. The circuit breaker's job is to make that choice automatic — open on sustained failure, close on recovery, half-open to test — and the degraded path is a product decision the breaker merely executes.</p>
+
+<h2>What this means in practice</h2>
+
+<ul>
+  <li><strong>One layer retries.</strong> Disable SDK retries, disable gateway retries, and let one component own attempts, budgets and deadlines.</li>
+  <li><strong>Budget retries against successes.</strong> A client that is failing should stop offering load, not multiply it. Ten percent is a sane starting ratio.</li>
+  <li><strong>Propagate a deadline, not a timeout.</strong> An attempt that cannot finish before the caller gives up is pure load; refuse it.</li>
+  <li><strong>Size concurrency from latency, and share the counter.</strong> Little's law, then divide by the fleet — or enforce it in one place the whole fleet can see.</li>
+  <li><strong>Bound the queue and reserve headroom.</strong> Interactive and batch in one FIFO queue is an availability bug waiting for a timezone.</li>
+  <li><strong>Ration and record failover.</strong> The secondary has its own limit and its own behaviour; make the serving model visible everywhere.</li>
+  <li><strong>One key per workload.</strong> A cron sharing production's project is the most common cause of a 429 spike that looks random.</li>
+  <li><strong>Dashboard the queue.</strong> Retries per logical call and wait time per lane will tell you about the incident before the error rate does.</li>
+</ul>
+
+<p>None of this raises a limit. It changes what happens when one is reached, which is the only part of the system you control. The providers will keep setting windows you cannot see, and the correct posture is not to push harder against them but to know, precisely, how much you are offering, what you are doing with the excess, and which of your users is waiting — because the provider cannot know, and the retry wrapper certainly does not.</p>
+
+<p>Two neighbours worth reading next: <a href="/blog/durable-agent-workflows-retries-compensation">durable agent workflows</a>, where retries meet side effects and idempotency becomes mandatory, and <a href="/blog/llm-cost-optimization-strategies">controlling LLM cost and latency</a>, where the same token arithmetic is spent on routing and caching instead of on retries. If your agent system intermittently hits provider limits and the dashboards blame the wrong layer, <a href="/contact">tell us what the traffic looks like</a> — this is routine work in our <a href="/services/ai-engineering">AI engineering practice</a>.</p>`,
+    date: '2026-11-19',
+    author: 'WeThinkDigital Engineering',
+    readTime: '14 min read',
+    category: 'AI Engineering',
+    tags: ['LLM infrastructure', 'rate limits', 'backpressure', 'reliability', 'agent systems'],
+    metaTitle: 'LLM Rate Limits and Retry Storms: Admission Control That Holds',
+    metaDescription:
+      'Why a provider 429 becomes your outage: retry amplification across SDK, worker and agent loop, retry budgets, concurrency sizing, bounded queues and visible failover.',
+    keywords: [
+      'llm rate limit handling',
+      '429 retry storm',
+      'retry budget client side',
+      'llm concurrency limiting',
+      'backpressure for llm calls',
+      'exponential backoff jitter',
+      'llm provider failover',
+      'admission control ai infrastructure',
+    ],
+  },
+
+  {
     id: '25',
     slug: 'tracing-agent-runs',
     title: 'Tracing an Agent Run: The Spans You Keep and the Evidence You Lose',
