@@ -1,5 +1,11 @@
 [
   {
+    "id": "27",
+    "slug": "shared-backlog-agent-claims",
+    "title": "Claiming Work From a Shared Backlog: Leases, Fencing and Duplicate Pull Requests",
+    "date": "2026-11-23"
+  },
+  {
     "id": "26",
     "slug": "llm-rate-limits-retry-storms",
     "title": "Rate Limits and Retry Storms: The Capacity Your Client Is Hiding",

@@ -8,6 +8,304 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  * `.prose-wtd` container. It never contains user input.
  */
 export const blogPosts: BlogPost[] = [
+{
+    id: '27',
+    slug: 'shared-backlog-agent-claims',
+    title: 'Claiming Work From a Shared Backlog: Leases, Fencing and Duplicate Pull Requests',
+    excerpt:
+      'Two pull requests for one ticket is not a model failure, it is a queue that promised exclusive ownership without an owner. A claim has to be an atomic statement, a lease rather than a lock, a proof that survives a reclaimed worker, and a dedupe at the effect boundary where the pull request is actually created.',
+    content: `<p>Two pull requests are open against the same ticket. They are forty minutes apart, they touch the same three files, and both are green. The agent was not confused. It claimed the ticket, worked it, and then a deploy restarted its container mid-run; the ticket stayed in <code>claimed</code> with nobody behind it; a second worker decided the ticket had been abandoned and did the work again. Nothing in that sequence produced an error. Nothing was corrupt. The queue had simply promised exclusive ownership and never had an owner.</p>
+
+<p>This is the shape of the problem once more than one agent works the same backlog, and it is the part of an agent platform that looks least like AI work. No single model call is wrong. Each worker does something defensible. The defect is in the coordination between them, which is why it shows up as duplicated pull requests, conflicting migrations and a backlog where the same ticket was "finished" twice — symptoms that get blamed on the agents because that is where they become visible.</p>
+
+<p>The goal is not elegance. It is that a claim means exactly one thing: at most one worker may hold this ticket at a time, and if a second worker ever does hold it, the duplicate is detectable, cheap, and cannot produce a second effect. Everything below is the mechanism for that, and the failure modes each mechanism introduces.</p>
+
+<h2>A claim is a lease, not a lock</h2>
+
+<p>A lock works inside one process because the kernel knows when the holder dies. A mutex held by a crashed thread is released with the process, so the next thread is correct to assume the lock is free. None of that is true across machines, and it is the first thing to unlearn. A worker that dies holding a row does not inform the database. It disappears, and the row keeps saying whatever it last said.</p>
+
+<p>There are only two ways out. Either something observes workers and releases their claims when they are gone, which means you now operate a membership system, or the claim carries its own expiry and the holder is responsible for proving it is still alive. The second is a lease, and it is almost always the cheaper choice.</p>
+
+<p>The distinction matters because of what each one does when the holder is not actually dead. A lease converts an undetectable failure into a detectable one: instead of "the worker is gone and nothing knows", you get "the lease expired, and something noticed". The price is a window in which the system believes the work is available while the original worker is still breathing — paused, partitioned, or blocked on a call that has not returned. That window is not a bug to be eliminated. It is a property of the primitive, and the rest of the design exists to make it harmless.</p>
+
+<table>
+  <thead>
+    <tr><th>Primitive</th><th>What it holds when the worker dies</th><th>Who releases it</th><th>Failure mode</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>In-process mutex</td><td>Nothing — the process takes it with it</td><td>The kernel</td><td>Does not cross process boundaries at all</td></tr>
+    <tr><td>Row lock in a claim transaction</td><td>Nothing — the transaction aborts</td><td>Postgres, on connection loss</td><td>Protects the claim statement only, not the work</td></tr>
+    <tr><td>Session advisory lock</td><td>A pooled connection that may outlive the handler</td><td>Whatever closes the session</td><td>A leaked connection holds the ticket forever</td></tr>
+    <tr><td>Lease row with expiry</td><td>The claim, until it expires</td><td>The next worker, after a timeout</td><td>Two owners for the length of the timeout</td></tr>
+    <tr><td>Lease plus fencing token</td><td>The claim, until it expires</td><td>The next worker, plus the storage layer</td><td>None for the effects you fence; the rest is unchanged</td></tr>
+  </tbody>
+</table>
+
+<p>Note what the third and fourth rows have in common: both are correct about the claim and wrong about the work. Most of the incidents in this class come from a team that chose one of them and believed it covered the run.</p>
+
+<h2>The claim has to be one statement</h2>
+
+<p>The naive version is a query and an update, and it has a race that is easy to reason about and hard to see in code review. Worker A selects the oldest queued ticket. Worker B, a few milliseconds later, selects the same one, because nothing has changed it yet. Both then update it to <code>claimed</code>, both proceed, and the sequence proves nothing in a log — each worker's statements are individually correct.</p>
+
+<p>What fixes it is not a mutex in application code but a single statement in which the selection, the lock and the state change cannot be separated.</p>
+
+<pre><code>UPDATE work_item AS w
+SET claimed_by       = $1,
+    claimed_at       = now(),
+    claim_epoch      = w.claim_epoch + 1,
+    lease_expires_at = now() + interval '4 minutes',
+    attempts         = w.attempts + 1
+WHERE w.id = (
+  SELECT id
+  FROM work_item
+  WHERE status = 'queued'
+    AND (eligible_at IS NULL OR eligible_at &lt;= now())
+    AND repo_id = ANY($2::uuid[])
+  ORDER BY priority DESC, created_at
+  FOR UPDATE SKIP LOCKED
+  LIMIT 1
+)
+RETURNING id, claim_epoch, attempts, lease_expires_at;</code></pre>
+
+<p>Three details in there are load-bearing and routinely omitted.</p>
+
+<p><code>FOR UPDATE SKIP LOCKED</code> is what makes concurrent claims cheap. A plain <code>FOR UPDATE</code> is correct but serialises the fleet: the second worker waits behind the row the first one is claiming, so ten workers drain the backlog at the speed of one. <code>SKIP LOCKED</code> tells Postgres to pretend the locked rows are not there. Every worker gets a different row and nobody blocks. The clause is documented as unsuitable for general queries precisely because of that lie — it returns an inconsistent view — and a queue is the case where the inconsistency is the feature.</p>
+
+<p>The row lock lives only as long as the claim transaction. That is the sentence teams read as "the database holds the lock for the run", and it is not what happens. The claim commits, the lock goes, and from that moment the only thing protecting the ticket is the <code>status</code> column and the lease. Which is exactly why a lease exists.</p>
+
+<p>The <code>repo_id = ANY(...)</code> filter is not incidental. Workers are scoped: one may only have credentials for three repositories, another only for one. A claim that ignores capability will hand a ticket to a worker that cannot act on it, which then either fails immediately and burns an attempt or holds the lease until it expires — a slow-motion denial of service that looks like a broken agent. Scope the claim query to what the worker can actually do. The credential boundary itself is a separate problem, covered in <a href="/blog/sandboxing-agent-commands">sandboxing agent commands</a>.</p>
+
+<p>Two smaller things belong at the schema level rather than in code. A partial index on <code>(priority, created_at) WHERE status = 'queued'</code>, so the claim stays an index lookup when the table has two hundred thousand historical rows. And a partial unique index on the active claim — one row per ticket where <code>released_at IS NULL</code> — so the manual requeue endpoint, the admin tool and the script somebody wrote at 2am are all caught by the database instead of by a pull request review.</p>
+
+<h2>A lease shorter than the work is a schedule for duplicates</h2>
+
+<p>The obvious way to size a lease is against the run, and it is the wrong unit. If a run takes twenty minutes and the lease is fifteen, every long run is guaranteed to be reclaimed while it is still working, and the fleet will manufacture exactly the collision the design was meant to prevent. Size the lease against the longest single blocking operation inside the run — a model call, a test suite, a container start — and renew on a cadence of roughly a third of that. The run may take an hour; the lease only has to survive one step.</p>
+
+<p>Renewal is where the failure hides. In a single-threaded runtime the heartbeat and the work share one thread, so anything that blocks that thread also blocks the renewal: a synchronous parse of a large artifact, a tight loop over a hundred thousand lines of captured output, a tool that shells out and waits. The lease expires while the process is perfectly healthy and completely unable to say so. Two consequences follow. Renew from a timer that is not inside the work loop, and treat a missed renewal as a hard stop rather than a warning — if the work continues without a lease, it is generating effects the system no longer attributes to an owner.</p>
+
+<pre><code>const LEASE_MS = 4 * 60_000;
+const RENEW_EVERY_MS = Math.floor(LEASE_MS / 3);
+
+export function startLease(
+  claim: { id: string; epoch: number; workerId: string },
+  onLost: () =&gt; void,
+): () =&gt; void {
+  let stopped = false;
+  let renewing = false;
+
+  const timer = setInterval(async () =&gt; {
+    if (stopped || renewing) return; // an async timer can overlap itself
+    renewing = true;
+    try {
+      const renewed = await db.query(
+        "UPDATE work_item SET lease_expires_at = now() + interval '4 minutes' " +
+          "WHERE id = $1 AND claim_epoch = $2 AND claimed_by = $3",
+        [claim.id, claim.epoch, claim.workerId],
+      );
+      if (renewed.rowCount !== 1) {
+        // Somebody else owns this ticket now. Stop writing immediately.
+        stopped = true;
+        clearInterval(timer);
+        onLost();
+      }
+    } finally {
+      renewing = false;
+    }
+  }, RENEW_EVERY_MS);
+
+  return () =&gt; {
+    stopped = true;
+    clearInterval(timer);
+  };
+}</code></pre>
+
+<p>The conditional in that update is the important line. Renewing by <code>id</code> alone resurrects a lease you have already lost: the row says another worker claimed it, and your heartbeat cheerfully extends the expiry under their feet. Matching on the epoch turns the renewal into a question — do I still own this? — and the answer arrives before the work does any more damage.</p>
+
+<p>All time arithmetic belongs to the database. Two workers comparing an application-written <code>expires_at</code> against their own clocks disagree by however much their clocks disagree, and a container with a drifted clock will either steal leases early or hold expired ones. <code>now()</code> in the statement, one clock, one answer.</p>
+
+<p>The lost-lease callback has to reach the actual work, not just the scheduler. An <code>AbortController</code> threaded into the model client and the tool executor cancels the HTTP request; without it, aborting a run leaves a request in flight whose result nobody will read, and a tool call whose side effect lands after the second worker has started its own. Cancellation is not cleanup — it is the mechanism that keeps the duplicate window short.</p>
+
+<h2>Fencing: the worker that came back</h2>
+
+<p>Leases make the system live. They do not make it safe, and the reason is one specific scenario. A worker is paused — a stop-the-world pause, a saturated network, a host that is being live-migrated — long enough for its lease to expire. Another worker claims the ticket and starts. The first one wakes up, still holding a stack that says it owns this ticket, and writes. Nothing in a lease prevents that, because the lease is a timestamp in a row and the paused worker never re-read it.</p>
+
+<p>The fix is a fencing token: a number minted by the claim and incremented every time the ticket changes hands, carried on every write the worker makes, and checked by the storage layer, which rejects anything older than the highest token it has seen. In the schema above that number is <code>claim_epoch</code>, incremented inside the claim statement so two concurrent claims cannot mint the same one.</p>
+
+<p>The point that people miss is that the check has to be in the same operation as the write. A worker that reads the epoch, decides it is still current, and then writes has recreated the race at a smaller scale. The fence and the write are one transaction or the fence is decoration.</p>
+
+<pre><code>export async function commitFencedEffect(
+  claim: { id: string; epoch: number },
+  statement: string,
+  params: unknown[],
+): Promise&lt;boolean&gt; {
+  const result = await db.tx(async (tx) =&gt; {
+    // FOR SHARE blocks a concurrent takeover of this row for the length of
+    // this transaction, so the check and the write cannot be separated.
+    const fence = await tx.query(
+      "SELECT 1 FROM work_item WHERE id = $1 AND claim_epoch = $2 " +
+        "AND lease_expires_at &gt; now() FOR SHARE",
+      [claim.id, claim.epoch],
+    );
+    if (fence.rowCount !== 1) return { rowCount: 0 };
+    return tx.query(statement, params);
+  });
+
+  return result.rowCount &gt; 0;
+}</code></pre>
+
+<p>A stale worker does not get an error from a race it cannot see; it gets a refusal it can log, and the run ends with "lease lost" instead of a silent duplicate. That distinction is most of the operational value: the incident becomes a counter that goes up rather than a pull request nobody can explain.</p>
+
+<p>Fencing stops at the boundary of systems that accept it. Your database can reject an old epoch. A pull request host, a payment API, a mail provider — none of them know what an epoch is. For those you need a different tool, and it is the same one that solves the retry problem: an identifier that is stable across attempts, so a duplicate is a lookup rather than a second object.</p>
+
+<h2>Reclaiming is the half that corrupts work</h2>
+
+<p>Expiry-based reclaim is a guess, and the guess is "the worker is dead". Expiry means the worker stopped proving it was alive, which is not the same thing. Two states hide behind that difference, and separating them removes most of the damage.</p>
+
+<p>A run that is <strong>stalled</strong> is holding resources and getting nowhere: blocked on a call, looping, waiting on a dependency that will never answer. Reclaiming it is correct, and the only question is how long to wait. A run that is <strong>parked</strong> is deliberately idle — waiting for a human to approve a plan, waiting for a CI run to finish, waiting three days for a signature. Reclaiming it is a bug that produces duplicate work every single time, and it will happen on the longest, most expensive runs first, because those are the ones with the waits in them.</p>
+
+<p>So parking has to be explicit. Either the run keeps heartbeating while it waits, which is honest but spends a lease on nothing, or it moves to a state where <code>lease_expires_at</code> is null and a separate watchdog watches the thing being waited on. The failure to avoid is the ambiguous middle: a run that is idle and indistinguishable from a run that is dead, because the scheduler will eventually treat it as dead and it will be right often enough to look correct.</p>
+
+<p>Reclaim policy needs two counters that teams usually collapse into one. <code>attempts</code> is incremented at claim time, not at failure time — a worker that dies never reaches its own failure handler, so a counter incremented there undercounts exactly the cases you care about. And eligibility after a failed attempt needs a backoff of its own: a ticket that kills its worker in ninety seconds will otherwise be reclaimed every ninety seconds, forever, by every worker in the fleet. That is a poison ticket, and its signature is a fleet-wide crash loop that looks like an infrastructure problem because the symptom is workers dying.</p>
+
+<p>The terminal state has to exist and has to be visible. After a small number of attempts, move the ticket to <code>blocked</code> with the last error attached and stop claiming it. A backlog that quietly retries forever is worse than one that stops, because the second one tells somebody there is a problem.</p>
+
+<h2>The claim guarantees one worker, never one execution</h2>
+
+<p>Even with perfect claims, effects run at least once. Claim one runs to step five, writes a branch and pushes three commits, then dies. The lease expires. Claim two starts the run from the beginning, and the beginning includes writing the branch. The claim did its job — only one worker held the ticket at any moment — and the outcome is still two attempts at the same effect.</p>
+
+<p>There are two places to fix that, and they solve different problems. Resuming from a journal means claim two does not redo steps one through five; that is the durability problem, and it is covered in <a href="/blog/durable-agent-workflows-retries-compensation">durable agent workflows</a>. Deduplicating the effect means claim two can redo the work and still not create a second object, which is what you need when the work itself is not replayable — a plan that was generated by a model, a test suite whose output nobody kept.</p>
+
+<p>For an engineering agent the effect that matters is a branch and a pull request, and the fix is to name them from the ticket rather than from the attempt.</p>
+
+<pre><code>function branchFor(ticketKey: string): string {
+  // Stable across attempts, workers and deploys: no timestamp, no attempt id.
+  return "agent/ticket-" + ticketKey;
+}
+
+async function ensurePullRequest(
+  repo: Repo,
+  ticketKey: string,
+): Promise&lt;PullRequest&gt; {
+  const head = branchFor(ticketKey);
+  const existing = await repo.findPullRequest({ head, state: "open" });
+  if (existing) return existing; // a reclaimed run adopts its own work
+
+  return repo.createPullRequest({
+    head,
+    base: repo.defaultBranch,
+    title: "Ticket " + ticketKey,
+    body: "Automated change for " + ticketKey + ".",
+  });
+}</code></pre>
+
+<p>Lookup by head branch, not by title. Titles are written by a model and drift between attempts; the branch name is produced by code and cannot. This is also why the identifier must not contain an attempt number or a timestamp: the whole mechanism depends on attempt two computing the same key as attempt one, and any component that varies per attempt silently disables it.</p>
+
+<p>There is a decision inside that function that has to be made deliberately rather than by accident. Adopting an existing branch is right when the previous attempt finished its commits; it is wrong when the previous attempt died halfway through writing files, because the second run then continues from a mixture of two states. Pick one policy per effect — reset the branch to the base commit before re-running, or adopt and let the agent verify the tree is coherent — and write it down. The failure mode of the default, which is "whatever the code happened to do", is a pull request whose diff includes a half-finished edit from a dead run and a contradictory edit from its replacement.</p>
+
+<p>Branches are the easy case. A tool that posts to a third-party API needs a dedupe table in front of it, keyed on the same stable identifier, because the guarantee has to live somewhere and it will not live on their side.</p>
+
+<h2>Ordering, dependencies and the collision you cannot see</h2>
+
+<p>Perfect claims do not prevent the expensive collision, because the expensive collision happens at merge time. Two tickets, claimed correctly, worked correctly, both editing the same migration directory or the same lockfile. Each run is a success. The integration is a conflict, and sometimes a conflict that CI reports as a failure three merges later.</p>
+
+<p>Rank the mitigations by cost, because the instinct is to reach for the most complicated one first.</p>
+
+<p><strong>Make the conflict cheap and re-running automatic.</strong> Small changes, a rebase that the agent can perform itself, a CI pipeline that finishes in minutes. This is unglamorous and fixes most of the problem, because most conflicts are mechanical and the real cost is the human hour spent noticing them.</p>
+
+<p><strong>Declare dependency edges.</strong> A ticket that must land after another gets a <code>depends_on</code> row, and the claim skips it while the dependency is open. Check the edge twice: at claim, and again before the push. The second check matters because dependencies are discovered mid-run — an agent reading the code often learns that this change needs that one first — and an edge added after the claim is invisible to a scheduler that only looked once.</p>
+
+<p><strong>Claim by affinity.</strong> Have the agent predict which paths it will touch and refuse to claim a ticket whose prediction intersects an active claim. The prediction is a guess from a plan the model just wrote, so it is advisory, and treating it as a lock creates a system that deadlocks on paranoid predictions. It is worth having for the narrow case of generated files, migrations and lockfiles, where the collision is not mechanically resolvable.</p>
+
+<p><strong>Serialise the integration, not the work.</strong> A merge queue is the honest version of "only one thing lands at a time": the agents work in parallel and the landing is ordered, each change rebased onto the result of the previous one. It does not prevent the conflict, it makes the conflict the queue's job instead of a human's. Note what it does not do — it does not reduce the work, and it turns a burst of parallel finishes into a serial rebase chain whose length is the number of agents you run.</p>
+
+<p>What does not work is the fantasy of conflict-free parallelism. Two workers editing the same repository will occasionally produce incompatible changes, no matter how the claims are ordered, because neither can see the other's intent. Design for cheap resolution instead of impossible avoidance.</p>
+
+<h2>Fair share across backlogs</h2>
+
+<p>A single global queue with one concurrency cap is fine until a customer imports four hundred tickets, at which point every other customer's work waits behind them and the system is technically healthy. The claim query is fast, workers are busy, and the only signal is that somebody's ticket has been queued for six hours.</p>
+
+<p>Two things fix it. A per-tenant cap on active claims, enforced in the claim query rather than in a post-claim check, so a tenant at its limit is skipped instead of claimed and released. And a reserved lane for work a human is waiting on, with a headroom that batch work may not consume — the same argument as in <a href="/blog/llm-rate-limits-retry-storms">admission control for model calls</a>, applied one layer up. Without the reserved lane, the priority column is decorative: a large backlog of low-priority work will occupy every slot if nothing bounds it.</p>
+
+<p>Long runs are the other starvation mechanism, and they are specific to agents. A run that holds a claim for forty minutes occupies a slot for forty minutes, so a handful of them can fill a small fleet. The fix is not a longer queue; it is a bound on run duration, enforced by the same soft and hard ceiling that stops a runaway loop, so a slot is occupied for a known maximum rather than an open-ended one.</p>
+
+<p>The metric that tells you this is happening is age, not depth. Queue depth says nothing about whether anyone is waiting badly; the age of the oldest queued ticket, split by tenant, says exactly that, and it moves before any error does.</p>
+
+<h2>What to put on the dashboard</h2>
+
+<p>Most of the signals here are counters that only exist if you decide to emit them, and the ones that matter are not the obvious ones. Claim throughput will look fine during every incident in this class, because the work is being claimed — repeatedly.</p>
+
+<table>
+  <thead>
+    <tr><th>What you see</th><th>What is happening</th><th>What to measure</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Duplicate pull requests, no errors</td><td>A lease expired under a live worker</td><td>Claims per ticket; runs whose epoch is greater than one</td></tr>
+    <tr><td>Ticket stuck in <code>claimed</code> for hours</td><td>The holder died without the lease being reclaimed, or the reclaim loop is not running</td><td>Age of claims with no renewal in two lease periods</td></tr>
+    <tr><td>The same ticket retried every few minutes</td><td>Poison ticket: it kills its worker before an attempt can be recorded as failed</td><td>Attempts per ticket, incremented at claim</td></tr>
+    <tr><td>Workers idle, queue deep</td><td>Claim query filters out everything available — capability scope, tenant cap, or a missing index</td><td>Claim latency p99 and empty-claim rate per worker</td></tr>
+    <tr><td>Conflicts concentrated in a few paths</td><td>Parallel work on the same files, invisible at claim time</td><td>Merge conflicts per landed change, by path prefix</td></tr>
+    <tr><td>One tenant's work never starts</td><td>Global FIFO, no per-tenant cap</td><td>Age of oldest queued item, by tenant</td></tr>
+  </tbody>
+</table>
+
+<p>Two of these are worth building first. Claims per ticket tells you the reclaim rate is doing something, and a sudden change in it is either a fix or a new failure — both worth knowing. Claim latency under load tells you whether the queue is still a queue or has become a lock: the moment <code>SKIP LOCKED</code> is missing or the index is wrong, that number goes from milliseconds to seconds and every worker slows down at once.</p>
+
+<h2>Test by killing the worker</h2>
+
+<p>None of this is exercised by a test that claims a ticket and finishes it. The mechanism exists for the paths where something stops halfway, so the tests have to stop things halfway, and they have to run against a real Postgres — <code>SKIP LOCKED</code> has no meaningful in-memory equivalent, so a fake database tests the fake.</p>
+
+<ul>
+  <li><strong>Kill mid-run.</strong> Start a run, kill the process with <code>SIGKILL</code> after the first effect, wait out the lease, and assert that the ticket is claimed again, that exactly one pull request exists, and that the branch was not reset out from under a completed commit.</li>
+  <li><strong>Pause the heartbeat while the work continues.</strong> Disable renewal through a test hook, let the lease expire, and assert that the fenced write is rejected and that the run ends in a lost-lease state rather than a quiet success.</li>
+  <li><strong>Claim under contention.</strong> Twenty workers, twenty tickets, one statement each, all at once. Assert twenty distinct claims, no duplicates, no deadlock, and record the p99 of the claim query — the number is the test's real output.</li>
+  <li><strong>Terminate the connection, not the process.</strong> <code>pg_terminate_backend</code> on the worker's session simulates the partition case, where the process is alive and the database has no idea.</li>
+  <li><strong>Requeue through the admin path.</strong> The partial unique index should refuse a second active claim, which is the only reason the manual tool is safe to have.</li>
+</ul>
+
+<p>The last one is worth doing precisely because it tests the thing review does not: the code path nobody wrote tests for, added six months after the design, by somebody who had not read this.</p>
+
+<h2>When a queue is the wrong tool</h2>
+
+<p>All of the above is machinery for concurrency, and concurrency is optional. One agent working a backlog sequentially needs a <code>for</code> loop and a status column; adding leases, epochs and a scheduler to that system is a way to invent incidents in a system that had none. The design starts paying for itself at the point where a second worker can hold a different ticket from the same backlog, which is earlier than most teams think and later than some assume.</p>
+
+<p>If you need the claim but not the domain semantics, buy it. Durable workflow engines and mature job libraries already implement the lease, the visibility timeout, the stalled-job reclaim and the attempt counter, and they have been debugged by more people than your queue has. BullMQ's stalled-job check, SQS's visibility timeout, River and pg-boss on Postgres — the mechanism differs, the semantics are the same shape you have been reading about.</p>
+
+<p>Build your own when the claim has to carry something the library does not model: priority across tenants, capability scoping to repositories, dependency edges that change mid-run, affinity on the paths a plan predicts. At that point you are not writing a queue, you are writing a scheduler with your product's rules inside it, and the honest thing is to own it and test it as such rather than to bend a library until it almost fits.</p>
+
+<h2>What this means in practice</h2>
+
+<ul>
+  <li><strong>Claim in one statement.</strong> <code>FOR UPDATE SKIP LOCKED</code> in a subquery, the state change and the epoch increment in the same update, the capability filter inside the query.</li>
+  <li><strong>Lease against the longest step, not the run.</strong> Renew on a third of that, from a timer outside the work loop, conditional on the epoch.</li>
+  <li><strong>Fence every write.</strong> The token goes into the transaction that performs the write, or the paused worker writes after the reclaim and nobody finds out for a week.</li>
+  <li><strong>Separate parked from stalled.</strong> A run waiting three days for an approval is not abandoned, and reclaiming it is a duplicate by construction.</li>
+  <li><strong>Count attempts at claim time.</strong> The failure handler never runs when the worker is killed, and that is the case that matters.</li>
+  <li><strong>Dedupe at the effect.</strong> Name branches from the ticket, look up pull requests by head, and decide explicitly whether a re-run adopts or resets.</li>
+  <li><strong>Assume the merge will conflict.</strong> Make re-running cheap, declare dependencies, and let a merge queue serialise landing rather than pretending parallel work never collides.</li>
+  <li><strong>Test the kill.</strong> If no test ever terminates a process mid-run, the reclaim path is unverified code that runs in production.</li>
+</ul>
+
+<p>The uncomfortable part of this design is that it is not about agents at all. It is a distributed systems problem that arrives with a model attached, and the model is the least interesting component in it — a wrong answer is visible in the diff, while a duplicate claim is invisible until somebody notices two branches with the same intent. That asymmetry is why the coordination layer deserves the same care as the prompt: the failure it produces is expensive, silent, and blamed on the wrong layer. If you are running agents against a shared backlog and the same ticket occasionally lands twice, <a href="/contact">tell us what the queue looks like</a> — this is routine work in our <a href="/services/ai-engineering">AI engineering practice</a>, and it is usually a week of schema and one honest conversation about what a claim is supposed to mean.</p>`,
+    date: '2026-11-23',
+    author: 'WeThinkDigital Engineering',
+    readTime: '17 min read',
+    category: 'AI Engineering',
+    tags: ['agent systems', 'distributed systems', 'PostgreSQL', 'idempotency', 'concurrency'],
+    metaTitle: 'Agent Work Claims: Leases, Fencing and Duplicate PRs',
+    metaDescription:
+      'Why a lock is the wrong primitive for an agent backlog: atomic claims with SKIP LOCKED, leases sized to a step, fencing tokens for the worker that comes back, and effect-level dedupe for pull requests.',
+    keywords: [
+      'agent work queue',
+      'distributed lease pattern',
+      'fencing token',
+      'FOR UPDATE SKIP LOCKED',
+      'duplicate pull request agent',
+      'at-least-once agent execution',
+      'job claim concurrency',
+      'agent backlog scheduler',
+    ],
+  },
+
   {
     id: '26',
     slug: 'llm-rate-limits-retry-storms',
