@@ -9,6 +9,254 @@ import type { BlogCategory, BlogPost, PostSummary } from '@/types/blog';
  */
 export const blogPosts: BlogPost[] = [
 {
+    id: '28',
+    slug: 'permission-filtered-retrieval',
+    title: 'Retrieval You Are Not Allowed to See: Authorisation Inside the Vector Query',
+    excerpt:
+      'The default RAG pipeline retrieves broadly and filters afterwards, which answers a relevance question and hopes the security one follows. Filtering is applied after an approximate index scan, so a selective permission filter silently returns three rows instead of ten, and every cache layer between the query and the reader can serve a document to somebody who lost access to it an hour ago.',
+    content: `<p>An assistant answers a question about a contract renewal in eleven seconds, with three citations. All three are real documents. Two of them belong to a different customer. Nothing errored, nothing logged a permission failure, and no test failed, because the permission check that everybody believed was in the pipeline ran on the path nobody used. The retriever searched one index holding every workspace's chunks, took the top forty by cosine distance, and the application removed the ones the caller was not allowed to see just before handing the remainder to the model. The answer was written from the two that survived, and it was fluent, confident and wrong in the way that matters most: it disclosed another customer's contract terms to a person who had no right to read them.</p>
+
+<p>Retrieve broadly, filter afterwards. That is the default shape of a retrieval pipeline, it is what most frameworks make easy, and it is wrong for a reason that has nothing to do with permissions. Filtering after retrieval is not a filter applied to an answer. It is a different query, with different reachability, different recall and a different failure mode — and the failure is silent, because a short result set is a valid result set to every layer below the application.</p>
+
+<p>There are two questions in a retrieval request, and the architecture usually collapses them into one: <em>which documents are closest to this query</em>, and <em>which documents may this reader see</em>. The first is approximate, statistical and tolerant of being a little wrong. The second is exact, non-negotiable, and must hold for every path that can produce text. Everything below is about putting the second question inside the query that answers the first, and about the places that decision still leaks.</p>
+
+<h2>Filtering after retrieval is a different query</h2>
+
+<p>A vector index does not evaluate your <code>WHERE</code> clause while it searches. It walks a graph or probes a set of lists, collects a bounded number of nearest candidates, and only then does the database apply the predicate. pgvector documents this plainly: with HNSW and the default <code>hnsw.ef_search</code> of 40, a predicate that matches ten percent of rows leaves roughly four, because forty candidates is all the index was asked for. The rows that were filtered out are, by construction, the ones nearest to the query — the most likely to be relevant. Filtering does not prune the tail. It removes the head and keeps whatever distant rows happened to be in the pool.</p>
+
+<p>This is the same mechanism that makes filtered search hard in every engine. Qdrant approaches it by building extra graph edges for indexed payload fields and by estimating filter cardinality so the planner can choose between the graph, a full scan of matching points, and an exact rescore when the filter is very selective. pgvector added iterative index scans in 0.8.0: when the predicate rejects too many candidates, the scan continues through the graph until the limit is satisfied or it hits <code>hnsw.max_scan_tuples</code>, twenty thousand by default. <code>strict_order</code> keeps exact distance ordering across iterations; <code>relaxed_order</code> permits slight reordering in exchange for better recall, at the cost of re-sorting yourself. None of this is exotic. All of it assumes you knew the filter was part of the search.</p>
+
+<p>The number that matters is selectivity. A tenant filter on a single-tenant deployment matches everything. A permission filter matches the fraction of the corpus the reader can see, and for a new user with access to one project out of two hundred, that fraction is small enough that a forty-candidate pool contains none of their documents. The index then returns three rows, or zero, and reports success. The database is not lying. It was asked for the nearest forty and then told to drop most of them.</p>
+
+<table>
+  <thead>
+    <tr><th>Selectivity of the permission filter</th><th>What a fixed candidate pool returns</th><th>What it looks like</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Most of the corpus</td><td>Enough rows, slightly worse ordering</td><td>Fine, and hides the problem</td></tr>
+    <tr><td>Ten percent</td><td>Roughly four rows for a limit of ten</td><td>Answers get thinner, not wrong</td></tr>
+    <tr><td>One percent</td><td>Often zero rows</td><td>"I could not find anything about that"</td></tr>
+    <tr><td>Empty (reader lost access)</td><td>Zero rows, full scan</td><td>Indistinguishable from an empty corpus</td></tr>
+  </tbody>
+</table>
+
+<h2>Authorisation belongs to the reader, not the document</h2>
+
+<p>The instinct is to store a permission list on the document: owner, shared-with, workspace. Real permission models are not that flat. A document inherits from its folder, the folder from its workspace, the workspace from the organisation, and a share to an external guest adds a principal that appears nowhere in the hierarchy. Groups nest. A deny on a subfolder overrides an allow on its parent. Any document may carry a handful of explicit exceptions that make the inherited answer wrong.</p>
+
+<p>So the thing the query needs is not the document's owner. It is the reader's effective principal set — every identity the reader holds, flattened: their user id, every group they are transitively a member of, their role in the tenant, and a marker for genuinely public content. Resolve that set once per session, cache it, and put it in the query.</p>
+
+<p>Where you resolve it decides what breaks.</p>
+
+<table>
+  <thead>
+    <tr><th>Resolution point</th><th>Correctness</th><th>Failure mode</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>At ingest, baked into the chunk</td><td>Correct until the first permission change</td><td>Revoking access requires re-indexing content that did not change</td></tr>
+    <tr><td>Per query, joined from the ACL tables</td><td>Correct</td><td>Eight joins on the hot path; the planner cannot estimate the result</td></tr>
+    <tr><td>Precomputed with a version, refreshed on change</td><td>Correct within a stated staleness budget</td><td>The budget is invisible until an audit asks what it is</td></tr>
+    <tr><td>In application code, after retrieval</td><td>Correct only if every path calls it</td><td>The path that does not call it is the one that leaks</td></tr>
+  </tbody>
+</table>
+
+<p>The third row is the one that works, provided the staleness budget is written down and the invalidation actually fires. Concretely: a table of effective principals per user, rebuilt when a membership changes, plus an access-control epoch per tenant that increments on any document permission write. The epoch is what makes caching honest — more on that below.</p>
+
+<h2>Put the permission in the index</h2>
+
+<p>The schema change is small and it is the whole design. Store the flattened principal set on the chunk, alongside the vector, and make it filterable.</p>
+
+<pre><code>CREATE TABLE chunk (
+  id             bigint PRIMARY KEY,
+  document_id    uuid   NOT NULL,
+  tenant_id      uuid   NOT NULL,
+  content        text   NOT NULL,
+  embedding      vector(1024) NOT NULL,
+  acl_principals text[] NOT NULL,
+  acl_deny       text[] NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX chunk_acl    ON chunk USING gin (acl_principals);
+CREATE INDEX chunk_deny   ON chunk USING gin (acl_deny);
+CREATE INDEX chunk_tenant ON chunk (tenant_id);</code></pre>
+
+<p>Tenant is a separate column even though a tenant principal could be folded into the array, because it is the one filter that must never be missing and the one an index can answer cheaply. Deny is a separate array because "allow unless explicitly denied" cannot be expressed by removing a principal from a list — the deny may sit on the parent while the allow sits on the child.</p>
+
+<p>Then the query. Note what is inside the <code>WHERE</code> and what is not.</p>
+
+<pre><code>BEGIN;
+
+SET LOCAL hnsw.iterative_scan  = relaxed_order;
+SET LOCAL hnsw.max_scan_tuples = 20000;
+
+WITH candidates AS MATERIALIZED (
+  SELECT c.id,
+         c.document_id,
+         c.content,
+         c.embedding &lt;=&gt; $1 AS distance
+  FROM chunk c
+  WHERE c.tenant_id = $2
+    AND c.acl_principals &amp;&amp; $3::text[]
+    AND NOT (c.acl_deny &amp;&amp; $3::text[])
+  ORDER BY c.embedding &lt;=&gt; $1
+  LIMIT $4
+)
+SELECT * FROM candidates ORDER BY distance;
+
+COMMIT;</code></pre>
+
+<p><code>&amp;&amp;</code> is array overlap, and the GIN index answers it without touching a row. The predicate is inside the scan, so the planner has a selectivity estimate, the iterative scan knows when to keep walking, and the deny check happens in the same pass. The materialised CTE exists only because <code>relaxed_order</code> does not guarantee the final order; re-sorting a few dozen rows costs nothing and removes an ordering bug that is otherwise very hard to see.</p>
+
+<p><code>SET LOCAL</code> rather than <code>SET</code> matters: the setting lives for the transaction and dies with it, so a pooled connection cannot carry a relaxed scan into the next request, and a query that raises does not leave a session configured differently from its peers.</p>
+
+<p>Two schema-level guards are worth the migration. A <code>CHECK</code> that <code>acl_principals</code> is not empty, because an empty array means "visible to nobody" and is what a bug produces when it resolves a set of zero groups — you want that insert to fail rather than produce an invisible document. And a partial unique index on <code>(document_id, chunk_ordinal)</code>, so a partially failed re-ingest cannot double every chunk and quietly halve the effective candidate pool.</p>
+
+<h2>The candidate pool is part of the contract</h2>
+
+<p>Requesting ten results means the retriever promises to return ten if ten exist. With a permission filter, that promise is broken by default, and the fix is not a bigger <code>ef_search</code>. Over-fetching ten times — ask for a hundred, keep ten — buys headroom proportional to the visible fraction, which is exactly the quantity you do not control. It also multiplies the cost of every stage downstream, including the reranker, for a user whose corpus is large and whose permissions are narrow.</p>
+
+<p>What you need instead is for the query to know it may need to work harder, and for the application to know when it did not get there. Iterative scans give the first part, bounded by <code>max_scan_tuples</code> and the memory multiplier, and the bound exists because walking a large portion of a graph is expensive. The second part is your code: return <code>returned</code> and <code>scanned</code> alongside the rows, and treat <code>returned &lt; k</code> as a signal rather than an outcome. When the count with the same filter is greater than zero and the returned set is short, the filter is too selective for the scan budget — that is a configuration problem you can see, not an absence of information you must explain to a user.</p>
+
+<pre><code>interface RetrievalResult {
+  chunks: Chunk[];
+  matchedWithFilter: number;
+  scanned: number;
+  truncated: boolean;
+}
+
+export async function retrieve(
+  principal: PrincipalSet,
+  query: Float32Array,
+  k: number,
+): Promise&lt;RetrievalResult&gt; {
+  if (!principal.tenantId || principal.principals.length === 0) {
+    throw new Error('retrieve() requires a resolved principal set');
+  }
+
+  const [rows, count] = await Promise.all([
+    runFilteredQuery({ tenantId: principal.tenantId, acl: principal.principals, query, k }),
+    countWithFilter({ tenantId: principal.tenantId, acl: principal.principals }),
+  ]);
+
+  return {
+    chunks: rows.chunks,
+    matchedWithFilter: count,
+    scanned: rows.scanned,
+    truncated: rows.chunks.length &lt; k &amp;&amp; count &gt; rows.chunks.length,
+  };
+}</code></pre>
+
+<p>The thrown error is not defensive noise. The most common incarnation of this bug is a service-to-service call with a user id in one field and no tenant in another, where the resolver returns a well-formed empty set and every subsequent layer treats it as "this user can see nothing" instead of "this caller did not say who the user is".</p>
+
+<h2>Reranking happens inside the boundary</h2>
+
+<p>A cross-encoder over a hundred candidates fixes ordering and costs money per candidate. If the candidates include documents the reader cannot see, you pay for them twice: once in the rerank bill, and once in the latency every user feels because the system is grading text that will be thrown away. If you rerank first and filter after, the loss is worse than cost — the top of a reranked list is dominated by the best-matching documents, so filtering the head of a reranked list is the same over-truncation as filtering the head of a vector scan, with a bill attached.</p>
+
+<p>There is a second reason the order matters, and it is not about efficiency. Sending a chunk to a third-party reranker or a hosted model is a disclosure. It leaves your boundary, it may be retained in a vendor log, and no amount of filtering afterwards un-sends it. The permission predicate has to sit upstream of every hop that leaves your infrastructure, which almost always means: retrieve with the filter, rerank the permitted set, then generate.</p>
+
+<h2>Revocation is a cache problem</h2>
+
+<p>Once the query is correct, the remaining leaks live in the layers between the query and the reader. A result cache keyed on the query string serves one user's documents to another user who asked the same thing. A prompt cache keyed on a system prompt and a trimmed context is worse, because the answer is already synthesised. An in-flight request started before a revocation completes happily. A provider-side prompt cache has its own lifetime. A conversation that has been "shared with the team" is an export of documents that were permitted when the answer was written.</p>
+
+<p>The cache key has to include the identity that produced the answer, not the text that produced it.</p>
+
+<pre><code>function retrievalCacheKey(input: {
+  tenantId: string;
+  principalHash: string;
+  aclEpoch: number;
+  queryHash: string;
+  model: string;
+  k: number;
+}): string {
+  return [
+    'ret',
+    input.tenantId,
+    input.principalHash,
+    String(input.aclEpoch),
+    input.queryHash,
+    input.model,
+    String(input.k),
+  ].join(':');
+}</code></pre>
+
+<p><code>principalHash</code> changes when a user joins or leaves a group, because the flattened set changes. <code>aclEpoch</code> covers the case the principal hash cannot see: a document moved into a private folder without any membership changing. Increment it on every document permission write for the tenant and every existing entry for that tenant becomes unreachable — blunt, cheap, and correct, which is the right trade for a security boundary.</p>
+
+<p>For content sensitive enough that a stale cache entry is unacceptable, add a second check at the point of use. Re-resolve the document ids after retrieval against the authorisation service, batched into one call, and drop anything that no longer passes before it reaches the model. This is the same discipline as fencing a queue write: the check lives in the operation that produces the bytes, not in a step that ran earlier and might not have run at all. It costs a round trip. What it must never become is the only check, because a single enforcement point that exists to catch mistakes will eventually be the single point that has the mistake.</p>
+
+<h2>Absence is information</h2>
+
+<p>"I could not find any documents about the Kestrel renewal." Depending on whether Kestrel exists and is merely restricted, that sentence tells the reader something they were not entitled to learn. Inference from absence is cheap and requires no exploit: ask about a project code, watch the assistant confirm or deny that the corpus contains it. The mitigation is not a smarter answer. It is making the two states indistinguishable — the same empty-state copy, the same number of retrieval round trips, no branch in the model's instructions that explains the difference between "nothing matched" and "you may not see what matched".</p>
+
+<p>The same reasoning applies to numbers. Raw similarity scores in a user-facing API are a probe: query a phrase you know appears in a document you cannot read, and a suspiciously high top score confirms it is indexed. Return the documents, not their distances. Related-document rails, "more like this", and citation chips that resolve document metadata on click are all part of the same surface, and all of them are commonly written months later by somebody who was not in the conversation about the filter.</p>
+
+<h2>Every path, not the main one</h2>
+
+<p>The predicate above protects one query. A retrieval system has several, and the leaks are almost always in the second one.</p>
+
+<ul>
+  <li><strong>The sparse leg of hybrid search.</strong> A BM25 query against the same table, added to improve recall, without the ACL predicate — and it usually returns a different, complementary set, so the leak is content the dense search would never have surfaced.</li>
+  <li><strong>Parent-document expansion.</strong> Retrieve a child chunk, then fetch its parent for context. The parent can live in a document whose permissions were resolved differently, or in a folder the reader cannot see.</li>
+  <li><strong>Summary tables and generated FAQs.</strong> A nightly job summarises the corpus into a table keyed by topic with no permission columns at all, and the assistant reads the summary.</li>
+  <li><strong>Traces and logs.</strong> Chunk text in span attributes, prompt payloads in a debug log, the retrieved-documents panel in an observability UI. Every engineer on the team can read them, which is fine, and every support tool that surfaces them is not.</li>
+  <li><strong>The evaluation fixture.</strong> A golden set built from real documents, committed to a repository, run in CI, and pasted into a hosted eval dashboard.</li>
+  <li><strong>The admin search box.</strong> Deliberately unfiltered, authenticated by a session cookie that does not distinguish an operator from a curious employee, and the one path nobody thought to review.</li>
+  <li><strong>Exports.</strong> Conversation downloads, CSV of "documents used", email digests. Each is a copy that outlives the revocation that prompted the question.</li>
+</ul>
+
+<p>A grep is the cheapest audit: search for the collection or table name and confirm every call site passes a resolved principal. Then search for the raw table name in migrations and notebooks, because that is where the second client lives.</p>
+
+<h2>Prove it with a matrix, not a vibe</h2>
+
+<p>Retrieval quality is measured with recall and judged subjectively. Permissions cannot be. They are a boolean over a cross product, and the test should look like one: a synthetic corpus where every document is labelled with the principals that may read it, and a set of principals that cover the interesting cases — owner, ordinary member, guest with a single share, outsider in another tenant, a user whose access was revoked one minute ago, and a user whose access arrives only through a nested group.</p>
+
+<p>For each principal, query with text taken from documents they may read and documents they may not, at several values of <code>k</code>, across every retrieval path: dense, sparse, hybrid, rerank, parent expansion, summary lookup. Then assert set inclusion. Not a ratio, not a threshold — <code>retrieved ⊆ permitted</code>, failing the build on one violation. A permission bug that shows up as one chunk in a thousand queries is still a breach, and a metric that averages it into 0.999 is a metric that will be read as passing.</p>
+
+<p>Three mutations belong in the same suite because they are the ones that ship. Revoke a document mid-run and assert the next request does not return it, including from a warm cache. Change a group membership and assert the principal hash changed. Kill the process between retrieval and generation, restart it, and assert no cached answer is served to the revoked principal. The last one is the only test that exercises the layer everybody assumes is stateless.</p>
+
+<p>Finally, a canary: a document containing a unique random token, granted to no principal at all, indexed in the production collection. Then scan responses, traces, logs and exports for that token in CI. It is the retrieval equivalent of a secret scanner, it costs nothing to maintain, and it catches exactly the path that a per-path test matrix forgets — which is always the newest one.</p>
+
+<h2>Symptoms and where they actually live</h2>
+
+<table>
+  <thead>
+    <tr><th>Symptom</th><th>Where to look first</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>An answer cites a document from another workspace</td><td>A retrieval path without the tenant and ACL predicate — usually sparse search, parent expansion or a summary table</td></tr>
+    <tr><td>"It cannot find my documents" for one user, fine for everyone else</td><td>Post-filter truncation: candidate pool too small for that principal's visible fraction</td></tr>
+    <tr><td>Filtered queries got slower after the ACL rollout</td><td>Filter column without a supporting index, or the planner falling back to a full scan on a very broad filter</td></tr>
+    <tr><td>Access was revoked and the assistant still answers</td><td>Result or prompt cache without the principal and epoch in the key</td></tr>
+    <tr><td>Answers degrade gradually as the corpus grows</td><td>Fixed candidate pool meeting a falling visible fraction; recall loss without an error</td></tr>
+    <tr><td>One tenant reports wildly inconsistent answer quality</td><td>Permission model with a deeply nested group structure, producing very wide or very narrow filters</td></tr>
+  </tbody>
+</table>
+
+<h2>What to instrument</h2>
+
+<p>Four numbers make this class of bug visible before a customer finds it. Filter selectivity per query, as matched rows over collection size — when it drops below a fraction you can name, the retrieval budget is wrong. Candidates scanned per returned row — the ratio tells you how much of the graph is being walked to satisfy a permission predicate. Empty-result rate grouped by principal — a spike for one user or one tenant is a resolution bug, not a content gap. And the count of documents rejected by the post-retrieval re-check, which must be zero; anything else means one of the upstream paths let something through and the second check is doing the work the first one was supposed to do.</p>
+
+<p>None of this is a retrieval-quality problem, which is why it gets neglected. Recall is visible in the answers and gets tuned; authorisation is invisible until it is a disclosure, and then it is not a tuning problem at all. The fix is a filter inside the query, an identity in the cache key, a re-check at the point of use and a canary that fails the build — four mechanisms for one property, because a boundary defended in one place is a boundary defended by whoever last edited that place. If you are adding permissions to a retrieval system that was built without them, <a href="/contact">send us the shape of your corpus and your permission model</a>; it is ordinary work in our <a href="/services/ai-engineering">AI engineering practice</a>, and it touches <a href="/blog/deleting-documents-from-rag">deletion</a>, <a href="/blog/multi-tenant-isolation-shared-database">tenant isolation</a> and <a href="/blog/tracing-agent-runs">tracing</a> before it is finished.</p>`,
+    date: '2026-11-26',
+    author: 'WeThinkDigital Engineering',
+    readTime: '18 min read',
+    category: 'AI Engineering',
+    tags: ['RAG', 'access control', 'vector search', 'retrieval quality', 'authorisation'],
+    metaTitle: 'Permission-Aware Retrieval: Filtering Inside the Vector Query',
+    metaDescription:
+      'Why filtering RAG results after retrieval leaks and truncates: ACLs as an indexed filter inside the query, candidate pools under selective filters, cache keys that survive revocation, and a test matrix that fails the build.',
+    keywords: [
+      'permission aware retrieval',
+      'RAG access control',
+      'pgvector filtered search',
+      'document level permissions RAG',
+      'ACL aware vector search',
+      'multi-tenant retrieval isolation',
+      'iterative index scan recall',
+      'retrieval cache revocation',
+    ],
+  },
+
+{
     id: '27',
     slug: 'shared-backlog-agent-claims',
     title: 'Claiming Work From a Shared Backlog: Leases, Fencing and Duplicate Pull Requests',

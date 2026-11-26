@@ -1,5 +1,11 @@
 [
   {
+    "id": "28",
+    "slug": "permission-filtered-retrieval",
+    "title": "Retrieval You Are Not Allowed to See: Authorisation Inside the Vector Query",
+    "date": "2026-11-26"
+  },
+  {
     "id": "27",
     "slug": "shared-backlog-agent-claims",
     "title": "Claiming Work From a Shared Backlog: Leases, Fencing and Duplicate Pull Requests",
